@@ -389,11 +389,7 @@ def unificarHorariosPonto(idEntidadesAgrupadas):
 
             if index == 0:
                 continue  
-
-            #Gambiarra
-            if ((int(identificador) == 1 and int(idEntidade) == 2) or (int(identificador) == 2 and int(idEntidade) in [2, 4]) or (int(identificador) == 3 and int(idEntidade) == 4)):
-                continue    
-            
+           
             querys = ""
 
             for tabela in tabelas:
