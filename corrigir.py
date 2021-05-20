@@ -1426,8 +1426,39 @@ def gruposFuncionaisRepetido():
             
             print(u)
             updateInsertDelete(u)
-       
 
+
+def dataInicialDependenteMaiorTitular():
+
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.func_planos_saude fp
+            SET 
+                fp.vigencia_inicial = plano_saude.vigencia_inicial_titular
+            FROM 
+                ( 
+                     SELECT 
+                        fps.i_entidades,
+                        fps.i_funcionarios,
+                        fps.i_pessoas,
+                        fps.i_sequenciais,
+                        vigencia_inicial AS vigencia_inicial_dependente,
+                        vigencia_inicial_titular = (select vigencia_inicial FROM bethadba.func_planos_saude WHERE i_sequenciais = 1 AND i_funcionarios = fps.i_funcionarios)
+                    FROM 
+                        bethadba.func_planos_saude fps 
+                    WHERE 
+                        fps.i_sequenciais != 1 AND 
+                        fps.vigencia_inicial < vigencia_inicial_titular 
+                ) AS plano_saude
+            WHERE 
+                fp.i_entidades = plano_saude.i_entidades AND
+                fp.i_funcionarios = plano_saude.i_funcionarios AND
+                fp.i_pessoas = plano_saude.i_pessoas AND
+                fp.i_sequenciais = plano_saude.i_sequenciais;    
+        """
+    )  
+       
 #--------------------Executar--------------------#
 campoAdicionalRepetido()
 dependentesOutros()
@@ -1476,3 +1507,4 @@ observacaoAfastamentoMaior150()
 dataInicialAfastamentoMaiorDataFinal()
 motivoAposentadoriaNulo()
 gruposFuncionaisRepetido()
+dataInicialDependenteMaiorTitular()

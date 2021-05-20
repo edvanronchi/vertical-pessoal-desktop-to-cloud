@@ -1374,6 +1374,37 @@ def gruposFuncionaisRepetido():
 
     return quantidade
 
+#Verifica a data inicial de beneficio do dependente se é melhor que a do titular
+#A data inicial do benefício não pode ser menor que a data de admissão
+#Plano de saude
+def dataInicialDependenteMaiorTitular():
+
+    resultado = select(
+        """
+            SELECT 
+                fps.i_entidades,
+                fps.i_funcionarios,
+                fps.i_pessoas,
+                fps.i_sequenciais,
+                vigencia_inicial AS vigencia_inicial_dependente,
+                vigencia_inicial_titular = (select vigencia_inicial FROM bethadba.func_planos_saude WHERE i_sequenciais = 1 AND i_funcionarios = fps.i_funcionarios)
+            FROM 
+                bethadba.func_planos_saude fps 
+            WHERE 
+                fps.i_sequenciais != 1 AND 
+                fps.vigencia_inicial < vigencia_inicial_titular   
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('A data inicial do dependente maior do que do titular (Plano de Saude): '+ str(quantidade))
+
+    return quantidade
+
 #-----------------------Executar---------------------#
 campoAdicionalRepetido()
 dependentesOutros()
@@ -1426,3 +1457,4 @@ observacaoAfastamentoMaior150()
 dataInicialAfastamentoMaiorDataFinal()
 motivoAposentadoriaNulo()
 gruposFuncionaisRepetido()
+dataInicialDependenteMaiorTitular()
