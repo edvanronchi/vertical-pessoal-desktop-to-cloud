@@ -136,5 +136,5 @@ def vincularAposentados():
 
 
 #--------------------Executar-------------------------
-#mostrarAposentados()
-vincularAposentados()
+mostrarAposentados()
+#vincularAposentados()

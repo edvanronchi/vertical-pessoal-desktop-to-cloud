@@ -1,7 +1,7 @@
 import pyodbc
 
 #Nome da conexão via ODBC
-database = 'folha_sao_ludgero_pm_oficial'
+database = 'teste'
 
 cnxn = pyodbc.connect(f'DSN={database}', ConnectionIdleTimeout=0)
 cursor = cnxn.cursor()

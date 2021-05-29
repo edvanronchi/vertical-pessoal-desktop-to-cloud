@@ -332,6 +332,29 @@ def logradourosSemCidade():
 
     return quantidade
 
+#Verifica os atos com número nulos
+def atosNumeroNulo():
+
+    resultado = select(
+        """
+            SELECT 
+                i_atos
+            FROM 
+                bethadba.atos 
+            WHERE
+                num_ato IS NULL;   
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Atos com número nulo: '+ str(quantidade))
+
+    return quantidade
+
 #Verifica os atos repetidos
 def atosRepetido():
 
@@ -933,6 +956,31 @@ def tipoAfastamentoConfiguracaoCancelamentoFerias():
 
     return quantidade
 
+#Verifica descricao de cofiguração de organograma se é maior que 30 caracteres
+def descricaoConfigOrganogramaMaior30():
+
+    resultado = select(
+        """
+            SELECT 
+                i_config_organ,
+                descricao,
+                LENGTH(descricao) AS tamanho 
+            FROM 
+                bethadba.config_organ
+            WHERE 	
+                tamanho > 30
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Descricao de cofiguração de organograma maior que 30 caracteres: '+ str(quantidade))
+
+    return quantidade
+
 #Verifica descricao de cofiguração de organograma repetido
 def descricaoConfigOrganogramaRepetido():
 
@@ -1056,7 +1104,7 @@ def cargoRepetido():
             FROM 
                 bethadba.cargos 
             WHERE   
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY 
                 nome 
             HAVING 
@@ -1183,20 +1231,25 @@ def funcionariosSemPrevidencia():
     resultado = select(
         """
             SELECT 
-                i_funcionarios,
-                i_entidades 
+                hf.i_funcionarios,
+                hf.i_entidades 
             FROM 
-                bethadba.hist_funcionarios 
+                bethadba.hist_funcionarios hf
+            INNER JOIN 
+                bethadba.funcionarios f ON (f.i_funcionarios = hf.i_funcionarios AND f.i_entidades = hf.i_entidades)
             WHERE
-                prev_federal = 'N' AND
-                prev_estadual = 'N' AND
-                fundo_ass = 'N' AND
-                fundo_prev = 'N' AND
-                i_vinculos NOT IN (7, 14)
+                hf.prev_federal = 'N' AND
+                hf.prev_estadual = 'N' AND
+                hf.fundo_ass = 'N' AND
+                hf.fundo_prev = 'N' AND
+                f.i_entidades = ({}) AND
+                f.tipo_func = 'F'
             GROUP BY
-                i_funcionarios,
-                i_entidades
-        """
+                hf.i_funcionarios,
+                hf.i_entidades
+            ORDER BY	
+                hf.i_funcionarios
+        """.format(idEntidadesAgrupadas)
     )
 
     quantidade = len(resultado)
@@ -1357,7 +1410,7 @@ def gruposFuncionaisRepetido():
             FROM 
                 bethadba.grupos
             WHERE
-                i_entidades IN {} 
+                i_entidades IN ({}) 
             GROUP BY 
                 nome 
             HAVING 
@@ -1405,6 +1458,34 @@ def dataInicialDependenteMaiorTitular():
 
     return quantidade
 
+#Verifica se o número de telefone na lotação fisica é maior que 11 caracteres
+#O telefone pode conter no máximo 11 caracteres
+def telefoneLotacaoFisicaMaior11():
+
+    resultado = select(
+        """
+            SELECT 
+                i_entidades,
+                i_locais_trab,
+                fone,
+                LENGTH(fone) AS quantidade
+            FROM 
+                bethadba.locais_trab
+            WHERE 
+                quantidade > 11     
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Número de telefone na lotação fisica é maior que 11 caracteres: '+ str(quantidade))
+
+    return quantidade
+
+
 #-----------------------Executar---------------------#
 campoAdicionalRepetido()
 dependentesOutros()
@@ -1418,6 +1499,7 @@ cnpjNulo()
 logradourosRepetido()
 tiposBasesRepetido()
 logradourosSemCidade()
+atosNumeroNulo()
 atosRepetido()
 cargoCboNulo()
 eSocialNuloVinculoEmpregaticio()
@@ -1441,6 +1523,7 @@ nivelOrganogramaSeparadorNulo()
 atoNaturezaTextoJuridicoNulo()
 atoFonteDivulgacaoMenorPublicacao()
 tipoAfastamentoConfiguracaoCancelamentoFerias()
+descricaoConfigOrganogramaMaior30()
 descricaoConfigOrganogramaRepetido()
 cpfInvalido()
 cnpjInvalido()
@@ -1458,3 +1541,4 @@ dataInicialAfastamentoMaiorDataFinal()
 motivoAposentadoriaNulo()
 gruposFuncionaisRepetido()
 dataInicialDependenteMaiorTitular()
+telefoneLotacaoFisicaMaior11()

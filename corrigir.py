@@ -2,6 +2,7 @@ from validate_email import validate_email
 from variavel_global import *
 from src.functions import *
 from src.database import *
+import re
 
 #Renomeia os campos adicionais repetidos
 def campoAdicionalRepetido():
@@ -268,6 +269,30 @@ def logradourosSemCidade():
         """
     )
 
+#Renomeia os atos com número nulo
+def atosNumeroNulo():
+
+    resultado = select(
+        """
+            SELECT 
+                i_atos
+            FROM 
+                bethadba.atos 
+            WHERE
+                num_ato IS NULL;   
+        """
+    )
+
+    for index, i in enumerate(resultado, start=1):
+        idAto = i[0]
+
+        numeroAto = "NAO INFORMADO " + str(index)
+        
+        u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numeroAto, idAto)
+
+        print(u)
+        updateInsertDelete(u)
+
 #Renomeia os atos repetidos
 def atosRepetido():
 
@@ -290,18 +315,19 @@ def atosRepetido():
 
     for i in resultado:
         ids = i[0].split(',')
+        numeroAto = i[1]
         
         for index, j in enumerate(ids):
-            numeroAto = i[1]
 
             if index == 0:
                 continue
             
-            descricao = numeroAto + " |" + str(index) 
-            if len(numeroAto) > 13:
-                descricao = numeroAto[:13] + " |" + str(index) 
+            numeroAtoNovo = numeroAto + " |" + str(index) 
 
-            u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(descricao, j)
+            if len(numeroAto) > 13:
+                numeroAtoNovo = numeroAto[:13] + " |" + str(index) 
+
+            u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numeroAtoNovo, j)
 
             print(u)
             updateInsertDelete(u)
@@ -355,18 +381,19 @@ def vinculoEmpregaticioRepetido():
 
     for i in resultado:
         ids = i[0].split(',')
+        descricao = i[1]
         
         for index, j in enumerate(ids):
-            descricao = i[1]
-
+            
             if index == 0:
                 continue
             
-            descricao = descricao + " |" + str(index) 
-            if len(descricao) > 26:
-                descricao = descricao[:26] + " |" + str(index) 
+            descricaoNovo = descricao + " |" + str(index) 
 
-            u = "UPDATE bethadba.vinculos SET descricao = '{}'  WHERE i_vinculos = {};".format(descricao, j)
+            if len(descricao) > 26:
+                descricaoNovo = descricao[:26] + " |" + str(index) 
+
+            u = "UPDATE bethadba.vinculos SET descricao = '{}'  WHERE i_vinculos = {};".format(descricaoNovo, j)
             
             print(u)
             updateInsertDelete(u)
@@ -493,7 +520,7 @@ def dataFinalLancamentoMaiorDataRescisao():
         dataInicial = str(i[9])
         dataInicialFormatada = int(dataInicial.replace('-', ''))
         dataFinal = i[11]
-        dataFinalFormatada = i[12]
+        dataInicialNovo = dataInicial
 
         if dataInicialFormatada > dataRescisaoFormatada:
             dataInicialNovo = dataRescisao
@@ -561,18 +588,19 @@ def movimentacaoPessoalRepetido():
 
     for i in resultado:
         ids = i[0].split(',')
+        descricao = i[1]
         
         for index, j in enumerate(ids):
-            descricao = i[1]
 
             if index == 0:
                 continue
             
-            descricao = descricao + " |" + str(index) 
-            if len(descricao) > 47:
-                descricao = descricao[:47] + " |" + str(index) 
+            descricaoNovo = descricao + " |" + str(index) 
 
-            u = "UPDATE bethadba.tipos_movpes SET descricao = '{}'  WHERE i_tipos_movpes = {};".format(descricao, j)
+            if len(descricao) > 47:
+                descricaoNovo = descricao[:47] + " |" + str(index) 
+
+            u = "UPDATE bethadba.tipos_movpes SET descricao = '{}'  WHERE i_tipos_movpes = {};".format(descricaoNovo, j)
             
             print(u)
             updateInsertDelete(u)
@@ -597,18 +625,19 @@ def tipoAfastamentoRepetido():
 
     for i in resultado:
         ids = i[0].split(',')
+        descricao = i[1]
         
         for index, j in enumerate(ids):
-            descricao = i[1]
-
+            
             if index == 0:
                 continue
             
-            descricao = descricao + " |" + str(index) 
-            if len(descricao) > 47:
-                descricao = descricao[:47] + " |" + str(index) 
+            descricaoNovo = descricao + " |" + str(index) 
 
-            u = "UPDATE bethadba.tipos_afast SET descricao = '{}'  WHERE i_tipos_afast = {};".format(descricao, j)
+            if len(descricao) > 47:
+                descricaoNovo = descricao[:47] + " |" + str(index) 
+
+            u = "UPDATE bethadba.tipos_afast SET descricao = '{}'  WHERE i_tipos_afast = {};".format(descricaoNovo, j)
             
             print(u)
             updateInsertDelete(u)
@@ -835,18 +864,19 @@ def tipoAtoRepetido():
 
     for i in resultado:
         ids = i[0].split(',')
+        descricao = i[1]
         
         for index, j in enumerate(ids):
-            descricao = i[1]
 
             if index == 0:
                 continue
             
-            descricao = descricao + " |" + str(index) 
-            if len(descricao) > 37:
-                descricao = descricao[:37] + " |" + str(index) 
+            descricaoNovo = descricao + " |" + str(index) 
 
-            u = "UPDATE bethadba.tipos_atos SET nome = '{}' WHERE i_tipos_atos = {};".format(descricao, j)
+            if len(descricao) > 37:
+                descricaoNovo = descricao[:37] + " |" + str(index) 
+
+            u = "UPDATE bethadba.tipos_atos SET nome = '{}' WHERE i_tipos_atos = {};".format(descricaoNovo, j)
             
             print(u)
             updateInsertDelete(u)
@@ -873,17 +903,17 @@ def descricaoHorarioPontoRepetido():
     for i in resultado:
         idsEntidade = i[0].split(',')
         idsHorarioPonto = i[1].split(',')
+        descricao = i[2]
         
         for index in range(len(idsEntidade)):
-            descricao = i[2]
-
+            
             if index == 0:
                 continue
             
-            descricao = descricao + " |" + str(index)
+            descricaoNovo = descricao + " |" + str(index)
 
             if len(descricao) > 47:
-                descricao = descricao[:47] + " |" + str(index) 
+                descricaoNovo = descricao[:47] + " |" + str(index) 
 
             u = """
                 UPDATE 
@@ -892,7 +922,7 @@ def descricaoHorarioPontoRepetido():
                     descricao = '{}' 
                 WHERE 
                     i_entidades = {} AND i_horarios_ponto = {};
-            """.format(descricao, idsEntidade[index], idsHorarioPonto[index])
+            """.format(descricaoNovo, idsEntidade[index], idsHorarioPonto[index])
             
             print(u)
             updateInsertDelete(u)
@@ -919,17 +949,17 @@ def descricaoTurmaRepetido():
     for i in resultado:
         idsEntidade = i[0].split(',')
         idsTurma = i[1].split(',')
+        descricao = i[2]
         
         for index in range(len(idsEntidade)):
-            descricao = i[2]
-
+            
             if index == 0:
                 continue
             
-            descricao = descricao + " |" + str(index)
+            descricaoNovo = descricao + " |" + str(index)
 
             if len(descricao) > 57:
-                descricao = descricao[:57] + " |" + str(index) 
+                descricaoNovo = descricao[:57] + " |" + str(index) 
 
             u = """
                 UPDATE 
@@ -938,7 +968,7 @@ def descricaoTurmaRepetido():
                     descricao = '{}' 
                 WHERE 
                     i_entidades = {} AND i_turmas = {};
-            """.format(descricao, idsEntidade[index], idsTurma[index])
+            """.format(descricaoNovo, idsEntidade[index], idsTurma[index])
             
             print(u)
             updateInsertDelete(u)
@@ -1014,6 +1044,31 @@ def tipoAfastamentoConfiguracaoCancelamentoFerias():
         """
     )
 
+#Renomeia descricao de cofiguração de organograma maior que 30 caracteres
+def descricaoConfigOrganogramaMaior30():
+
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.config_organ co
+            SET 
+                co.descricao = SUBSTRING(co.descricao, 1, 30)
+            FROM 
+                ( 
+                    SELECT 
+                        i_config_organ,
+                        descricao,
+                        LENGTH(descricao) AS tamanho 
+                    FROM 
+                        bethadba.config_organ
+                    WHERE 	
+                        tamanho > 30 
+                ) AS config_organograma
+            WHERE 
+                co.i_config_organ = config_organograma.i_config_organ;
+        """
+    )    
+
 #Renomeia descricao de cofiguração de organograma repetido
 def descricaoConfigOrganogramaRepetido():
 
@@ -1037,10 +1092,16 @@ def descricaoConfigOrganogramaRepetido():
         nome = i[1]
 
         for index, j in enumerate(ids):
+
             if index == 0:
                 continue
             
-            u = "UPDATE bethadba.config_organ SET descricao = '{}'  WHERE i_config_organ = {};".format((nome + " |" + str(index)), j)
+            nomeNovo = nome + " |" + str(index) 
+
+            if len(nome) > 27:
+                nomeNovo = nome[:27] + " |" + str(index) 
+            
+            u = "UPDATE bethadba.config_organ SET descricao = '{}'  WHERE i_config_organ = {};".format(nomeNovo, j)
 
             print(u)
             updateInsertDelete(u)
@@ -1135,7 +1196,7 @@ def cargoRepetido():
             FROM 
                 bethadba.cargos 
             WHERE   
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY 
                 nome 
             HAVING 
@@ -1148,17 +1209,17 @@ def cargoRepetido():
     for i in resultado:
         idsCargo = i[0].split(',')
         idsEntidade = i[1].split(',')
+        nome = i[2]
         
         for index in range(len(idsEntidade)):
-            nome = i[2]
-
+            
             if index == 0:
                 continue
             
-            nome = nome + " |" + str(index)
+            nomeNovo = nome + " |" + str(index)
 
             if len(nome) > 97:
-                nome = nome[:97] + " |" + str(index) 
+                nomeNovo = nome[:97] + " |" + str(index) 
 
             u = """
                 UPDATE 
@@ -1167,7 +1228,7 @@ def cargoRepetido():
                     nome = '{}' 
                 WHERE 
                     i_entidades = {} AND i_cargos = {};
-            """.format(nome, idsEntidade[index], idsCargo[index])
+            """.format(nomeNovo, idsEntidade[index], idsCargo[index])
             
             print(u)
             updateInsertDelete(u)
@@ -1392,7 +1453,7 @@ def gruposFuncionaisRepetido():
             FROM 
                 bethadba.grupos
             WHERE
-                i_entidades IN {} 
+                i_entidades IN ({}) 
             GROUP BY 
                 nome 
             HAVING 
@@ -1403,17 +1464,17 @@ def gruposFuncionaisRepetido():
     for i in resultado:
         idsEntidade = i[0].split(',')
         idsGrupo = i[1].split(',')
+        nome = i[2]
         
         for index in range(len(idsEntidade)):
-            nome = i[2]
 
             if index == 0:
                 continue
             
-            nome = nome + " |" + str(index)
+            nomeNovo = nome + " |" + str(index)
 
             if len(nome) > 57:
-                nome = nome[:57] + " |" + str(index) 
+                nomeNovo = nome[:57] + " |" + str(index) 
 
             u = """
                 UPDATE 
@@ -1422,7 +1483,7 @@ def gruposFuncionaisRepetido():
                     nome = '{}' 
                 WHERE 
                     i_entidades = {} AND i_grupos = {};
-            """.format(nome, idsEntidade[index], idsGrupo[index])
+            """.format(nomeNovo, idsEntidade[index], idsGrupo[index])
             
             print(u)
             updateInsertDelete(u)
@@ -1457,8 +1518,40 @@ def dataInicialDependenteMaiorTitular():
                 fp.i_pessoas = plano_saude.i_pessoas AND
                 fp.i_sequenciais = plano_saude.i_sequenciais;    
         """
-    )  
-       
+    ) 
+
+#Remove caracteres especiais e espaços para que o número do telefone seja menor ou igual a 11
+def telefoneLotacaoFisicaMaior11():
+
+    resultado = select(
+        """
+            SELECT 
+                i_entidades,
+                i_locais_trab,
+                fone,
+                LENGTH(fone) AS quantidade
+            FROM 
+                bethadba.locais_trab
+            WHERE 
+                quantidade > 11     
+        """
+    )
+
+    for i in resultado:
+        idEntidade = i[0]
+        idLotacaoFisica = i[1]
+        telefone = i[2]
+
+        telefone = re.sub('[^0-9]', '', telefone)
+
+        telefone = telefone[(len(telefone) - 8):]
+
+        u = "UPDATE bethadba.locais_trab SET fone = '{}' WHERE i_entidades = {} AND i_locais_trab = {};".format(telefone, idEntidade, idLotacaoFisica)
+        
+        print(u)
+        updateInsertDelete(u)
+        
+     
 #--------------------Executar--------------------#
 campoAdicionalRepetido()
 dependentesOutros()
@@ -1468,6 +1561,7 @@ cnpjNulo()
 logradourosRepetido()
 tiposBasesRepetido()
 logradourosSemCidade()
+atosNumeroNulo()
 atosRepetido()
 cargoCboNulo()
 eSocialNuloVinculoEmpregaticio()
@@ -1491,6 +1585,7 @@ nivelOrganogramaSeparadorNulo()
 atoNaturezaTextoJuridicoNulo()
 atoFonteDivulgacaoMenorPublicacao()
 tipoAfastamentoConfiguracaoCancelamentoFerias()
+descricaoConfigOrganogramaMaior30()
 descricaoConfigOrganogramaRepetido()
 cpfInvalido()
 cnpjInvalido()
@@ -1508,3 +1603,4 @@ dataInicialAfastamentoMaiorDataFinal()
 motivoAposentadoriaNulo()
 gruposFuncionaisRepetido()
 dataInicialDependenteMaiorTitular()
+telefoneLotacaoFisicaMaior11()

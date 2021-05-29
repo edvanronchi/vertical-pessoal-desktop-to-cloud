@@ -1,7 +1,6 @@
 #Variaveis globais
-idEntidadePrincipal = 1             #Integer
-idEntidadeSecundaria = (2, 3, 4)    #Tupla
-idEntidadesAgrupadas = (1, 2, 3, 4) #Tupla
+idEntidadePrincipal = "1"  #Somente o id da entidade principal
+idEntidadesAgrupadas = "1,2,3,4,5,6,7,8" #Id's das entidades separadas por vigula
 
 #Fechar as folhas de pagamentos anterior a data especificada
 competenciaFechamentoFolha = 20210501
