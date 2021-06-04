@@ -1,22 +1,17 @@
-from variavel_global import *
+from variaveis import *
 from src.functions import *
 from src.database import *
 from os import path
 
-unificarGeral1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_geral_1.sql", "a")
-unificarGeral2 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_geral_2.sql", "a")
+desabilitarTriggers = "CALL bethadba.dbp_conn_gera(1, 2021, 300);\nCALL bethadba.pg_setoption('wait_for_commit','on');\nCALL bethadba.pg_habilitartriggers('off');\nset option fire_triggers = 'off';\n\n"
 
-desabilitarTriggers = "CALL bethadba.dbp_conn_gera(1, 2021, 300);\nCALL bethadba.pg_setoption('wait_for_commit','on');\nCALL bethadba.pg_habilitartriggers('off');\n\n"
+#recodificarGeral = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_geral.sql", "a")
+#recodificarGeral.writelines(desabilitarTriggers)
 
-unificarGeral1.writelines(desabilitarTriggers)
-unificarGeral2.writelines(desabilitarTriggers)
-
-def unificarFuncionarios(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_funcionarios_1.sql", "a")
-    unificar2 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_funcionarios_2.sql", "a")
+def recodificarFuncionarios(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_funcionarios.sql", "a")
     
-    unificar1.writelines(desabilitarTriggers)
-    unificar2.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -27,7 +22,7 @@ def unificarFuncionarios(idEntidadesAgrupadas):
             FROM 
                 bethadba.funcionarios 
             WHERE
-                i_entidades IN {}    
+                i_entidades IN ({})    
             GROUP BY 
                 i_funcionarios 
             HAVING 
@@ -41,15 +36,41 @@ def unificarFuncionarios(idEntidadesAgrupadas):
 
     idMax = select("SELECT (MAX(i_funcionarios)+1) AS id FROM bethadba.funcionarios")[0][0]
 
+    idCampoAdicional = select("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Matrícula do funcionário'")[0][0]
+
     for i in resultado:
         idsEntidade = i[0].split(',')
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue
+
+            valorCaracter = "{}-{}".format(idEntidade, identificador)
+
+            queryDadosAdicionais = ""
+
+            buscaDadosAdicionais = select(
+                """
+                    SELECT 
+                        * 
+                    FROM 
+                        bethadba.funcionarios_prop_adic 
+                    WHERE 
+                        i_caracteristicas = {} AND 
+                        i_funcionarios = {} AND 
+                        i_entidades = {};
+                """.format(idCampoAdicional, identificador, idEntidade)
+            )
+
+            if len(buscaDadosAdicionais) > 0:
+                queryDadosAdicionais = "UPDATE bethadba.funcionarios_prop_adic SET valor_caracter = {} WHERE i_caracteristicas = {} AND i_entidades = {} AND i_funcionarios = {};".format(valorCaracter, idCampoAdicional, idEntidade, identificador)
+            else:
+                queryDadosAdicionais = "INSERT INTO bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_caracter) VALUES ({}, {}, {}, {});".format(idCampoAdicional, idEntidade, identificador, valorCaracter)
+                   
+            recodificar.writelines(queryDadosAdicionais)
 
             querys = ""
 
@@ -57,26 +78,21 @@ def unificarFuncionarios(idEntidadesAgrupadas):
                 
                 u = "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
 
-                if tabela in tabelasSemPermissoes:
-                    unificar2.writelines(u)
-                    unificarGeral2.writelines(u)                   
-                    continue
-
                 querys += u
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            recodificar.writelines("COMMIT;\n")
 
             idMax += 1
 
     print("Código SQL gerado para tabela: funcionarios!")
 
-def unificarCargos(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_cargos_1.sql", "a")
+def recodificarCargos(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_cargos.sql", "a")
 
-    unificar1.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -87,7 +103,7 @@ def unificarCargos(idEntidadesAgrupadas):
             FROM 
                 bethadba.cargos 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY 
                 i_cargos 
             HAVING 
@@ -106,9 +122,9 @@ def unificarCargos(idEntidadesAgrupadas):
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue      
             
             querys = ""
@@ -121,17 +137,17 @@ def unificarCargos(idEntidadesAgrupadas):
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: cargos")
 
-def unificarPeriodosTrab(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_periodos_trab_1.sql", "a")
+def recodificarPeriodosTrab(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_periodos_trab.sql", "a")
 
-    unificar1.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -142,7 +158,7 @@ def unificarPeriodosTrab(idEntidadesAgrupadas):
             FROM
                 bethadba.periodos_trab 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY 
                 i_periodos_trab 
             HAVING 
@@ -161,9 +177,9 @@ def unificarPeriodosTrab(idEntidadesAgrupadas):
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue      
             
             querys = ""
@@ -176,17 +192,17 @@ def unificarPeriodosTrab(idEntidadesAgrupadas):
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: periodos_trab")
 
-def unificarTurmas(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_turmas_1.sql", "a")
+def recodificarTurmas(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_turmas.sql", "a")
 
-    unificar1.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -197,7 +213,7 @@ def unificarTurmas(idEntidadesAgrupadas):
             FROM 
                 bethadba.turmas 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY 
                 i_turmas 
             HAVING 
@@ -216,9 +232,9 @@ def unificarTurmas(idEntidadesAgrupadas):
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue      
             
             querys = ""
@@ -231,17 +247,17 @@ def unificarTurmas(idEntidadesAgrupadas):
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: turmas")
 
-def unificarDespesas(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_despesas_1.sql", "a")
+def recodificarDespesas(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_despesas.sql", "a")
 
-    unificar1.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -253,7 +269,7 @@ def unificarDespesas(idEntidadesAgrupadas):
             FROM 
                 bethadba.despesas 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY 
                 i_despesas,
                 ano_exerc
@@ -274,9 +290,9 @@ def unificarDespesas(idEntidadesAgrupadas):
         identificador = i[1]
         anoExercicio = i[2]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue      
             
             querys = ""
@@ -289,17 +305,17 @@ def unificarDespesas(idEntidadesAgrupadas):
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: despesas")
 
-def unificarNiveis(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_niveis_1.sql", "a")
+def recodificarNiveis(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_niveis.sql", "a")
 
-    unificar1.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -310,7 +326,7 @@ def unificarNiveis(idEntidadesAgrupadas):
             FROM 
                 bethadba.níveis 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY 
                 i_niveis 
             HAVING 
@@ -329,9 +345,9 @@ def unificarNiveis(idEntidadesAgrupadas):
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue      
             
             querys = ""
@@ -344,18 +360,18 @@ def unificarNiveis(idEntidadesAgrupadas):
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: niveis")
 
 
-def unificarHorariosPonto(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_horarios_ponto_1.sql", "a")
+def recodificarHorariosPonto(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_horarios_ponto.sql", "a")
  
-    unificar1.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -366,7 +382,7 @@ def unificarHorariosPonto(idEntidadesAgrupadas):
             FROM 
                 bethadba.horarios_ponto 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY
                 i_horarios_ponto
             HAVING
@@ -385,9 +401,9 @@ def unificarHorariosPonto(idEntidadesAgrupadas):
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue  
            
             querys = ""
@@ -400,17 +416,17 @@ def unificarHorariosPonto(idEntidadesAgrupadas):
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: horarios_ponto")
 
-def unificarGrupos(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_grupos_1.sql", "a")
+def recodificarGrupos(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_grupos.sql", "a")
 
-    unificar1.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -421,7 +437,7 @@ def unificarGrupos(idEntidadesAgrupadas):
             FROM 
                 bethadba.grupos 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY
                 i_grupos
             HAVING
@@ -440,9 +456,9 @@ def unificarGrupos(idEntidadesAgrupadas):
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue    
             
             querys = ""
@@ -455,19 +471,17 @@ def unificarGrupos(idEntidadesAgrupadas):
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: grupos")
 
-def unificarLocaisTrab(idEntidadesAgrupadas):
-    unificar1 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_locais_trab_1.sql", "a")
-    unificar2 = open(path.dirname(path.realpath(__file__)) + "\src\sql\\unificar_locais_trab_2.sql", "a")
+def recodificarLocaisTrab(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_locais_trab.sql", "a")
 
-    unificar1.writelines(desabilitarTriggers)
-    unificar2.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitarTriggers)
 
     resultado = select(
         """
@@ -478,7 +492,7 @@ def unificarLocaisTrab(idEntidadesAgrupadas):
             FROM 
                 bethadba.locais_trab 
             WHERE
-                i_entidades IN {}
+                i_entidades IN ({})
             GROUP BY
                 i_locais_trab
             HAVING
@@ -497,9 +511,9 @@ def unificarLocaisTrab(idEntidadesAgrupadas):
 
         identificador = i[1]
 
-        for index, idEntidade in enumerate(idsEntidade):
+        for idEntidade in idsEntidade:
 
-            if index == 0:
+            if idEntidade == idEntidadePrincipal:
                 continue    
             
             querys = ""
@@ -508,29 +522,24 @@ def unificarLocaisTrab(idEntidadesAgrupadas):
           
                 u = "UPDATE bethadba.{} SET i_locais_trab = {} WHERE i_locais_trab = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
 
-                if tabela in tabelasSemPermissoes:
-                    unificar2.writelines(u)
-                    unificarGeral2.writelines(u)
-                    continue
-
                 querys += u
             
             querys += "\n"
 
-            unificar1.writelines(querys)
-            unificarGeral1.writelines(querys)
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: locais_trab")
 
 #--------------------Executar-------------------------#
-unificarFuncionarios(idEntidadesAgrupadas)
-unificarCargos(idEntidadesAgrupadas)
-unificarPeriodosTrab(idEntidadesAgrupadas)
-unificarTurmas(idEntidadesAgrupadas)
-unificarDespesas(idEntidadesAgrupadas)
-unificarNiveis(idEntidadesAgrupadas)
-unificarHorariosPonto(idEntidadesAgrupadas)
-unificarGrupos(idEntidadesAgrupadas)
-unificarLocaisTrab(idEntidadesAgrupadas)
+recodificarFuncionarios(idEntidadesAgrupadas)
+#recodificarCargos(idEntidadesAgrupadas)
+#recodificarPeriodosTrab(idEntidadesAgrupadas)
+#recodificarTurmas(idEntidadesAgrupadas)
+#recodificarDespesas(idEntidadesAgrupadas)
+#recodificarNiveis(idEntidadesAgrupadas)
+#recodificarHorariosPonto(idEntidadesAgrupadas)
+#recodificarGrupos(idEntidadesAgrupadas)
+#recodificarLocaisTrab(idEntidadesAgrupadas)

@@ -1,4 +1,4 @@
-from variavel_global import *
+from variaveis import *
 from src.functions import *
 from src.database import *
 
@@ -133,7 +133,6 @@ def vincularAposentados():
             )
 
             print("Registro inserido: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
-
 
 #--------------------Executar-------------------------
 mostrarAposentados()

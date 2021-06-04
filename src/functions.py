@@ -63,6 +63,15 @@ def validarCpf(cpf) -> bool:
     
     return validador.validate(cpf)
 
+def validarPis(pis) -> bool:
+
+    if not pis:
+        return False
+
+    validador = PIS()
+    
+    return validador.validate(pis)
+
 def validarCnpj(cnpj) -> bool:
 
     if not cnpj:

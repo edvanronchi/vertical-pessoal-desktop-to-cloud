@@ -1,7 +1,5 @@
 import pyodbc
-
-#Nome da conexão via ODBC
-database = 'teste'
+from variaveis import *
 
 cnxn = pyodbc.connect(f'DSN={database}', ConnectionIdleTimeout=0)
 cursor = cnxn.cursor()
@@ -14,15 +12,17 @@ def select(query: str) -> list:
     return row
 
 #Atualizar, deletar, inserir dados
-def updateInsertDelete(query: str, fire: bool = False):
+def updateInsertDelete(query: str):
 
-    if fire:
+    if bethaDBA:
         cursor.execute(
             """
-                CALL bethadba.pg_setoption('fire_triggers','off');
+                CALL bethadba.dbp_conn_gera(1, 2021, 300);
+                set option wait_for_commit = 'on';
+                set option fire_triggers = 'off';
                 {}
                 COMMIT; 
-                CALL bethadba.pg_setoption('fire_triggers','on');
+                set option fire_triggers = 'on';
             """.format(query)
         )
 
@@ -31,7 +31,7 @@ def updateInsertDelete(query: str, fire: bool = False):
     cursor.execute(
         """
             CALL bethadba.dbp_conn_gera(1, 2021, 300);
-            CALL bethadba.pg_setoption('wait_for_commit','on');
+            set option wait_for_commit = 'on';
             CALL bethadba.pg_habilitartriggers('off'); 
             {}
             COMMIT; 

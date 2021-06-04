@@ -1,10 +1,12 @@
 from src.functions import *
 from src.database import *
 from datetime import timedelta
+from os import path
 
 #Busca afastamentos concomitantes
 def afastamentos():
-
+    afastamentosConcomitantes = open(path.dirname(path.realpath(__file__)) + "\src\sql\\afastamentos_concomitantes.sql", "a")
+    
     idFuncionarios = select(
         """
             SELECT 
@@ -57,13 +59,13 @@ def afastamentos():
 
                     u = "UPDATE bethadba.afastamentos SET dt_ultimo_dia = '{}' WHERE dt_afastamento = '{}' AND i_entidades = {} AND i_funcionarios = {};".format((dataInicial - timedelta(days = 1)), dataInicialAnterior, idEntidade, idFuncionario)
 
-                    print(u)
+                    afastamentosConcomitantes.writelines(u)
 
                 elif tabelaAnterior == "ferias" and tabela == "afastamentos":
 
                     u = "UPDATE bethadba.afastamentos SET dt_afastamento = '{}' WHERE dt_afastamento = '{}' AND i_entidades = {} AND i_funcionarios = {};".format((dataFinalAnterior + timedelta(days = 1)), dataInicial, idEntidade, idFuncionario)
 
-                    print(u)
+                    afastamentosConcomitantes.writelines(u)
                           
                 else:
                     print("Update manual: Verificar o incidente!")
@@ -87,5 +89,5 @@ def afastamentos():
             print(dataFinal)
             print("===")
 
-#--------------------Executar-------------------------
+#--------------------Executar-------------------------#
 afastamentos()

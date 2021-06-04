@@ -1,21 +1,21 @@
 from validate_email import validate_email 
-from variavel_global import *
+from variaveis import *
 from src.functions import *
 from src.database import *
 
-#Campos adicionais repetidos
-def campoAdicionalRepetido():
+#Campos adicionais com descrição repetido
+def campoAdicionalDescricaoRepetido():
 
     resultado = select(
         """
            SELECT 
                 list(i_caracteristicas), 
-                nome, 
+                TRIM(nome), 
                 count(nome) 
             FROM 
                 bethadba.caracteristicas 
             GROUP BY 
-                nome 
+                TRIM(nome) 
             HAVING 
                 count(nome) > 1
         """
@@ -26,7 +26,7 @@ def campoAdicionalRepetido():
     if quantidade == 0:
         return 0
 
-    print('Campos adicionais repetido(s): '+ str(quantidade))
+    print('Campos adicionais com descrição repetido: '+ str(quantidade))
 
     return quantidade
 
@@ -53,7 +53,6 @@ def dependentesOutros():
     print('Dependentes cadastrados como OUTROS: '+ str(quantidade))
 
     return quantidade
-
 
 #Pessoas com data de nascimento nulo
 def pessoaDataNascimentoNulo():
@@ -173,6 +172,7 @@ def cpfNulo():
     return quantidade
 
 #Verifica os CPF's repetidos
+#As Pessoas (0,0) possuem o mesmo CPF!
 def cpfRepetido():
 
     resultado = select(
@@ -200,6 +200,7 @@ def cpfRepetido():
     return quantidade
 
 #Verifica os PIS's repetidos
+#As Pessoas (0,0) possuem o mesmo número do PIS!
 def pisRepetido():
 
     resultado = select(
@@ -223,6 +224,37 @@ def pisRepetido():
         return 0
 
     print('PIS repetido(s): '+ str(quantidade))
+
+    return quantidade
+
+#Verifica se o PIS é valido
+#PIS inválido
+def pisInvalido():
+
+    resultado = select(
+        """
+           SELECT
+                i_pessoas,
+                num_pis
+            FROM 
+                bethadba.pessoas_fisicas
+            WHERE 
+                num_pis IS NOT NULL;
+        """
+    )
+
+    quantidade = 0
+
+    for i in resultado:
+        pis = i[1]
+
+        if not validarPis(pis):
+            quantidade += 1
+
+    if quantidade == 0:
+        return 0
+
+    print('PIS invalido(s): '+ str(quantidade))
 
     return quantidade
 
@@ -259,13 +291,13 @@ def logradourosRepetido():
         """
             SELECT 
                 list(i_ruas), 
-                nome,
+                TRIM(nome),
                 i_cidades, 
                 count(nome) AS quantidade
             FROM 
                 bethadba.ruas 
             GROUP BY 
-                nome, 
+                TRIM(nome), 
                 i_cidades
             HAVING 
                 quantidade > 1;
@@ -342,7 +374,7 @@ def atosNumeroNulo():
             FROM 
                 bethadba.atos 
             WHERE
-                num_ato IS NULL;   
+                num_ato IS NULL OR num_ato = '';   
         """
     )
 
@@ -641,12 +673,12 @@ def tipoAfastamentoRepetido():
         """
             SELECT 
                 list(i_tipos_afast), 
-                descricao,
+                TRIM(descricao),
                 count(descricao) AS quantidade 
             FROM 
                 bethadba.tipos_afast 
             GROUP BY 
-                descricao 
+                TRIM(descricao) 
             HAVING
                 quantidade > 1
         """
@@ -1018,6 +1050,8 @@ def cpfInvalido():
                 cpf
             FROM 
                 bethadba.pessoas_fisicas
+            WHERE
+                cpf IS NOT NULL;
         """
     )
 
@@ -1091,22 +1125,23 @@ def RgRepetido():
 
     return quantidade
 
-#Verifica os cargos repetidos
-def cargoRepetido():
+#Verifica os cargos com descricao repetidos
+#Já existe um cargo com a descrição informada
+def cargoDescricaoRepetido():
 
     resultado = select(
         """
             SELECT
                 list(i_cargos),
                 list(i_entidades),
-                nome,
+                TRIM(nome),
                 count(nome) AS quantidade
             FROM 
                 bethadba.cargos 
             WHERE   
                 i_entidades IN ({})
             GROUP BY 
-                nome 
+                TRIM(nome) 
             HAVING 
                 quantidade > 1
             ORDER BY
@@ -1168,7 +1203,7 @@ def emailInvalido():
         idPessoa = i[0]
         email = i[1]
 
-        if not validate_email(email) :
+        if not validate_email(email) or len(email) < 5:
             quantidade += 1
 
     if quantidade == 0:
@@ -1242,7 +1277,7 @@ def funcionariosSemPrevidencia():
                 hf.prev_estadual = 'N' AND
                 hf.fundo_ass = 'N' AND
                 hf.fundo_prev = 'N' AND
-                f.i_entidades = ({}) AND
+                f.i_entidades IN ({}) AND
                 f.tipo_func = 'F'
             GROUP BY
                 hf.i_funcionarios,
@@ -1485,9 +1520,257 @@ def telefoneLotacaoFisicaMaior11():
 
     return quantidade
 
+#Busca os atos com data inicial nulo
+#A data de criação é obrigatória
+def dataCriacaoAtoNulo():
+
+    resultado = select(
+        """
+            SELECT 
+                i_atos, 
+                dt_vigorar 
+            FROM
+                bethadba.atos 
+            WHERE
+                dt_inicial IS NULL     
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Data de criação do ato é obrigatorio: '+ str(quantidade))
+
+    return quantidade
+
+#Busca as descrições repetidas dos niveis salariais
+def descricaoNivelSalarialRepetido():
+
+    resultado = select(
+        """
+            SELECT 
+                list(i_entidades), 
+                list(i_niveis), 
+                TRIM(nome),
+                count(nome) AS quantidade
+            FROM 
+                bethadba.niveis 
+            GROUP BY 
+                TRIM(nome)  
+            HAVING
+                quantidade > 1
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Descricao de niveis salariais repetido(s): '+ str(quantidade))
+
+    return quantidade
+
+#Busca os cartões pontos que estão diferente de sua matricula ou repetidos
+#Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
+def cartaoPontoRepetido():
+
+    matriculas = select(
+        """
+            SELECT 
+                list(i_entidades), 
+                i_funcionarios, 
+                count(*) AS quantidade 
+            FROM 
+                bethadba.funcionarios 
+            WHERE
+                i_entidades IN ({})    
+            GROUP BY 
+                i_funcionarios 
+            HAVING 
+                quantidade > 1 
+            ORDER BY 
+                i_funcionarios   
+        """.format(idEntidadesAgrupadas)
+    )
+
+    if len(matriculas) > 0:
+        return 0
+
+    resultado = select(
+        """
+            SELECT 
+                num_cp, 
+                list(DISTINCT(i_funcionarios)), 
+                COUNT(DISTINCT(i_funcionarios)) AS quantidade
+            FROM 
+                bethadba.hist_funcionarios 
+            WHERE
+                bate_cartao = 'S' AND num_cp IS NOT NULL
+            GROUP BY 
+                num_cp
+            HAVING
+                quantidade > 1
+            ORDER BY 
+                quantidade DESC
+        """.format()
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Cartão ponto repetido(s): '+ str(quantidade))
+
+    return quantidade
+
+#Busca os funcionarios com data de nomeação maior que a data de posse
+#O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
+def dataNomeacaoMaiorDataPosse():
+
+    resultado = select(
+        """
+            SELECT 
+                i_funcionarios 
+            FROM 
+                bethadba.hist_cargos
+            WHERE
+                dt_nomeacao > dt_posse
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Data de nomeação maior que data de posse: '+ str(quantidade))
+
+    return quantidade
+
+#Busca as contas bancarias dos funcionarios que estão invalidas
+#Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
+def contaBancariaFuncionarioInvalida():
+
+    resultado = select(
+        """
+            SELECT 
+                f.i_funcionarios,
+                f.i_entidades,
+                hf.dt_alteracoes,
+                hf.i_bancos AS banco_atual,
+                hf.i_agencias AS agencia_atual,
+                hf.i_pessoas_contas,
+                pc.i_bancos AS banco_novo,
+                pc.i_agencias AS agencia_nova
+            FROM 
+                bethadba.hist_funcionarios hf
+            INNER JOIN 
+                bethadba.funcionarios f ON (hf.i_funcionarios = f.i_funcionarios AND hf.i_entidades = f.i_entidades)
+            INNER JOIN 
+                bethadba.pessoas_contas pc ON (f.i_pessoas = pc.i_pessoas AND pc.i_pessoas_contas = hf.i_pessoas_contas)	
+            WHERE 
+                (pc.i_bancos != hf.i_bancos OR pc.i_agencias != hf.i_agencias) AND hf.forma_pagto = 'R'
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Historicos de funcionarios que estão com conta bancaria errada: '+ str(quantidade))
+
+    return quantidade
+
+#Busca os historicos de funcionarios com mais do que uma previdencia informada
+#Apenas uma previdência pode ser informada
+def previdenciaMaiorQueUm():
+
+    resultado = select(
+        """
+            SELECT 
+                i_funcionarios,
+                i_entidades,
+                dt_alteracoes,
+                LENGTH(REPLACE(prev_federal || prev_estadual || fundo_ass || fundo_prev, 'N', '')) AS quantidade
+            FROM 
+                bethadba.hist_funcionarios
+            WHERE
+                quantidade > 1;
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Historicos de funcionarios com mais do que uma previdencia informada: '+ str(quantidade))
+
+    return quantidade
+
+#Busca os afastamentos com data inicial menor que data de admissão
+#A data inicial não poderá ser menor que a data de admissão
+def dataInicialAfastamentoMenorDataAdmissao():
+
+    resultado = select(
+        """
+            SELECT 
+                dt_afastamento, 
+                dt_ultimo_dia, 
+                i_entidades, 
+                i_funcionarios, 
+                (SELECT dt_admissao FROM bethadba.funcionarios WHERE i_funcionarios = a.i_funcionarios AND i_entidades = a.i_entidades) AS data_admissao 
+            FROM 
+                bethadba.afastamentos a
+            WHERE 
+                a.dt_afastamento < data_admissao;
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Afastamentos com data inicial menor que data de admissão: '+ str(quantidade))
+
+    return quantidade
+
+#Busca as areas de atuação com descrição repetido
+#Já existe uma área de atuação com a descrição informada
+def areasAtuacaoDescricaoRepetido():
+
+    resultado = select(
+        """
+           SELECT 
+                list(i_areas_atuacao), 
+                TRIM(nome), 
+                count(nome) 
+            FROM 
+                bethadba.areas_atuacao 
+            GROUP BY 
+                TRIM(nome) 
+            HAVING 
+                count(nome) > 1
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Áreas de atuação com descrição repetido: '+ str(quantidade))
+
+    return quantidade
 
 #-----------------------Executar---------------------#
-campoAdicionalRepetido()
+campoAdicionalDescricaoRepetido()
 dependentesOutros()
 pessoaDataNascimentoNulo()
 pessoaDataNascimentoMaiorDataDependecia()
@@ -1495,6 +1778,7 @@ pessoaDataNascimentoMaiorDataNascimentoResponsavel()
 cpfNulo()
 cpfRepetido()
 pisRepetido()
+pisInvalido()
 cnpjNulo()
 logradourosRepetido()
 tiposBasesRepetido()
@@ -1528,7 +1812,7 @@ descricaoConfigOrganogramaRepetido()
 cpfInvalido()
 cnpjInvalido()
 RgRepetido()
-cargoRepetido()
+cargoDescricaoRepetido()
 terminoVigenciaMaior2099()
 emailInvalido()
 numeroEnderecoVazio()
@@ -1542,3 +1826,11 @@ motivoAposentadoriaNulo()
 gruposFuncionaisRepetido()
 dataInicialDependenteMaiorTitular()
 telefoneLotacaoFisicaMaior11()
+dataCriacaoAtoNulo()
+descricaoNivelSalarialRepetido()
+cartaoPontoRepetido()
+dataNomeacaoMaiorDataPosse()
+contaBancariaFuncionarioInvalida()
+previdenciaMaiorQueUm()
+dataInicialAfastamentoMenorDataAdmissao()
+areasAtuacaoDescricaoRepetido()
