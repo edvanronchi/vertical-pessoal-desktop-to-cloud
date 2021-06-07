@@ -52,7 +52,39 @@ def dependentesOutros():
 #Adiciona a data '1900-01-01' e se tiver responsavel adiciona a data de nascimento do mesmo
 def pessoaDataNascimentoNulo():
 
+    #Coloca a data '1900-01-01' nas datas das pessoas com data de nascimento maior que data de admissão
+    #pessoaDataNascimentoMaiorDataAdmissao
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.pessoas_fisicas pff
+            SET 
+                pff.dt_nascimento = '1900-01-01' 
+            FROM 
+                ( 
+                    SELECT 
+                        i_funcionarios,
+                        i_entidades,
+                        f.dt_admissao,
+                        pf.dt_nascimento,
+                        pf.i_pessoas,
+                        p.nome
+                    FROM 
+                        bethadba.funcionarios f
+                    INNER JOIN 
+                        bethadba.pessoas_fisicas pf ON (f.i_pessoas = pf.i_pessoas)
+                    INNER JOIN 
+                        bethadba.pessoas p ON (f.i_pessoas = p.i_pessoas)
+                    WHERE
+                        pf.dt_nascimento > f.dt_admissao
+                ) AS subPessoa
+            WHERE 
+                pff.i_pessoas = subPessoa.i_pessoas;
+        """
+    )
+
     #Coloca a data '1900-01-01' nas datas nulas
+    #pessoaDataNascimentoNulo
     updateInsertDelete(
         """
             UPDATE 
@@ -1501,6 +1533,31 @@ def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
                 lmv.i_locais_trab = lotacaoFisica.i_locais_trab;
         """
     )
+
+#Limita a descrição do motivo de alteração do ponto em 30 caracteres
+#A descrição não pode conter mais de 30 caracteres
+def descricaoMotivoAlteracaoPontoMaior30():
+
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.motivos_altponto ma
+            SET 
+                ma.descricao = SUBSTRING(ma.descricao, 1, 30)
+            FROM 
+                ( 
+                    SELECT
+                        i_motivos_altponto,
+                        LENGTH(descricao) AS tamanho_descricao
+                    FROM
+                        bethadba.motivos_altponto 
+                    WHERE 
+                        tamanho_descricao > 30  
+                ) AS alteracao_ponto
+            WHERE 
+                ma.i_motivos_altponto = alteracao_ponto.i_motivos_altponto;  
+        """
+    )
     
 #Limita o numero de caracteres em 150 no motivo dos afastamentos
 def observacaoAfastamentoMaior150():
@@ -2000,6 +2057,7 @@ nomeRuaVazio()
 funcionariosSemPrevidencia()
 eventoMediaVantagemComposicao()
 dataAdmissaoMatriculaMaiorDataLotacaoFisica()
+descricaoMotivoAlteracaoPontoMaior30()
 observacaoAfastamentoMaior150()
 dataInicialAfastamentoMaiorDataFinal()
 motivoAposentadoriaNulo()

@@ -10,6 +10,3 @@ bethaDBA = True
 
 #Fechar as folhas de pagamentos com data anterior a data especificada
 competenciaFechamentoFolha = 20210601
-
-#Tabelas sem permissões TECBTH
-tabelaSemPermissao = ['marcacoes', 'marcacoes_excluidas', 'par_ponto_portaria']

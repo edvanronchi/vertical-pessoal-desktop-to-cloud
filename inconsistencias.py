@@ -3,7 +3,39 @@ from variaveis import *
 from src.functions import *
 from src.database import *
 
-#Campos adicionais com descrição repetido
+#Busca as pessoas com data de nascimento maior que data de admissão
+def pessoaDataNascimentoMaiorDataAdmissao():
+
+    resultado = select(
+        """
+            SELECT 
+                i_funcionarios,
+                i_entidades,
+                f.dt_admissao,
+                pf.dt_nascimento,
+                pf.i_pessoas,
+                p.nome
+            FROM 
+                bethadba.funcionarios f
+            INNER JOIN 
+                bethadba.pessoas_fisicas pf ON (f.i_pessoas = pf.i_pessoas)
+            INNER JOIN 
+                bethadba.pessoas p ON (f.i_pessoas = p.i_pessoas)
+            WHERE
+                pf.dt_nascimento > f.dt_admissao;
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Pessoas com data de nascimento maior que data de admissão: '+ str(quantidade))
+
+    return quantidade
+
+#Busca os campos adicionais com descrição repetido
 def campoAdicionalDescricaoRepetido():
 
     resultado = select(
@@ -1351,6 +1383,31 @@ def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
 
     return quantidade
 
+#Verifica a descrição do motivo de alteração do ponto se contem mais que 30 caracteres
+#A descrição não pode conter mais de 30 caracteres
+def descricaoMotivoAlteracaoPontoMaior30():
+
+    resultado = select(
+        """
+            SELECT
+                i_motivos_altponto,
+                LENGTH(descricao) AS tamanho_descricao
+            FROM
+                bethadba.motivos_altponto 
+            WHERE 
+                tamanho_descricao > 30 
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Descricao de motivos de alteração do ponto maior que 30 caracteres: '+ str(quantidade))
+
+    return quantidade
+
 #Verifica o motivo nos afastamentos se contem no máximo 150 caracteres
 def observacaoAfastamentoMaior150():
 
@@ -1373,7 +1430,7 @@ def observacaoAfastamentoMaior150():
     if quantidade == 0:
         return 0
 
-    print('Motivos nos afastamentos maior que 150 caracter: '+ str(quantidade))
+    print('Motivos nos afastamentos maior que 150 caracteres: '+ str(quantidade))
 
     return quantidade
 
@@ -1770,6 +1827,7 @@ def areasAtuacaoDescricaoRepetido():
     return quantidade
 
 #-----------------------Executar---------------------#
+pessoaDataNascimentoMaiorDataAdmissao()
 campoAdicionalDescricaoRepetido()
 dependentesOutros()
 pessoaDataNascimentoNulo()
@@ -1820,6 +1878,7 @@ nomeRuaVazio()
 funcionariosSemPrevidencia()
 eventoMediaVantagemComposicao()
 dataAdmissaoMatriculaMaiorDataLotacaoFisica()
+descricaoMotivoAlteracaoPontoMaior30()
 observacaoAfastamentoMaior150()
 dataInicialAfastamentoMaiorDataFinal()
 motivoAposentadoriaNulo()

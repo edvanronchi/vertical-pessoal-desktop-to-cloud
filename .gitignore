@@ -1,3 +1,7 @@
 src/sql/*
 !src/sql/sql.txt
+src/planilhas/*
+!src/planilhas/planilhas.txt
 __pycache__/
+teste.py
+variaveis.py

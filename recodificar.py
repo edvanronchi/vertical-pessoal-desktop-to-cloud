@@ -533,8 +533,63 @@ def recodificarLocaisTrab(idEntidadesAgrupadas):
 
     print("Código SQL gerado para tabela: locais_trab")
 
+def recodificarRelogios(idEntidadesAgrupadas):
+    recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_relogios.sql", "a")
+
+    recodificar.writelines(desabilitarTriggers)
+
+    resultado = select(
+        """
+            SELECT 
+                list(i_entidades), 
+                i_relogios, 
+                count(*) AS quantidade 
+            FROM 
+                bethadba.relogios 
+            WHERE
+                i_entidades IN ({})
+            GROUP BY
+                i_relogios
+            HAVING
+                quantidade > 1 
+            ORDER BY 
+                i_relogios       
+        """.format(idEntidadesAgrupadas)
+    )
+
+    tabelas = tabelaColuna(['i_entidades', 'i_relogios'])
+
+    idMax = select("SELECT (MAX(i_relogios)+1) AS id FROM bethadba.relogios")[0][0]
+
+    for i in resultado:
+        idsEntidade = i[0].split(',')
+
+        identificador = i[1]
+
+        for idEntidade in idsEntidade:
+
+            if idEntidade == idEntidadePrincipal:
+                continue    
+            
+            querys = ""
+
+            for tabela in tabelas:
+          
+                u = "UPDATE bethadba.{} SET i_relogios = {} WHERE i_relogios = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+
+                querys += u
+            
+            querys += "\n"
+
+            recodificar.writelines(querys)
+            #recodificarGeral.writelines(querys)
+
+            idMax += 1
+
+    print("Código SQL gerado para tabela: relogios")
+
 #--------------------Executar-------------------------#
-recodificarFuncionarios(idEntidadesAgrupadas)
+#recodificarFuncionarios(idEntidadesAgrupadas)
 #recodificarCargos(idEntidadesAgrupadas)
 #recodificarPeriodosTrab(idEntidadesAgrupadas)
 #recodificarTurmas(idEntidadesAgrupadas)
@@ -543,3 +598,4 @@ recodificarFuncionarios(idEntidadesAgrupadas)
 #recodificarHorariosPonto(idEntidadesAgrupadas)
 #recodificarGrupos(idEntidadesAgrupadas)
 #recodificarLocaisTrab(idEntidadesAgrupadas)
+#recodificarRelogios(idEntidadesAgrupadas)
