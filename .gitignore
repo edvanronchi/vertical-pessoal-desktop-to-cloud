@@ -4,4 +4,4 @@ src/planilhas/*
 !src/planilhas/planilhas.txt
 __pycache__/
 teste.py
-variaveis.py
+.env

@@ -1,12 +1,19 @@
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 #Variaveis globais
-idEntidadePrincipal = "2"        #Somente o id da entidade principal
-idEntidadesAgrupadas = "1,2,3,4" #Id's das entidades separadas por vigula
+idEntidadePrincipal = os.environ.get("ID_ENTIDADE_PRINCIPAL")    
+idEntidadesAgrupadas = os.environ.get("ID_ENTIDADE_AGRUPADAS")
 
 #Nome da conexão via ODBC
-database = 'folha_monte_carlo_pm'
+database = os.environ.get("DATABASE")
 
-#Utilização do bethaDBA
-bethaDBA = True
+#Utilização do bethaD BA
+bethaDBA = os.environ.get("BETHADBA")
 
 #Fechar as folhas de pagamentos com data anterior a data especificada
-competenciaFechamentoFolha = 20210601
+competenciaFechamentoFolha = os.environ.get("COMPETENCIA_FECHAMENTO_FOLHA")
