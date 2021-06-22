@@ -35,6 +35,27 @@ def pessoaDataNascimentoMaiorDataAdmissao():
 
     return quantidade
 
+#Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
+def pessoaDataVencimentoCNHMenorDataEmissao():
+
+    resultado = select(
+        """
+        select 
+        i_pessoas
+        from bethadba.hist_pessoas_fis hpf  
+        where dt_primeira_cnh > dt_vencto_cnh; 
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Pessoas com data de vencimento da CNH maior que emissão da 1ª habilitação: '+ str(quantidade))
+
+    return quantidade
+
 #Busca os campos adicionais com descrição repetido
 def campoAdicionalDescricaoRepetido():
 
@@ -1930,12 +1951,13 @@ def cargoConfiguracaoFeriasNulo():
 
 #-----------------------Executar---------------------#
 pessoaDataNascimentoMaiorDataAdmissao()
+pessoaDataVencimentoCNHMenorDataEmissao()
 campoAdicionalDescricaoRepetido()
 dependentesOutros()
 pessoaDataNascimentoNulo()
 pessoaDataNascimentoMaiorDataDependecia()
 pessoaDataNascimentoMaiorDataNascimentoResponsavel()
-cpfNulo()
+#cpfNulo()
 cpfRepetido()
 pisRepetido()
 pisInvalido()

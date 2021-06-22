@@ -77,7 +77,7 @@ def mostrarAposentados():
     return vinculosAposentados
 
 #Faz o vinculo do aposentado com sua matricula anterior
-def vincularAposentados():
+def vincularAposentados(vincular):
     resultado = select("SELECT * FROM bethadba.caracteristicas WHERE i_caracteristicas = 19999")
 
     if len(resultado) == 0:
@@ -87,8 +87,10 @@ def vincularAposentados():
 
         updateInsertDelete("INSERT INTO bethadba.funcionarios_caract_cfg (i_caracteristicas, ordem, permite_excluir, dt_expiracao) VALUES(19999, {}, 'S', '2999-12-31');".format(idMax))
 
-    vinculos = mostrarAposentados()
+    if not vincular:
+        return
 
+    vinculos = mostrarAposentados()    
     for i in vinculos:
 
         buscaDadosAdicionais = select(
@@ -136,4 +138,4 @@ def vincularAposentados():
 
 #--------------------Executar-------------------------
 mostrarAposentados()
-#vincularAposentados()
+vincularAposentados(False)
