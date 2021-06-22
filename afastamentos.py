@@ -1,6 +1,6 @@
 from src.functions import *
 from src.database import *
-from datetime import timedelta
+from datetime import date, datetime, timedelta
 from os import path
 
 #Busca afastamentos concomitantes
@@ -10,7 +10,8 @@ def afastamentos():
     idFuncionarios = select(
         """
             SELECT 
-                i_funcionarios
+                i_funcionarios,
+                i_entidades
             FROM  
                 bethadba.funcionarios;
         """
@@ -18,23 +19,24 @@ def afastamentos():
 
     for i in idFuncionarios:
         idFuncionario = i[0]
+        idEntidade  = i[1]
 
         temRescisao = False
 
         resultado = select(
             """
                 SELECT data_inicial, data_final, i_entidades, i_funcionarios, tabela FROM (
-                    SELECT dt_afastamento AS data_inicial, dt_ultimo_dia AS data_final, i_entidades, i_funcionarios, 'afastamentos' AS tabela FROM bethadba.afastamentos WHERE i_funcionarios = {0} AND i_tipos_afast NOT IN (7, 8)
+                    SELECT dt_afastamento AS data_inicial, dt_ultimo_dia AS data_final, i_entidades, i_funcionarios, 'afastamentos' AS tabela FROM bethadba.afastamentos WHERE i_funcionarios = {0} AND i_entidades = {1} AND i_tipos_afast NOT IN (7, 8)
                     
                     UNION ALL
                     
-                    SELECT dt_gozo_ini AS data_inicial, dt_gozo_fin AS data_final, i_entidades, i_funcionarios, 'ferias' AS tabela FROM bethadba.ferias WHERE i_funcionarios = {0}
+                    SELECT dt_gozo_ini AS data_inicial, dt_gozo_fin AS data_final, i_entidades, i_funcionarios, 'ferias' AS tabela FROM bethadba.ferias WHERE i_funcionarios = {0} AND i_entidades = {1}
                     
                     UNION ALL
                     
-                    SELECT ISNULL(dt_aviso, dt_rescisao) AS  data_inicial, dt_rescisao AS data_final, i_entidades, i_funcionarios, 'rescisoes' AS tabela FROM bethadba.rescisoes WHERE i_funcionarios = {0}
+                    SELECT ISNULL(dt_aviso, dt_rescisao) AS  data_inicial, dt_rescisao AS data_final, i_entidades, i_funcionarios, 'rescisoes' AS tabela FROM bethadba.rescisoes WHERE i_funcionarios = {0} AND i_entidades = {1}
                 ) AS a ORDER BY data_inicial, data_final DESC;
-            """.format(idFuncionario)
+            """.format(idFuncionario, idEntidade)
         )
 
         dataFinalAnterior = ""
@@ -44,7 +46,6 @@ def afastamentos():
         for index, j in enumerate(resultado):
             dataInicial = j[0]
             dataFinal = j[1]
-            idEntidade = j[2]
             tabela = j[4]
 
             if index == 0:
@@ -52,24 +53,29 @@ def afastamentos():
                 dataInicialAnterior = dataInicial
                 dataFinalAnterior = dataFinal
                 continue
-
+        
             if dataFinalAnterior >= dataInicial:
 
                 if tabelaAnterior == "afastamentos":
 
                     u = "UPDATE bethadba.afastamentos SET dt_ultimo_dia = '{}' WHERE dt_afastamento = '{}' AND i_entidades = {} AND i_funcionarios = {};".format((dataInicial - timedelta(days = 1)), dataInicialAnterior, idEntidade, idFuncionario)
-
-                    afastamentosConcomitantes.writelines(u)
+                    
+                    afastamentosConcomitantes.writelines(u + "\n")
 
                 elif tabelaAnterior == "ferias" and tabela == "afastamentos":
 
                     u = "UPDATE bethadba.afastamentos SET dt_afastamento = '{}' WHERE dt_afastamento = '{}' AND i_entidades = {} AND i_funcionarios = {};".format((dataFinalAnterior + timedelta(days = 1)), dataInicial, idEntidade, idFuncionario)
-
-                    afastamentosConcomitantes.writelines(u)
+                    
+                    afastamentosConcomitantes.writelines(u + "\n")
                           
                 else:
+
+                    if tabelaAnterior == 'rescisoes' and tabela == 'rescisoes':
+                        continue
+
                     print("Update manual: Verificar o incidente!")
                     print(idFuncionario)
+                    print(idEntidade)
                     print(dataInicialAnterior)
                     print(dataFinalAnterior)
                     print("===")

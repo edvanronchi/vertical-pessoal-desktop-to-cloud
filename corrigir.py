@@ -191,11 +191,10 @@ def cpfNulo():
     for i in resultado:
         idPessoa = i[0]
 
-        updateInsertDelete(
-            """
-                UPDATE bethadba.pessoas_fisicas SET cpf = {} WHERE i_pessoas = {};
-            """.format(gerarCpf(False), idPessoa)
-        )
+        u = "UPDATE bethadba.pessoas_fisicas SET cpf = {} WHERE i_pessoas = {};".format(gerarCpf(False), idPessoa)
+        
+        print(u)
+        updateInsertDelete(u)
 
 #Coloca nulo para um dos CPF's repetidos
 #As Pessoas (0,0) possuem o mesmo CPF!
@@ -311,8 +310,22 @@ def cnpjNulo():
             """.format(gerarCnpj(False), idPessoa)
         )
 
-#Renomeia os logradouros repetidos
-def logradourosRepetido():
+#Renomeia a descrição dos logradouros que tem caracter especial no inicio da descrição
+def logradourosDescricaoCaracterEspecial():
+
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.ruas
+            SET 
+                nome = SUBSTRING(nome, 2)   
+            WHERE 
+                SUBSTRING(nome, 1, 1) in ('[', ']');
+        """
+    )
+
+#Renomeia os logradouros com descrição repetidos
+def logradourosDescricaoRepetido():
 
     resultado = select(
         """
@@ -763,6 +776,39 @@ def tipoAfastamentoRepetido():
             updateInsertDelete(u)
 
 #Coloca a data de rescisão na data de alteração
+def alteracaoFuncionarioMaiorDataRescisaoA():
+
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.hist_funcionarios hff
+            SET 
+                hff.dt_alteracoes = historico.dt_alteracoes_novo
+            FROM 
+                ( 
+                    SELECT
+                        hf.i_funcionarios,
+                        hf.i_entidades,
+                        hf.dt_alteracoes,
+                        r.dt_rescisao,
+                        STRING(r.dt_rescisao, ' ', SUBSTRING(hf.dt_alteracoes, 12, 8)) AS dt_alteracoes_novo
+                    FROM
+                        bethadba.hist_funcionarios hf
+                    INNER JOIN 
+                        bethadba.rescisoes r ON (hf.i_funcionarios = r.i_funcionarios AND hf.i_entidades = r.i_entidades)
+                    WHERE
+                        hf.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59')
+                    ORDER BY 
+                        hf.dt_alteracoes DESC
+                ) AS historico
+            WHERE
+                hff.i_funcionarios = historico.i_funcionarios AND
+                hff.i_entidades = historico.i_entidades AND
+                hff.dt_alteracoes = historico.dt_alteracoes;
+        """
+    )
+
+#Coloca a data de rescisão na data de alteração
 def alteracaoFuncionarioMaiorDataRescisao():
 
     resultado = select(
@@ -780,7 +826,7 @@ def alteracaoFuncionarioMaiorDataRescisao():
             WHERE
                 hf.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59')
             ORDER BY 
-            	hf.dt_alteracoes DESC;
+            	hf.i_funcionarios, hf.dt_alteracoes DESC;
         """
     )
 
@@ -797,10 +843,9 @@ def alteracaoFuncionarioMaiorDataRescisao():
             SET
                 dt_alteracoes = '{}'
             WHERE
-                i_funcionarios = {} AND 
+                i_funcionarios = {} AND
                 i_entidades = {} AND
                 dt_alteracoes = '{}';
-
         """.format(dtAlteracoesNovo, idFuncionario, idEntidade, dtAlteracoes)
 
         s = """
@@ -1246,7 +1291,7 @@ def cpfInvalido():
         cpf = i[1]
        
         if not validarCpf(cpf):
-            u = "UPDATE bethadba.pessoas_fisicas SET cpf = '{}' WHERE i_pessoas = {};".format(gerarCpf(), idPessoa)
+            u = "UPDATE bethadba.pessoas_fisicas SET cpf = NULL WHERE i_pessoas = {};".format(idPessoa)
 
             print(u)
             updateInsertDelete(u)
@@ -1476,6 +1521,32 @@ def funcionariosSemPrevidencia():
                 hfu.i_entidades = sem_previdencia.i_entidades;    
         """.format(idEntidadesAgrupadas)
     )
+
+#Exclui os eventos de média/vantagem que não tem eventos vinculados
+#Os eventos de composição da média são obrigatórios
+def eventoMediaVantagemSemComposicao():
+
+    resultado = select(
+        """
+            SELECT 
+                DISTINCT(m.i_eventos),
+                me.i_eventos_medias
+            FROM 
+                bethadba.mediasvant m
+            LEFT JOIN
+                mediasvant_eve me ON (m.i_eventos = me.i_eventos_medias)
+            WHERE 
+                me.i_eventos_medias IS NULL
+        """
+    )
+
+    for i in resultado:
+        idEventos = i[0]
+        
+        d = "DELETE FROM bethadba.mediasvant WHERE i_eventos = {};".format(idEventos)
+        
+        print(d)
+        updateInsertDelete(d)
 
 #Exclui os eventos de média/vantagem pai que estão vinculados a outros
 def eventoMediaVantagemComposicao():
@@ -2008,16 +2079,50 @@ def areasAtuacaoDescricaoRepetido():
             print(u)
             updateInsertDelete(u)
 
+#Coloca 0 - Outros para os dependentes sem motivo de termino
+#O motivo de término é obrigatório
+def dependenteMotivoTerminoNulo():
+
+    updateInsertDelete(
+        """
+            UPDATE
+                bethadba.dependentes
+            SET 
+                mot_fin_depende = 0
+            WHERE
+                mot_fin_depende IS NULL AND 
+                dt_fin_depende IS NOT NULL;                               
+        """
+    )  
+
+#Coloca a configuração de feroas mais utilizada para os cargos sem configuração de ferias
+#A configuração de férias é obrigatória
+def cargoConfiguracaoFeriasNulo():
+
+    updateInsertDelete(
+        """
+            UPDATE
+                bethadba.cargos_compl
+            SET 
+                i_config_ferias = (SELECT TOP 1 i_config_ferias FROM bethadba.cargos_compl GROUP BY i_config_ferias ORDER BY count(*) DESC),
+                i_config_ferias_subst = (SELECT TOP 1 i_config_ferias_subst FROM bethadba.cargos_compl GROUP BY i_config_ferias_subst ORDER BY count(*) DESC)
+            WHERE
+                i_config_ferias IS NULL OR 
+                i_config_ferias_subst IS NULL;                               
+        """
+    )  
+
 #--------------------Executar--------------------#
 campoAdicionalDescricaoRepetido()
 dependentesOutros()
 pessoaDataNascimentoNulo()
-#cpfNulo()
+cpfNulo()
 cpfRepetido()
 pisRepetido()
 pisInvalido()
 cnpjNulo()
-logradourosRepetido()
+logradourosDescricaoCaracterEspecial()
+logradourosDescricaoRepetido()
 tiposBasesRepetido()
 logradourosSemCidade()
 atosNumeroNulo()
@@ -2026,7 +2131,7 @@ cargoCboNulo()
 eSocialNuloVinculoEmpregaticio()
 vinculoEmpregaticioRepetido()
 eSocialNuloMotivoRescisao()
-#fechamentoFolha(competenciaFechamentoFolha)
+fechamentoFolha(competenciaFechamentoFolha)
 folhaFeriasDataPagamentoNulo()
 eSocialNuloMotivoAposentadoria()
 historicoSalarialZerado()
@@ -2055,6 +2160,7 @@ emailInvalido()
 numeroEnderecoVazio()
 nomeRuaVazio()
 funcionariosSemPrevidencia()
+eventoMediaVantagemSemComposicao()
 eventoMediaVantagemComposicao()
 dataAdmissaoMatriculaMaiorDataLotacaoFisica()
 descricaoMotivoAlteracaoPontoMaior30()
@@ -2066,9 +2172,11 @@ dataInicialDependenteMaiorTitular()
 telefoneLotacaoFisicaMaior11()
 dataCriacaoAtoNulo()
 descricaoNivelSalarialRepetido()
-#cartaoPontoRepetido()
+cartaoPontoRepetido()
 dataNomeacaoMaiorDataPosse()
 contaBancariaFuncionarioInvalida()
 previdenciaMaiorQueUm()
 dataInicialAfastamentoMenorDataAdmissao()
 areasAtuacaoDescricaoRepetido()
+dependenteMotivoTerminoNulo()
+cargoConfiguracaoFeriasNulo()

@@ -316,8 +316,31 @@ def cnpjNulo():
 
     return quantidade
 
-#Verifica os logradouros repetidos
-def logradourosRepetido():
+#Verifica a descrição dos logradouros que tem caracter especial no inicio da descrição
+def logradourosDescricaoCaracterEspecial():
+
+    resultado = select(
+        """
+            SELECT 
+                SUBSTRING(nome, 1, 1) as nome_com_caracter 
+            FROM 
+                bethadba.ruas 
+            WHERE 
+                nome_com_caracter in ('[', ']')
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Logradouros que tem caracter especial no inicio da descrição: '+ str(quantidade))
+
+    return quantidade
+
+#Verifica os logradouros com descrição repetidos
+def logradourosDescricaoRepetido():
 
     resultado = select(
         """
@@ -743,7 +766,7 @@ def alteracaoFuncionarioMaiorDataRescisao():
             WHERE
                 hf.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59')
             ORDER BY 
-            	hf.dt_alteracoes DESC
+            	hf.i_funcionarios, hf.dt_alteracoes DESC
         """
     )
 
@@ -1328,6 +1351,33 @@ def funcionariosSemPrevidencia():
 
     return quantidade
 
+#Verifica os eventos de média/vantagem que não tem eventos vinculados
+#Os eventos de composição da média são obrigatórios
+def eventoMediaVantagemSemComposicao():
+
+    resultado = select(
+        """
+            SELECT 
+                DISTINCT(m.i_eventos),
+                me.i_eventos_medias
+            FROM 
+                bethadba.mediasvant m
+            LEFT JOIN
+                mediasvant_eve me ON (m.i_eventos = me.i_eventos_medias)
+            WHERE 
+                me.i_eventos_medias IS NULL
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Eventos de média/vantagem compondo outros eventos: '+ str(quantidade))
+
+    return quantidade
+
 #Verifica os eventos de média/vantagem se estão compondo outros eventos de média/vantagem
 #Eventos de composição não pode ser eventos de média/vantagem
 def eventoMediaVantagemComposicao():
@@ -1349,7 +1399,7 @@ def eventoMediaVantagemComposicao():
     if quantidade == 0:
         return 0
 
-    print('Eventos de média/vantagem compondo outros eventos: '+ str(quantidade))
+    print('Eventos de média/vantagem sem composição de eventos: '+ str(quantidade))
 
     return quantidade
 
@@ -1826,6 +1876,58 @@ def areasAtuacaoDescricaoRepetido():
 
     return quantidade
 
+#Busca os dependentes sem motivo de termino
+#O motivo de término é obrigatório
+def dependenteMotivoTerminoNulo():
+
+    resultado = select(
+        """
+            SELECT 
+                i_pessoas ,
+                i_dependentes,
+                dt_ini_depende
+            FROM 
+                bethadba.dependentes d  
+            WHERE 
+                mot_fin_depende IS NULL AND 
+                dt_fin_depende IS NOT NULL;
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Dependente sem motivo de termino: '+ str(quantidade))
+
+    return quantidade
+
+#Busca os cargos sem configuração de ferias
+#A configuração de férias é obrigatória
+def cargoConfiguracaoFeriasNulo():
+
+    resultado = select(
+        """
+            SELECT 
+                i_cargos, i_entidades 
+            FROM 
+                bethadba.cargos_compl
+            WHERE
+                i_config_ferias IS NULL OR 
+                i_config_ferias_subst IS NULL
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return 0
+
+    print('Cargos sem configuração de ferias: '+ str(quantidade))
+
+    return quantidade
+
 #-----------------------Executar---------------------#
 pessoaDataNascimentoMaiorDataAdmissao()
 campoAdicionalDescricaoRepetido()
@@ -1838,7 +1940,8 @@ cpfRepetido()
 pisRepetido()
 pisInvalido()
 cnpjNulo()
-logradourosRepetido()
+logradourosDescricaoCaracterEspecial()
+logradourosDescricaoRepetido()
 tiposBasesRepetido()
 logradourosSemCidade()
 atosNumeroNulo()
@@ -1876,6 +1979,7 @@ emailInvalido()
 numeroEnderecoVazio()
 nomeRuaVazio()
 funcionariosSemPrevidencia()
+eventoMediaVantagemSemComposicao()
 eventoMediaVantagemComposicao()
 dataAdmissaoMatriculaMaiorDataLotacaoFisica()
 descricaoMotivoAlteracaoPontoMaior30()
@@ -1893,3 +1997,5 @@ contaBancariaFuncionarioInvalida()
 previdenciaMaiorQueUm()
 dataInicialAfastamentoMenorDataAdmissao()
 areasAtuacaoDescricaoRepetido()
+dependenteMotivoTerminoNulo()
+cargoConfiguracaoFeriasNulo()
