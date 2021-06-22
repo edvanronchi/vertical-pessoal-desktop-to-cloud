@@ -171,6 +171,20 @@ def pessoaDataNascimentoNulo():
         """
     )
 
+#Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
+def pessoaDataVencimentoCNHMenorDataEmissao():
+
+    updateInsertDelete(
+        """
+            UPDATE
+            bethadba.hist_pessoas_fis
+            SET 
+            dt_vencto_cnh = dt_primeira_cnh
+            where dt_primeira_cnh > dt_vencto_cnh; 
+        """
+    )
+
+
 #Gera CPF aleatorio para pessoas com CPF nulo
 def cpfNulo():
 
@@ -2114,6 +2128,7 @@ def cargoConfiguracaoFeriasNulo():
 
 #--------------------Executar--------------------#
 campoAdicionalDescricaoRepetido()
+pessoaDataVencimentoCNHMenorDataEmissao()
 dependentesOutros()
 pessoaDataNascimentoNulo()
 #cpfNulo()
