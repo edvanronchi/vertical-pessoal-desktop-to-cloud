@@ -1,7 +1,6 @@
-src/sql/*
-!src/sql/sql.txt
+src/sql/*.sql
 src/planilhas/*
-!src/planilhas/planilhas.txt
+!src/planilhas/README.md
 __pycache__/
 teste.py
 .env

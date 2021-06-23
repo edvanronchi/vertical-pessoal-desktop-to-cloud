@@ -1,0 +1,1 @@
+# Diretório responsavel por armazenar os SQL's de recoficação e afastamentos concomitantes.

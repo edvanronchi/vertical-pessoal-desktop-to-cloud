@@ -177,13 +177,69 @@ def pessoaDataVencimentoCNHMenorDataEmissao():
     updateInsertDelete(
         """
             UPDATE
-            bethadba.hist_pessoas_fis
+                bethadba.hist_pessoas_fis
             SET 
-            dt_vencto_cnh = dt_primeira_cnh
-            where dt_primeira_cnh > dt_vencto_cnh; 
+                dt_vencto_cnh = dt_primeira_cnh+1
+            WHERE
+                dt_primeira_cnh >= dt_vencto_cnh; 
         """
     )
 
+    updateInsertDelete(
+        """
+            UPDATE
+                bethadba.pessoas_fis_compl
+            SET 
+                dt_vencto_cnh = dt_primeira_cnh+1
+            WHERE 
+                dt_primeira_cnh >= dt_vencto_cnh; 
+        """
+    )
+    print("Data de emissao da CNH atualizada!")
+
+#Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
+def pessoaDataPrimeiraCNHMaiorNascimento():
+
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.hist_pessoas_fis
+            SET    
+                hist_pessoas_fis.dt_primeira_cnh = NULL
+            FROM   
+                (SELECT i_pessoas,
+                        (SELECT a.dt_nascimento
+                            FROM   bethadba.pessoas_fisicas AS a
+                            WHERE  a.i_pessoas = hpf.i_pessoas) nascimento,
+                        dt_emissao_cnh,
+                        NULL AS novaDataCNH
+                    FROM   bethadba.hist_pessoas_fis hpf
+                    WHERE  nascimento >= dt_primeira_cnh) AS d
+            WHERE  
+                hist_pessoas_fis.i_pessoas = d.i_pessoas;
+        """
+    )
+
+    updateInsertDelete(
+        """
+            UPDATE 
+                bethadba.pessoas_fis_compl
+            SET    
+                pessoas_fis_compl.dt_primeira_cnh = NULL
+            FROM   
+                (SELECT i_pessoas,
+                        (SELECT a.dt_nascimento
+                            FROM   bethadba.pessoas_fisicas AS a
+                            WHERE  a.i_pessoas = hpf.i_pessoas) nascimento,
+                        dt_emissao_cnh,
+                        NULL AS novaDataCNH
+                    FROM   bethadba.pessoas_fis_compl hpf
+                    WHERE  nascimento >= dt_primeira_cnh) AS d
+            WHERE  
+                pessoas_fis_compl.i_pessoas = d.i_pessoas;
+        """
+    )
+    print("Data da primeira CNH atualizada!")
 
 #Gera CPF aleatorio para pessoas com CPF nulo
 def cpfNulo():
@@ -2126,9 +2182,21 @@ def cargoConfiguracaoFeriasNulo():
         """
     )  
 
+#Alterações realizadas manualmente
+def alteracao():
+    alteracao = open("vertical-pessoal-desktop-to-cloud\\src\\sql\\alteracao.sql", "r", encoding = 'utf-8')    
+    updateInsertDelete(
+        """
+          {}                           
+        """.format(alteracao.read())
+    )
+    alteracao.close()    
+    print("Executado arquivo de alterações.")
+
 #--------------------Executar--------------------#
 campoAdicionalDescricaoRepetido()
 pessoaDataVencimentoCNHMenorDataEmissao()
+pessoaDataPrimeiraCNHMaiorNascimento()
 dependentesOutros()
 pessoaDataNascimentoNulo()
 #cpfNulo()
@@ -2195,3 +2263,4 @@ previdenciaMaiorQueUm()
 areasAtuacaoDescricaoRepetido()
 dependenteMotivoTerminoNulo()
 cargoConfiguracaoFeriasNulo()
+alteracao()

@@ -4,7 +4,7 @@ from src.functions import *
 from src.database import *
 
 #Busca as pessoas com data de nascimento maior que data de admissão
-def pessoaDataNascimentoMaiorDataAdmissao():
+def pessoa_data_nascimento_maior_data_admissao():
 
     resultado = select(
         """
@@ -29,21 +29,52 @@ def pessoaDataNascimentoMaiorDataAdmissao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Pessoas com data de nascimento maior que data de admissão: '+ str(quantidade))
 
     return quantidade
 
 #Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
-def pessoaDataVencimentoCNHMenorDataEmissao():
+def pessoa_data_vencimento_cnh_menor_data_emissao():
 
     resultado = select(
         """
-        select 
-        i_pessoas
-        from bethadba.hist_pessoas_fis hpf  
-        where dt_primeira_cnh > dt_vencto_cnh; 
+            SELECT 
+                pessoas_fis_compl.i_pessoas
+            FROM   
+                bethadba.pessoas_fis_compl
+            WHERE  
+                dt_primeira_cnh > dt_vencto_cnh;
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Pessoas com data de vencimento da CNH maior que emissão da 1ª habilitação: '+ str(quantidade))
+
+    return quantidade
+
+#Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
+def pessoaDataVencimentoCNHMaiorNascimento():
+
+    resultado = select(
+        """
+            SELECT i_pessoas,
+                    (SELECT a.dt_nascimento
+                FROM   
+                    bethadba.pessoas_fisicas AS a
+                WHERE  
+                    a.i_pessoas = hpf.i_pessoas) nascimento,
+                dt_emissao_cnh,
+                NULL AS novaDataCNH
+            FROM   
+                bethadba.pessoas_fis_compl hpf
+            WHERE  
+                nascimento >= dt_primeira_cnh; 
         """
     )
 
@@ -52,9 +83,9 @@ def pessoaDataVencimentoCNHMenorDataEmissao():
     if quantidade == 0:
         return 0
 
-    print('Pessoas com data de vencimento da CNH maior que emissão da 1ª habilitação: '+ str(quantidade))
+    print('Pessoas com data de nascimento maior que emissão da 1ª habilitação: '+ str(quantidade))
 
-    return quantidade
+    return quantidade    
 
 #Busca os campos adicionais com descrição repetido
 def campoAdicionalDescricaoRepetido():
@@ -62,15 +93,15 @@ def campoAdicionalDescricaoRepetido():
     resultado = select(
         """
            SELECT 
-                list(i_caracteristicas), 
+                LIST(i_caracteristicas), 
                 TRIM(nome), 
-                count(nome) 
+                COUNT(nome) 
             FROM 
                 bethadba.caracteristicas 
             GROUP BY 
                 TRIM(nome) 
             HAVING 
-                count(nome) > 1
+                COUNT(nome) > 1
         """
     )
 
@@ -1950,8 +1981,9 @@ def cargoConfiguracaoFeriasNulo():
     return quantidade
 
 #-----------------------Executar---------------------#
-pessoaDataNascimentoMaiorDataAdmissao()
-pessoaDataVencimentoCNHMenorDataEmissao()
+pessoa_data_vencimento_cnh_menor_data_emissao()
+pessoa_data_vencimento_cnh_menor_data_emissao()
+pessoaDataVencimentoCNHMaiorNascimento()
 campoAdicionalDescricaoRepetido()
 dependentesOutros()
 pessoaDataNascimentoNulo()
