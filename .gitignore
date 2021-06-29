@@ -4,3 +4,4 @@ src/planilhas/*
 __pycache__/
 teste.py
 .env
+target/

@@ -1,15 +1,15 @@
 from validate_docbr import CPF, CNPJ, PIS
-from src.database import *
-import random
+from src.database import consultar
+from random import randint
 
 #Tabelas que tem o nome da coluna especifica
-def tabelaColuna(colunas: list = []) -> list:
-    colunas = str(colunas).replace("[", "").replace("]", "").replace(" ", "")
+def tabela_coluna(colunas: list = []) -> list:
+    colunas = ",".join(colunas)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
-                list(cname) as lista,
+                LIST(cname) as lista,
                 tname 
             FROM 
                 sys.syscolumns
@@ -27,61 +27,61 @@ def tabelaColuna(colunas: list = []) -> list:
 
     return [i[1] for i in resultado if len(i[0]) >= len(colunas.replace("'", ""))]
 
-def gerarCpf(ponto: bool = False) -> bool:                                                        
+def cpf_gerar(ponto: bool = False) -> bool:                                                        
     return CPF().generate(ponto)
 
-def gerarPis(ponto: bool = False) -> bool:
+def pis_gerar(ponto: bool = False) -> bool:
     return PIS().generate(ponto)
 
-def gerarCnpj(ponto: bool = False) -> bool:                                                     
+def cnpj_gerar(ponto: bool = False) -> bool:                                                     
     return CNPJ().generate(ponto)
 
-def gerarRg(ponto: bool = False) -> bool:                                                       
-    rg = [random.randint(0, 9) for x in range(7)]                              
+def rg_gerar(ponto: bool = False) -> bool:                                                       
+    rg = [randint(0, 9) for x in range(7)]                              
                                                                                 
     for _ in range(2):                                                          
-        val = sum([(len(rg) + 1 - i) * v for i, v in enumerate(rg)]) % 9      
+        numero = sum([(len(rg) + 1 - i) * v for i, v in enumerate(rg)]) % 9      
                                                                                 
-        rg.append(9 - val if val > 1 else 0)                                  
+        rg.append(9 - numero if numero > 1 else 0)                                  
 
     if ponto:
         return '%s%s.%s%s%s.%s%s%s-%s' % tuple(rg)
     
     return '%s%s%s%s%s%s%s%s%s' % tuple(rg)
 
-def validarCpf(cpf) -> bool:
+def cpf_validar(cpf) -> bool:
 
     if not cpf:
         return False
 
-    numbers = [int(digit) for digit in cpf if digit.isdigit()]
+    numero = [int(digit) for digit in cpf if digit.isdigit()]
 
-    if len(numbers) != 11 or len(set(numbers)) == 1:
+    if len(numero) != 11 or len(set(numero)) == 1:
         return False
 
-    validador = CPF()
+    valida = CPF()
     
-    return validador.validate(cpf)
+    return valida.validate(cpf)
 
-def validarPis(pis) -> bool:
+def pis_validar(pis) -> bool:
 
     if not pis:
         return False
 
-    validador = PIS()
+    valida = PIS()
     
-    return validador.validate(pis)
+    return valida.validate(pis)
 
-def validarCnpj(cnpj) -> bool:
+def cnpj_validar(cnpj) -> bool:
 
     if not cnpj:
         return False
 
-    numbers = [int(digit) for digit in cnpj if digit.isdigit()]
+    numero = [int(digit) for digit in cnpj if digit.isdigit()]
 
-    if len(numbers) != 14 or len(set(numbers)) == 1:
+    if len(numero) != 14 or len(set(numero)) == 1:
         return False
 
-    validate_cnpj = CNPJ()
+    valida = CNPJ()
     
-    return validate_cnpj.validate(cnpj)
+    return valida.validate(cnpj)

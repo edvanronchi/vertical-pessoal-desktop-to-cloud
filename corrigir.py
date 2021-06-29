@@ -1,18 +1,18 @@
 from validate_email import validate_email 
 from variaveis import *
 from src.functions import *
-from src.database import *
+from src.database import consultar,executar
 import re
 
-#Renomeia os campos adicionais com descrição repetido
-def campoAdicionalDescricaoRepetido():
+#Renomeia os campos adicionais com descrição repetida /(def)(.*)(?<!:)/g
+def caracteristicas_nome_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
-                list(i_caracteristicas), 
+                LIST(i_caracteristicas), 
                 TRIM(nome), 
-                count(nome) AS quantidade 
+                COUNT(nome) AS quantidade 
             FROM 
                 bethadba.caracteristicas 
             GROUP BY 
@@ -23,22 +23,21 @@ def campoAdicionalDescricaoRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = ','.split(i[0])
         nome = i[1]
 
-        for index, identificador in enumerate(ids):
-            if index == 0:
+        for j, identificador in enumerate(lista):
+            if j == 0:
                 continue
             
-            u = "UPDATE bethadba.caracteristicas SET nome = '{}'  WHERE i_caracteristicas = {};".format((nome + " |" + str(index)), identificador)
+            u = "UPDATE bethadba.caracteristicas SET nome = '{}'  WHERE i_caracteristicas = {};".format((nome + " |" + str(j)), identificador)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Adiciona o valor 1 - Filho para os dependentes que estão cadastrados como 10 - OUTROS
-def dependentesOutros():
+def dependentes_grau_outros():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.dependentes
@@ -50,11 +49,11 @@ def dependentesOutros():
     )
     
 #Adiciona a data '1900-01-01' e se tiver responsavel adiciona a data de nascimento do mesmo
-def pessoaDataNascimentoNulo():
+def pessoas_sem_dt_nascimento():
 
     #Coloca a data '1900-01-01' nas datas das pessoas com data de nascimento maior que data de admissão
     #pessoaDataNascimentoMaiorDataAdmissao
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.pessoas_fisicas pff
@@ -85,7 +84,7 @@ def pessoaDataNascimentoNulo():
 
     #Coloca a data '1900-01-01' nas datas nulas
     #pessoaDataNascimentoNulo
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.pessoas_fisicas pff
@@ -111,7 +110,7 @@ def pessoaDataNascimentoNulo():
 
     #Atualiza a data de nascimento de acordo com a do responsavel
     #pessoaDataNascimentoMaiorDataNascimentoResponsavel
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.pessoas_fisicas pff
@@ -147,7 +146,7 @@ def pessoaDataNascimentoNulo():
 
     #Atualiza a data de dependencia acordo com a pessoa
     #pessoaDataNascimentoMaiorDataDependecia
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.dependentes dpe
@@ -172,9 +171,8 @@ def pessoaDataNascimentoNulo():
     )
 
 #Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
-def pessoaDataVencimentoCNHMenorDataEmissao():
-
-    updateInsertDelete(
+def pessoas_cnh_dt_vencimento_menor_dt_emissao():
+    executar(
         """
             UPDATE
                 bethadba.hist_pessoas_fis
@@ -185,7 +183,7 @@ def pessoaDataVencimentoCNHMenorDataEmissao():
         """
     )
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE
                 bethadba.pessoas_fis_compl
@@ -195,32 +193,41 @@ def pessoaDataVencimentoCNHMenorDataEmissao():
                 dt_primeira_cnh >= dt_vencto_cnh; 
         """
     )
-    print("Data de emissao da CNH atualizada!")
 
 #Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
-def pessoaDataPrimeiraCNHMaiorNascimento():
+def pessoas_dt_primeira_cnh_maior_dt_nascimento():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_pessoas_fis
             SET    
                 hist_pessoas_fis.dt_primeira_cnh = NULL
             FROM   
-                (SELECT i_pessoas,
-                        (SELECT a.dt_nascimento
-                            FROM   bethadba.pessoas_fisicas AS a
-                            WHERE  a.i_pessoas = hpf.i_pessoas) nascimento,
+                (
+                    SELECT 
+                        i_pessoas,
+                        (
+                            SELECT 
+                                a.dt_nascimento
+                            FROM   
+                                bethadba.pessoas_fisicas AS a
+                            WHERE  
+                                a.i_pessoas = hpf.i_pessoas
+                        ) nascimento,
                         dt_emissao_cnh,
                         NULL AS novaDataCNH
-                    FROM   bethadba.hist_pessoas_fis hpf
-                    WHERE  nascimento >= dt_primeira_cnh) AS d
+                    FROM   
+                        bethadba.hist_pessoas_fis hpf
+                    WHERE  
+                        nascimento >= dt_primeira_cnh
+                ) AS d
             WHERE  
                 hist_pessoas_fis.i_pessoas = d.i_pessoas;
         """
     )
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.pessoas_fis_compl
@@ -239,12 +246,13 @@ def pessoaDataPrimeiraCNHMaiorNascimento():
                 pessoas_fis_compl.i_pessoas = d.i_pessoas;
         """
     )
+
     print("Data da primeira CNH atualizada!")
 
 #Gera CPF aleatorio para pessoas com CPF nulo
-def cpfNulo():
+def pessoas_sem_cpf():
 
-    resultado = select(
+    resultado = consultar(
         """ 
             SELECT 
                 p.i_pessoas,
@@ -259,20 +267,19 @@ def cpfNulo():
     )
 
     for i in resultado:
-        idPessoa = i[0]
+        identificador = i[0]
 
-        u = "UPDATE bethadba.pessoas_fisicas SET cpf = {} WHERE i_pessoas = {};".format(gerarCpf(False), idPessoa)
-        
-        print(u)
-        updateInsertDelete(u)
+        u = "UPDATE bethadba.pessoas_fisicas SET cpf = {} WHERE i_pessoas = {};".format(cpf_gerar(False), identificador)
+                
+        executar(u)
 
 #Coloca nulo para um dos CPF's repetidos
 #As Pessoas (0,0) possuem o mesmo CPF!
-def cpfRepetido():
+def pessoas_cpf_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 list(pf.i_pessoas),
                 cpf,
                 count(cpf) AS quantidade
@@ -286,24 +293,23 @@ def cpfRepetido():
     )
 
     for i in resultado:
-        idsPessoa = i[0].split(',')
+        lista = i[0].split(',')
 
-        for index, idPessoa in enumerate(idsPessoa):
-            if index == 0:
+        for j, identificador in enumerate(lista):
+            if j == 0:
                 continue
             
-            u = "UPDATE bethadba.pessoas_fisicas SET cpf = NULL WHERE i_pessoas = {};".format(idPessoa)
-
-            print(u)
-            updateInsertDelete(u)
+            u = "UPDATE bethadba.pessoas_fisicas SET cpf = NULL WHERE i_pessoas = {};".format(identificador)
+            
+            executar(u)
 
 #Coloca nulo para um dos PIS's repetidos
 #As Pessoas (0,0) possuem o mesmo número do PIS!
-def pisRepetido():
+def pessoas_pis_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 list(pf.i_pessoas),
                 num_pis,
                 count(num_pis) AS quantidade
@@ -317,24 +323,23 @@ def pisRepetido():
     )
 
     for i in resultado:
-        idsPessoa = i[0].split(',')
+        lista = i[0].split(',')
 
-        for index, idPessoa in enumerate(idsPessoa):
-            if index == 0:
+        for j, identificador in enumerate(lista):
+            if j == 0:
                 continue
             
-            u = "UPDATE bethadba.pessoas_fisicas SET num_pis = NULL WHERE i_pessoas = {};".format(idPessoa)
-
-            print(u)
-            updateInsertDelete(u)
+            u = "UPDATE bethadba.pessoas_fisicas SET num_pis = NULL WHERE i_pessoas = {};".format(identificador)
+            
+            executar(u)
 
 #Verifica se o PIS é valido
 #PIS inválido
-def pisInvalido():
+def pessoas_pis_invalido():
 
-    resultado = select(
+    resultado = consultar(
         """
-           SELECT
+           consultar
                 i_pessoas,
                 num_pis
             FROM 
@@ -345,19 +350,18 @@ def pisInvalido():
     )
 
     for i in resultado:
-        idPessoa = i[0]
+        identificador = i[0]
         pis = i[1]
 
-        if not validarPis(pis):
-            u = "UPDATE bethadba.pessoas_fisicas SET num_pis = NULL WHERE i_pessoas = {};".format(idPessoa)
-
-            print(u)
-            updateInsertDelete(u)          
+        if not pis_validar(pis):
+            u = "UPDATE bethadba.pessoas_fisicas SET num_pis = NULL WHERE i_pessoas = {};".format(identificador)
+            
+            executar(u)          
 
 #Gera CNPJ aleatorio para pessoas com CNPJ nulo
-def cnpjNulo():
+def pessoas_sem_cnpj():
 
-    resultado = select(
+    resultado = consultar(
         """ 
             SELECT 
                 pj.i_pessoas,
@@ -372,18 +376,18 @@ def cnpjNulo():
     )
 
     for i in resultado:
-        idPessoa = i[0]
+        identificador = i[0]
 
-        updateInsertDelete(
+        executar(
             """
                 UPDATE bethadba.pessoas_juridicas SET cnpj = {} WHERE i_pessoas = {};
-            """.format(gerarCnpj(False), idPessoa)
+            """.format(cnpj_gerar(False), identificador)
         )
 
 #Renomeia a descrição dos logradouros que tem caracter especial no inicio da descrição
-def logradourosDescricaoCaracterEspecial():
+def ruas_nome_caracter_especial():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.ruas
@@ -395,9 +399,9 @@ def logradourosDescricaoCaracterEspecial():
     )
 
 #Renomeia os logradouros com descrição repetidos
-def logradourosDescricaoRepetido():
+def ruas_nome_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_ruas), 
@@ -415,22 +419,21 @@ def logradourosDescricaoRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         nome = i[1]
 
-        for index, identificador in enumerate(ids):
-            if index == 0:
+        for j, identificador in enumerate(lista):
+            if j == 0:
                 continue
             
-            u = "UPDATE bethadba.ruas SET nome = '{}'  WHERE i_ruas = {};".format((nome + " |" + str(index)), identificador)
+            u = "UPDATE bethadba.ruas SET nome = '{}'  WHERE i_ruas = {};".format((nome + " |" + str(j)), identificador)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Renomeia os tipos bases repetidos
-def tiposBasesRepetido():
+def tipos_bases_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_bases), 
@@ -446,22 +449,21 @@ def tiposBasesRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         nome = i[1]
 
-        for index, identificador in enumerate(ids):
-            if index == 0:
+        for j, identificador in enumerate(lista):
+            if j == 0:
                 continue
             
-            u = "UPDATE bethadba.tipos_bases SET nome = '{}'  WHERE i_tipos_bases = {};".format((nome + " |" + str(index)), identificador)
+            u = "UPDATE bethadba.tipos_bases SET nome = '{}'  WHERE i_tipos_bases = {};".format((nome + " |" + str(j)), identificador)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Coloca a cidade da entidade
-def logradourosSemCidade():
+def ruas_sem_cidade():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.ruas
@@ -473,9 +475,9 @@ def logradourosSemCidade():
     )
 
 #Renomeia os atos com número nulo
-def atosNumeroNulo():
+def atos_sem_numero():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_atos
@@ -486,20 +488,20 @@ def atosNumeroNulo():
         """
     )
 
-    for index, i in enumerate(resultado, start=1):
-        idAto = i[0]
+    for j, i in enumerate(resultado, start=1):
+        identificador = i[0]
 
-        numeroAto = "NAO INFOR. " + str(index)
+        numero = "NAO INFOR. " + str(j)
         
-        u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numeroAto, idAto)
+        u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numero, identificador)
 
         print(u)
-        updateInsertDelete(u)
+        executar(u)
 
 #Renomeia os atos repetidos
-def atosRepetido():
+def atos_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_atos),
@@ -517,28 +519,27 @@ def atosRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
-        numeroAto = i[1]
+        lista = i[0].split(',')
+        numero = i[1]
         
-        for index, identificador in enumerate(ids):
+        for j, identificador in enumerate(lista):
 
-            if index == 0:
+            if j == 0:
                 continue
             
-            numeroAtoNovo = numeroAto + " |" + str(index) 
+            numero_novo = numero + " |" + str(j) 
 
-            if len(numeroAto) > 13:
-                numeroAtoNovo = numeroAto[:13] + " |" + str(index) 
+            if len(numero) > 13:
+                numero_novo = numero[:13] + " |" + str(j) 
 
-            u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numeroAtoNovo, identificador)
+            u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numero_novo, identificador)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Adiciona o CBO mais utilizado no cargo
-def cargoCboNulo():
+def cargos_sem_cbo():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.cargos 
@@ -549,10 +550,21 @@ def cargoCboNulo():
         """
     )
 
-#Adiciona uma categoria eSocial qualquer no vinculo empregaticio
-def eSocialNuloVinculoEmpregaticio():
+    executar(
+        """
+            UPDATE 
+                bethadba.hist_cargos_cadastro 
+            SET 
+                i_cbo = (SELECT TOP 1 i_cbo FROM bethadba.cargos GROUP BY i_cbo ORDER BY count(i_cbo) DESC)
+            WHERE
+                i_cbo IS NULL; 
+        """
+    )
 
-    updateInsertDelete(
+#Adiciona uma categoria eSocial qualquer no vinculo empregaticio
+def vinculos_sem_esocial():
+
+    executar(
         """
             UPDATE 
                 bethadba.vinculos
@@ -565,9 +577,9 @@ def eSocialNuloVinculoEmpregaticio():
     )
 
 #Renomeia os vinculos empregaticios repetidos
-def vinculoEmpregaticioRepetido():
+def vinculos_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_vinculos), 
@@ -583,28 +595,28 @@ def vinculoEmpregaticioRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         descricao = i[1]
-        
-        for index, identificador in enumerate(ids):
+
+        for j, identificador in enumerate(lista):
             
-            if index == 0:
+            if j == 0:
                 continue
             
-            descricaoNovo = descricao + " |" + str(index) 
+            descricao_novo = descricao + " |" + str(j) 
 
             if len(descricao) > 26:
-                descricaoNovo = descricao[:26] + " |" + str(index) 
+                descricao_novo = descricao[:26] + " |" + str(j) 
 
-            u = "UPDATE bethadba.vinculos SET descricao = '{}'  WHERE i_vinculos = {};".format(descricaoNovo, identificador)
+            u = "UPDATE bethadba.vinculos SET descricao = '{}'  WHERE i_vinculos = {};".format(descricao_novo, identificador)
             
             print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Adiciona uma categoria eSocial qualquer no motivo de rescisão
-def eSocialNuloMotivoRescisao():
+def motivos_resc_sem_esocial():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.motivos_resc
@@ -616,10 +628,9 @@ def eSocialNuloMotivoRescisao():
     )
 
 #Fecha as folha que não foram fechadas confome competencia passada por parametro
-def fechamentoFolha(competencia):
-    print('Pode demorar um pouco!')
+def folha_fechamento(competencia):
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.dados_calc SET dt_fechamento = date(year(i_competencias)||
@@ -648,13 +659,13 @@ def fechamentoFolha(competencia):
 
 #Verifica as folhas de ferias sem data de pagamento
 #A data de pagamento é obrigatória
-def folhaFeriasDataPagamentoNulo():
-    print("Não foi feito ainda: folhaFeriasDataPagamentoNulo()")
+def folhas_ferias_sem_dt_pagamento():
+    print("Não foi feito ainda: folhas_ferias_sem_dt_pagamento()")
 
 #Adiciona uma categoria eSocial qualquer no motivo de aposentadoria
-def eSocialNuloMotivoAposentadoria():
+def motivos_apos_sem_esocial():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.motivos_apos
@@ -666,9 +677,9 @@ def eSocialNuloMotivoAposentadoria():
     )
 
 #Coloca R$0,01 nos historicos salariais com salario zerado ou nulo
-def historicoSalarialZerado():
+def hist_salariais_sem_salario():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_salariais
@@ -681,9 +692,9 @@ def historicoSalarialZerado():
 
 #Coloca data de rescisão na data inicial se a mesma for maior;
 #Coloca a data de rescisão na data final
-def dataFinalLancamentoMaiorDataRescisao():
+def variaveis_dt_inical_maior_dt_rescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 v.i_funcionarios,
@@ -710,26 +721,21 @@ def dataFinalLancamentoMaiorDataRescisao():
         """
     )
 
-    for i in resultado:
-        idFuncionario = i[0]  
-        idEntidade = i[1]
-        idEvento = i[2]
-        idProcessamento = i[3]
-        idTipoProcessamento = i[4]
-        dataAdmissao = str(i[5])[:8] + "01" 
-        dataAdmissaoFormatada = int(dataAdmissao.replace('-', ''))
-        dataRescisao = str(i[7])[:8] + "01"
-        dataRescisaoFormatada = int(dataRescisao.replace('-', ''))
-        dataInicial = str(i[9])
-        dataInicialFormatada = int(dataInicial.replace('-', ''))
-        dataFinal = i[11]
-        dataInicialNovo = dataInicial
+    for i in resultado:       
+        dt_admissao = str(i[5])[:8] + "01" 
+        dt_admissao_formatada = int(dt_admissao.replace('-', ''))
+        dt_rescisao = str(i[7])[:8] + "01"
+        dt_rescisao_formatada = int(dt_rescisao.replace('-', ''))
+        dt_inicial = str(i[9])
+        dt_inicial_formatada = int(dt_inicial.replace('-', ''))
+        dt_final = i[11]
+        dt_inicial_novo = dt_inicial
 
-        if dataInicialFormatada > dataRescisaoFormatada:
-            dataInicialNovo = dataRescisao
+        if dt_inicial_formatada > dt_rescisao_formatada:
+            dt_inicial_novo = dt_rescisao
         
-        if dataInicialFormatada < dataAdmissaoFormatada:
-            dataInicialNovo = dataAdmissao
+        if dt_inicial_formatada < dt_admissao_formatada:
+            dt_inicial_novo = dt_admissao
 
         u = """
             UPDATE 
@@ -744,7 +750,7 @@ def dataFinalLancamentoMaiorDataRescisao():
                 i_tipos_proc = {} AND 
                 dt_inicial = '{}' AND
                 dt_final = '{}';
-        """.format(dataInicialNovo, dataRescisao, idFuncionario, idEntidade, idEvento, idProcessamento, idTipoProcessamento, dataInicial, dataFinal)
+        """.format(dt_inicial_novo, dt_rescisao, i[0], i[1], i[2], i[3], i[4], dt_inicial, dt_final)
 
         s = """
             SELECT 
@@ -759,22 +765,22 @@ def dataFinalLancamentoMaiorDataRescisao():
                 i_tipos_proc = {} AND 
                 dt_inicial = '{}' AND
                 dt_final = '{}';           
-        """.format(idFuncionario, idEntidade, idEvento, idProcessamento, idTipoProcessamento, dataInicialNovo, dataRescisao)
+        """.format( i[0], i[1], i[2], i[3], i[4], dt_inicial_novo, dt_rescisao)
 
-        if len(select(s)) > 0:
-            updateInsertDelete(
+        if len(consultar(s)) > 0:
+            executar(
                 """
                     DELETE FROM bethadba.variaveis WHERE i_funcionarios = {} AND i_entidades = {} AND i_eventos = {} AND i_processamentos = {} AND i_tipos_proc = {} AND dt_inicial = '{}' AND dt_final = '{}'; 
-                """.format(idFuncionario, idEntidade, idEvento, idProcessamento, idTipoProcessamento, dataInicial, dataFinal)
+                """.format( i[0], i[1], i[2], i[3], i[4], dt_inicial, dt_final)
             )
 
         else:
-            updateInsertDelete(u)
+            executar(u)
 
 #Renomeia as movimetação de pessoal repetidos
-def movimentacaoPessoalRepetido():
+def tipos_movpes_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_movpes), 
@@ -790,28 +796,28 @@ def movimentacaoPessoalRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         descricao = i[1]
         
-        for index, identificador in enumerate(ids):
+        for j, identificador in enumerate(lista):
 
-            if index == 0:
+            if j == 0:
                 continue
             
-            descricaoNovo = descricao + " |" + str(index) 
+            descricao_novo = descricao + " |" + str(j) 
 
             if len(descricao) > 47:
-                descricaoNovo = descricao[:47] + " |" + str(index) 
+                descricao_novo = descricao[:47] + " |" + str(j) 
 
-            u = "UPDATE bethadba.tipos_movpes SET descricao = '{}'  WHERE i_tipos_movpes = {};".format(descricaoNovo, identificador)
+            u = "UPDATE bethadba.tipos_movpes SET descricao = '{}'  WHERE i_tipos_movpes = {};".format(descricao_novo, identificador)
             
             print(u)
-            updateInsertDelete(u)
+            executar(u)
         
 #Renomeia os tipos de afastamentos repetidos
-def tipoAfastamentoRepetido():
+def tipos_afast_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_afast), 
@@ -827,28 +833,28 @@ def tipoAfastamentoRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         descricao = i[1]
         
-        for index, identificador in enumerate(ids):
+        for j, identificador in enumerate(lista):
             
-            if index == 0:
+            if j == 0:
                 continue
             
-            descricaoNovo = descricao + " |" + str(index) 
+            descricao_novo = descricao + " |" + str(j) 
 
             if len(descricao) > 47:
-                descricaoNovo = descricao[:47] + " |" + str(index) 
+                descricao_novo = descricao[:47] + " |" + str(j) 
 
-            u = "UPDATE bethadba.tipos_afast SET descricao = '{}'  WHERE i_tipos_afast = {};".format(descricaoNovo, identificador)
+            u = "UPDATE bethadba.tipos_afast SET descricao = '{}'  WHERE i_tipos_afast = {};".format(descricao_novo, identificador)
             
             print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Coloca a data de rescisão na data de alteração
-def alteracaoFuncionarioMaiorDataRescisaoA():
+def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_funcionarios hff
@@ -856,7 +862,7 @@ def alteracaoFuncionarioMaiorDataRescisaoA():
                 hff.dt_alteracoes = historico.dt_alteracoes_novo
             FROM 
                 ( 
-                    SELECT
+                    consultar
                         hf.i_funcionarios,
                         hf.i_entidades,
                         hf.dt_alteracoes,
@@ -879,11 +885,11 @@ def alteracaoFuncionarioMaiorDataRescisaoA():
     )
 
 #Coloca a data de rescisão na data de alteração
-def alteracaoFuncionarioMaiorDataRescisao():
+def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 hf.i_funcionarios,
                 hf.i_entidades,
                 hf.dt_alteracoes,
@@ -901,12 +907,7 @@ def alteracaoFuncionarioMaiorDataRescisao():
     )
 
     for i in resultado:
-        idFuncionario = i[0]    
-        idEntidade = i[1]               
-        dtAlteracoes = i[2]
-        dtRescisao = i[3] 
-        dtAlteracoesNovo = i[4]
-
+   
         u = """
             UPDATE
                 bethadba.hist_funcionarios
@@ -916,7 +917,7 @@ def alteracaoFuncionarioMaiorDataRescisao():
                 i_funcionarios = {} AND
                 i_entidades = {} AND
                 dt_alteracoes = '{}';
-        """.format(dtAlteracoesNovo, idFuncionario, idEntidade, dtAlteracoes)
+        """.format(i[4], i[0], i[1], i[2])
 
         s = """
             SELECT 
@@ -927,25 +928,24 @@ def alteracaoFuncionarioMaiorDataRescisao():
                 i_funcionarios = {} AND 
                 i_entidades = {} AND
                 dt_alteracoes = '{}';
+        """.format(i[0], i[1], i[4])
 
-        """.format(idFuncionario, idEntidade, dtAlteracoesNovo)
-
-        if len(select(s)) > 0:
-            updateInsertDelete(
+        if len(consultar(s)) > 0:
+            executar(
                 """
                     DELETE FROM bethadba.hist_funcionarios WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';
-                """.format(idFuncionario, idEntidade, dtAlteracoes)
+                """.format(i[0], i[1], i[2])
             )
 
         else:
-            updateInsertDelete(u)
+            executar(u)
 
 #Coloca a data de rescisão na data de alteração
-def alteracaoSalarialMaiorDataRescisao():
+def hist_salariais_dt_alteracoes_maior_dt_rescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 hs.i_funcionarios,
                 hs.i_entidades,
                 hs.dt_alteracoes,
@@ -963,12 +963,7 @@ def alteracaoSalarialMaiorDataRescisao():
     )
 
     for i in resultado:
-        idFuncionario = i[0]    
-        idEntidade = i[1]               
-        dtAlteracoes = i[2]
-        dtRescisao = i[3] 
-        dtAlteracoesNovo = i[4]
-
+      
         u = """
             UPDATE
                 bethadba.hist_salariais
@@ -979,7 +974,7 @@ def alteracaoSalarialMaiorDataRescisao():
                 i_entidades = {} AND
                 dt_alteracoes = '{}';
 
-        """.format(dtAlteracoesNovo, idFuncionario, idEntidade, dtAlteracoes)
+        """.format(i[4], i[0], i[1], i[2])
 
         s = """
             SELECT 
@@ -991,24 +986,24 @@ def alteracaoSalarialMaiorDataRescisao():
                 i_entidades = {} AND
                 dt_alteracoes = '{}';
 
-        """.format(idFuncionario, idEntidade, dtAlteracoesNovo)
+        """.format(i[0], i[1], i[4])
 
-        if len(select(s)) > 0:
-            updateInsertDelete(
+        if len(consultar(s)) > 0:
+            executar(
                 """
                     DELETE FROM bethadba.hist_salariais WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';
-                """.format(idFuncionario, idEntidade, dtAlteracoes)
+                """.format(i[0], i[1], i[2])
             )
 
         else:
-            updateInsertDelete(u)
+            executar(u)
 
 #Coloca a data de rescisão na data de alteração
-def alteracaoCargoMaiorDataRescisao():
+def hist_cargos_dt_alteracoes_maior_dt_rescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 hc.i_funcionarios,
                 hc.i_entidades,
                 hc.dt_alteracoes,
@@ -1026,11 +1021,6 @@ def alteracaoCargoMaiorDataRescisao():
     )
 
     for i in resultado:
-        idFuncionario = i[0]    
-        idEntidade = i[1]               
-        dtAlteracoes = i[2]
-        dtRescisao = i[3] 
-        dtAlteracoesNovo = i[4]
 
         u = """
             UPDATE
@@ -1041,7 +1031,7 @@ def alteracaoCargoMaiorDataRescisao():
                 i_funcionarios = {} AND 
                 i_entidades = {} AND
                 dt_alteracoes = '{}';
-        """.format(dtAlteracoesNovo, idFuncionario, idEntidade, dtAlteracoes)
+        """.format(i[4], i[0], i[1], i[2])
 
         s = """
             SELECT 
@@ -1053,22 +1043,22 @@ def alteracaoCargoMaiorDataRescisao():
                 i_entidades = {} AND
                 dt_alteracoes = '{}';
 
-        """.format(idFuncionario, idEntidade, dtAlteracoesNovo)
+        """.format(i[0], i[1], i[4])
 
-        if len(select(s)) > 0:
-            updateInsertDelete(
+        if len(consultar(s)) > 0:
+            executar(
                 """
                     DELETE FROM bethadba.hist_cargos WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';
-                """.format(idFuncionario, idEntidade, dtAlteracoes)
+                """.format(i[0], i[1], i[2])
             )
 
         else:
-            updateInsertDelete(u)
+            executar(u)
         
 #Coloca 7 - (Licença SEM vencimentos) para as classificações que estão com código errado no tipo de afastamento
-def classificacaoErradaTipoAfastamento():
+def tipos_afast_classif_invalida():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE
                 bethadba.tipos_afast
@@ -1080,9 +1070,9 @@ def classificacaoErradaTipoAfastamento():
     )
 
 #Renomeia os tipos de atos repetidos
-def tipoAtoRepetido():
+def tipos_atos_nome_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_atos), 
@@ -1098,28 +1088,27 @@ def tipoAtoRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         descricao = i[1]
         
-        for index, identificador in enumerate(ids):
+        for j, identificador in enumerate(lista):
 
-            if index == 0:
+            if j == 0:
                 continue
             
-            descricaoNovo = descricao + " |" + str(index) 
+            descricao_novo = descricao + " |" + str(j) 
 
             if len(descricao) > 37:
-                descricaoNovo = descricao[:37] + " |" + str(index) 
+                descricao_novo = descricao[:37] + " |" + str(j) 
 
-            u = "UPDATE bethadba.tipos_atos SET nome = '{}' WHERE i_tipos_atos = {};".format(descricaoNovo, identificador)
+            u = "UPDATE bethadba.tipos_atos SET nome = '{}' WHERE i_tipos_atos = {};".format(descricao_novo, identificador)
             
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Renomeia as descrições repetidas no horario ponto
-def descricaoHorarioPontoRepetido():
+def horarios_ponto_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1136,19 +1125,19 @@ def descricaoHorarioPontoRepetido():
     )
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
-        idsHorarioPonto = i[1].split(',')
+        entidade = i[0].split(',')
+        horario = i[1].split(',')
         descricao = i[2]
         
-        for index in range(len(idsEntidade)):
+        for j in range(len(entidade)):
             
-            if index == 0:
+            if j == 0:
                 continue
             
-            descricaoNovo = descricao + " |" + str(index)
+            descricao_novo = descricao + " |" + str(j)
 
             if len(descricao) > 47:
-                descricaoNovo = descricao[:47] + " |" + str(index) 
+                descricao_novo = descricao[:47] + " |" + str(j) 
 
             u = """
                 UPDATE 
@@ -1157,15 +1146,14 @@ def descricaoHorarioPontoRepetido():
                     descricao = '{}' 
                 WHERE 
                     i_entidades = {} AND i_horarios_ponto = {};
-            """.format(descricaoNovo, idsEntidade[index], idsHorarioPonto[index])
+            """.format(descricao_novo, entidade[j], horario[j])
             
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Renomeia as descrições repetidas na turma
-def descricaoTurmaRepetido():
+def turmas_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1182,19 +1170,19 @@ def descricaoTurmaRepetido():
     )
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
-        idsTurma = i[1].split(',')
+        entidade = i[0].split(',')
+        turma = i[1].split(',')
         descricao = i[2]
         
-        for index in range(len(idsEntidade)):
+        for j in range(len(entidade)):
             
-            if index == 0:
+            if j == 0:
                 continue
             
-            descricaoNovo = descricao + " |" + str(index)
+            descricao_novo = descricao + " |" + str(j)
 
             if len(descricao) > 57:
-                descricaoNovo = descricao[:57] + " |" + str(index) 
+                descricao_novo = descricao[:57] + " |" + str(j) 
 
             u = """
                 UPDATE 
@@ -1203,15 +1191,14 @@ def descricaoTurmaRepetido():
                     descricao = '{}' 
                 WHERE 
                     i_entidades = {} AND i_turmas = {};
-            """.format(descricaoNovo, idsEntidade[index], idsTurma[index])
+            """.format(descricao_novo, entidade[j], turma[j])
             
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Coloca um ponto (.) nos separadores nulos
-def nivelOrganogramaSeparadorNulo():
+def niveis_organ_separador_invalido():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.niveis_organ 
@@ -1223,9 +1210,9 @@ def nivelOrganogramaSeparadorNulo():
     )
 
 #Adiciona a natureza de texto juridico mais utilizada no ato
-def atoNaturezaTextoJuridicoNulo():
+def atos_sem_natureza_texto_juridico():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.atos 
@@ -1237,9 +1224,9 @@ def atoNaturezaTextoJuridicoNulo():
     )
 
 #Coloca a data de publicação do ato na data de fonte de divulgação
-def atoFonteDivulgacaoMenorPublicacao():
+def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.fontes_atos fa
@@ -1264,9 +1251,9 @@ def atoFonteDivulgacaoMenorPublicacao():
     )
 
 #Inseri um tipo de afastamento na configuração do cancelamento de férias
-def tipoAfastamentoConfiguracaoCancelamentoFerias():
+def canc_ferias_sem_tipos_afast():
 
-    updateInsertDelete(
+    executar(
         """
             INSERT INTO bethadba.canc_ferias_afast
             SELECT 
@@ -1280,9 +1267,9 @@ def tipoAfastamentoConfiguracaoCancelamentoFerias():
     )
 
 #Renomeia descricao de cofiguração de organograma maior que 30 caracteres
-def descricaoConfigOrganogramaMaior30():
+def config_organograma_descricao_invalida():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.config_organ co
@@ -1305,9 +1292,9 @@ def descricaoConfigOrganogramaMaior30():
     )    
 
 #Renomeia descricao de cofiguração de organograma repetido
-def descricaoConfigOrganogramaRepetido():
+def config_organ_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_config_organ), 
@@ -1323,30 +1310,30 @@ def descricaoConfigOrganogramaRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         nome = i[1]
 
-        for index, identificador in enumerate(ids):
+        for j, identificador in enumerate(lista):
 
-            if index == 0:
+            if j == 0:
                 continue
             
-            nomeNovo = nome + " |" + str(index) 
+            nome_novo = nome + " |" + str(j) 
 
             if len(nome) > 27:
-                nomeNovo = nome[:27] + " |" + str(index) 
+                nome_novo = nome[:27] + " |" + str(j) 
             
-            u = "UPDATE bethadba.config_organ SET descricao = '{}'  WHERE i_config_organ = {};".format(nomeNovo, identificador)
+            u = "UPDATE bethadba.config_organ SET descricao = '{}'  WHERE i_config_organ = {};".format(nome_novo, identificador)
 
             print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Adiciona um CPF valido
-def cpfInvalido():
+def pessoas_cpf_invalido():
 
-    resultado = select(
+    resultado = consultar(
         """
-           SELECT
+           consultar
                 i_pessoas,
                 cpf
             FROM 
@@ -1357,21 +1344,20 @@ def cpfInvalido():
     )
 
     for i in resultado:
-        idPessoa = i[0]
+        identificador = i[0]
         cpf = i[1]
        
-        if not validarCpf(cpf):
-            u = "UPDATE bethadba.pessoas_fisicas SET cpf = NULL WHERE i_pessoas = {};".format(idPessoa)
+        if not cpf_validar(cpf):
+            u = "UPDATE bethadba.pessoas_fisicas SET cpf = NULL WHERE i_pessoas = {};".format(identificador)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Adiciona um CNPJ valido
-def cnpjInvalido():
+def pessoas_cnpj_invalido():
 
-    resultado = select(
+    resultado = consultar(
         """
-           SELECT
+           consultar
                 i_pessoas,
                 cnpj
             FROM 
@@ -1380,21 +1366,20 @@ def cnpjInvalido():
     )
 
     for i in resultado:
-        idPessoa = i[0]
+        identificador = i[0]
         cnpj = i[1]
        
-        if not validarCnpj(cnpj):
-            u = "UPDATE bethadba.pessoas_juridicas SET cnpj = '{}'  WHERE i_pessoas = {};".format(gerarCnpj(), idPessoa)
+        if not cnpj_validar(cnpj):
+            u = "UPDATE bethadba.pessoas_juridicas SET cnpj = '{}'  WHERE i_pessoas = {};".format(cnpj_gerar(), identificador)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
             
 #Adiciona um RG aleatorio
-def RgRepetido():
+def pessoas_rg_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 list(i_pessoas),
                 rg,
                 count(rg) AS quantidade
@@ -1408,25 +1393,23 @@ def RgRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
-        rg = i[1]
+        lista = i[0].split(',')
 
-        for index, identificador in enumerate(ids):
-            if index == 0:
+        for j, identificador in enumerate(lista):
+            if j == 0:
                 continue
             
-            u = "UPDATE bethadba.pessoas_fisicas SET rg = '{}'  WHERE i_pessoas = {};".format(gerarRg(), identificador)
+            u = "UPDATE bethadba.pessoas_fisicas SET rg = NULL  WHERE i_pessoas = {};".format(identificador)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Renomeia os cargos com descricão repetidos
 #Já existe um cargo com a descrição informada
-def cargoDescricaoRepetido():
+def cargos_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 list(i_cargos),
                 list(i_entidades),
                 nome,
@@ -1441,23 +1424,23 @@ def cargoDescricaoRepetido():
                 quantidade > 1
             ORDER BY
                 quantidade
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
     for i in resultado:
-        idsCargo = i[0].split(',')
-        idsEntidade = i[1].split(',')
+        cargo = i[0].split(',')
+        entidade = i[1].split(',')
         nome = i[2]
         
-        for index in range(len(idsEntidade)):
+        for j in range(len(entidade)):
             
-            if index == 0:
+            if j == 0:
                 continue
             
-            nomeNovo = nome + " |" + str(index)
+            nome_novo = nome + " |" + str(j)
 
             if len(nome) > 97:
-                nomeNovo = nome[:97] + " |" + str(index) 
+                nome_novo = nome[:97] + " |" + str(j) 
 
             u1 = """
                 UPDATE 
@@ -1466,30 +1449,67 @@ def cargoDescricaoRepetido():
                     nome = '{}' 
                 WHERE 
                     i_entidades = {} AND i_cargos = {};
-            """.format(nomeNovo, idsEntidade[index], idsCargo[index])
+            """.format(nome_novo, entidade[j], cargo[j])
 
+            executar(u1)
+            
+#Renomeia os cargos com descricão repetidos
+#Já existe um cargo com a descrição informada
+def historico_cargo_descricao_repetida():
 
-            u2 = """
+    resultado = consultar(
+        """
+            consultar
+                list(i_cargos),
+                list(i_entidades),
+                nome,
+                count(nome) AS quantidade
+            FROM 
+                bethadba.hist_cargos_cadastro 
+            WHERE   
+                i_entidades IN ({})
+            GROUP BY 
+                nome 
+            HAVING 
+                quantidade > 1
+            ORDER BY
+                quantidade
+        """.format(lista_entidade)
+    )
+
+    for i in resultado:
+        cargo = i[0].split(',')
+        entidade = i[1].split(',')
+        nome = i[2]
+        
+        for j in range(len(entidade)):
+            
+            if j == 0:
+                continue
+            
+            nome_novo = nome + " |" + str(j)
+
+            if len(nome) > 97:
+                nome_novo = nome[:97] + " |" + str(j) 
+
+            u1 = """
                 UPDATE 
                     bethadba.hist_cargos_cadastro 
                 SET 
                     nome = '{}' 
                 WHERE 
                     i_entidades = {} AND i_cargos = {};
-            """.format(nomeNovo, idsEntidade[index], idsCargo[index])
-
+            """.format(nome_novo, entidade[j], cargo[j])
 
             print(u1)
-            print(u2)
 
-            updateInsertDelete(u1)
-            updateInsertDelete(u2)
-            
+            executar(u1)
+
 #Adiciona um valor fixo para o termino de vigencia maior que 2099
 #Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
-def terminoVigenciaMaior2099():
+def bases_calc_outras_empresas_vigencia_invalida():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.bases_calc_outras_empresas
@@ -1501,9 +1521,9 @@ def terminoVigenciaMaior2099():
     )
 
 #Remove os emails invalidos
-def emailInvalido():
+def pessoas_email_invalido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_pessoas,
@@ -1516,20 +1536,19 @@ def emailInvalido():
     )
 
     for i in resultado:
-        idPessoa = i[0]
+        pessoa = i[0]
         email = i[1]
 
         if not validate_email(email) or len(email) < 5:
 
-            u = "UPDATE bethadba.pessoas SET email = NULL WHERE i_Pessoas = {};".format(idPessoa)
+            u = "UPDATE bethadba.pessoas SET email = NULL WHERE i_Pessoas = {};".format(pessoa)
 
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Remove o número do endereço que está vazio
-def numeroEnderecoVazio():
+def pessoas_enderecos_sem_numero():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.pessoas_enderecos
@@ -1541,9 +1560,9 @@ def numeroEnderecoVazio():
     )
 
 #Adiona um nome aleatorio para o nome da rua que está vazio
-def nomeRuaVazio():
+def ruas_sem_nome():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.ruas
@@ -1556,9 +1575,9 @@ def nomeRuaVazio():
     )
 
 #Adiciona previdencia federal para os funcionarios sem previdencia
-def funcionariosSemPrevidencia():
+def funcionarios_sem_previdencia():
     
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_funcionarios hfu
@@ -1589,14 +1608,14 @@ def funcionariosSemPrevidencia():
             WHERE
                 hfu.i_funcionarios = sem_previdencia.i_funcionarios  AND
                 hfu.i_entidades = sem_previdencia.i_entidades;    
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
 #Exclui os eventos de média/vantagem que não tem eventos vinculados
 #Os eventos de composição da média são obrigatórios
-def eventoMediaVantagemSemComposicao():
+def mediasvant_sem_composicao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 DISTINCT(m.i_eventos),
@@ -1616,12 +1635,12 @@ def eventoMediaVantagemSemComposicao():
         d = "DELETE FROM bethadba.mediasvant WHERE i_eventos = {};".format(idEventos)
         
         print(d)
-        updateInsertDelete(d)
+        executar(d)
 
 #Exclui os eventos de média/vantagem pai que estão vinculados a outros
-def eventoMediaVantagemComposicao():
+def mediasvant_eve_composicao_invalida():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_eventos_medias,
@@ -1634,18 +1653,17 @@ def eventoMediaVantagemComposicao():
     )
 
     for i in resultado:
-        idEventosMedias = i[0]
-        idEventos = i[1]
+        evento_media = i[0]
+        evento = i[1]
         
-        d = "DELETE FROM bethadba.mediasvant_eve WHERE i_eventos_medias = {} AND i_eventos = {};".format(idEventosMedias, idEventos)
+        d = "DELETE FROM bethadba.mediasvant_eve WHERE i_eventos_medias = {} AND i_eventos = {};".format(evento_media, evento)
         
-        print(d)
-        updateInsertDelete(d)
+        executar(d)
 
 #Verifica a data de admissão da matrícula se é posterior a data de início da matrícula nesta lotação física
-def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
+def locais_mov_dt_inicial_menor_dt_admissao():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.locais_mov lmv
@@ -1677,9 +1695,9 @@ def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
 
 #Limita a descrição do motivo de alteração do ponto em 30 caracteres
 #A descrição não pode conter mais de 30 caracteres
-def descricaoMotivoAlteracaoPontoMaior30():
+def motivos_altponto_descricao_invalida():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.motivos_altponto ma
@@ -1687,7 +1705,7 @@ def descricaoMotivoAlteracaoPontoMaior30():
                 ma.descricao = SUBSTRING(ma.descricao, 1, 30)
             FROM 
                 ( 
-                    SELECT
+                    consultar
                         i_motivos_altponto,
                         LENGTH(descricao) AS tamanho_descricao
                     FROM
@@ -1701,9 +1719,9 @@ def descricaoMotivoAlteracaoPontoMaior30():
     )
     
 #Limita o numero de caracteres em 150 no motivo dos afastamentos
-def observacaoAfastamentoMaior150():
+def afastamentos_observacao_invalida():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.afastamentos a
@@ -1731,9 +1749,9 @@ def observacaoAfastamentoMaior150():
 
 #Verifica a data inicial no afastamento se é maior que a data final 
 #A quantidade de dias não pode ser menor que 0
-def dataInicialAfastamentoMaiorDataFinal():
+def ferias_dt_gozo_ini_maior_dt_gozo_fin():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.ferias f
@@ -1762,9 +1780,9 @@ def dataInicialAfastamentoMaiorDataFinal():
 
 #Adiciona o motivo de aposentadoria 1 - Aposentadoria por tempo de serviço, com rescisão contratual
 #O motivo de rescisão é obrigatório
-def motivoAposentadoriaNulo():
+def rescisoes_sem_motivos_apos():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE
                 bethadba.rescisoes
@@ -1777,11 +1795,11 @@ def motivoAposentadoriaNulo():
     )
 
 #Renomeia os grupos funcionais repetidos
-def gruposFuncionaisRepetido():
+def grupos_nome_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
-            SELECT
+            consultar
                 list(i_entidades),
                 list(i_grupos),
                 nome,
@@ -1794,23 +1812,23 @@ def gruposFuncionaisRepetido():
                 nome 
             HAVING 
                 quantidade > 1
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
-        idsGrupo = i[1].split(',')
+        entidade = i[0].split(',')
+        grupo = i[1].split(',')
         nome = i[2]
         
-        for index in range(len(idsEntidade)):
+        for j in range(len(entidade)):
 
-            if index == 0:
+            if j == 0:
                 continue
             
-            nomeNovo = nome + " |" + str(index)
+            nome_novo = nome + " |" + str(j)
 
             if len(nome) > 57:
-                nomeNovo = nome[:57] + " |" + str(index) 
+                nome_novo = nome[:57] + " |" + str(j) 
 
             u = """
                 UPDATE 
@@ -1819,15 +1837,15 @@ def gruposFuncionaisRepetido():
                     nome = '{}' 
                 WHERE 
                     i_entidades = {} AND i_grupos = {};
-            """.format(nomeNovo, idsEntidade[index], idsGrupo[index])
+            """.format(nome_novo, entidade[j], grupo[j])
             
             print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 
-def dataInicialDependenteMaiorTitular():
+def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.func_planos_saude fp
@@ -1841,7 +1859,7 @@ def dataInicialDependenteMaiorTitular():
                         fps.i_pessoas,
                         fps.i_sequenciais,
                         vigencia_inicial AS vigencia_inicial_dependente,
-                        vigencia_inicial_titular = (select vigencia_inicial FROM bethadba.func_planos_saude WHERE i_sequenciais = 1 AND i_funcionarios = fps.i_funcionarios)
+                        vigencia_inicial_titular = (SELECT vigencia_inicial FROM bethadba.func_planos_saude WHERE i_sequenciais = 1 AND i_funcionarios = fps.i_funcionarios)
                     FROM 
                         bethadba.func_planos_saude fps 
                     WHERE 
@@ -1857,9 +1875,9 @@ def dataInicialDependenteMaiorTitular():
     ) 
 
 #Remove caracteres especiais e espaços para que o número do telefone seja menor ou igual a 11
-def telefoneLotacaoFisicaMaior11():
+def locais_trab_fone_invalido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_entidades,
@@ -1874,24 +1892,23 @@ def telefoneLotacaoFisicaMaior11():
     )
 
     for i in resultado:
-        idEntidade = i[0]
-        idLotacaoFisica = i[1]
+        entidade = i[0]
+        local = i[1]
         telefone = i[2]
 
         telefone = re.sub('[^0-9]', '', telefone)
 
         telefone = telefone[(len(telefone) - 8):]
 
-        u = "UPDATE bethadba.locais_trab SET fone = '{}' WHERE i_entidades = {} AND i_locais_trab = {};".format(telefone, idEntidade, idLotacaoFisica)
+        u = "UPDATE bethadba.locais_trab SET fone = '{}' WHERE i_entidades = {} AND i_locais_trab = {};".format(telefone, entidade, local)
         
-        print(u)
-        updateInsertDelete(u)
+        executar(u)
         
 #Coloca a data de vigor na data de criação
 #A data de criação é obrigatória
-def dataCriacaoAtoNulo():
+def atos_sem_dt_inicial():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.atos a
@@ -1903,9 +1920,9 @@ def dataCriacaoAtoNulo():
     ) 
 
 #Renomeia as descrições repetidas dos niveis salariais
-def descricaoNivelSalarialRepetido():
+def niveis_descricao_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1922,19 +1939,19 @@ def descricaoNivelSalarialRepetido():
     )
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
-        idsNiveis = i[1].split(',')
-        descricao = i[2]
+        entidade = i[0].split(',')
+        nivel = i[1].split(',')
+        nome = i[2]
         
-        for index in range(len(idsEntidade)):
+        for j in range(len(entidade)):
             
-            if index == 0:
+            if j == 0:
                 continue
             
-            descricaoNovo = descricao + " |" + str(index)
+            descricao_novo = nome + " |" + str(j)
 
-            if len(descricao) > 46:
-                descricaoNovo = descricao[:46] + " |" + str(index) 
+            if len(nome) > 46:
+                descricao_novo = nome[:46] + " |" + str(j) 
 
             u = """
                 UPDATE 
@@ -1943,16 +1960,15 @@ def descricaoNivelSalarialRepetido():
                     nome = '{}' 
                 WHERE 
                     i_entidades = {} AND i_niveis = {};
-            """.format(descricaoNovo, idsEntidade[index], idsNiveis[index])
+            """.format(descricao_novo, entidade[j], nivel[j])
             
-            print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Recodifica os cartões pontos que estão diferentes de sua matricula ou repetidos
 #Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
-def cartaoPontoRepetido():
+def funcionarios_cartao_ponto_repetido():
 
-    matriculas = select(
+    funcioario = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1968,15 +1984,15 @@ def cartaoPontoRepetido():
                 quantidade > 1 
             ORDER BY 
                 i_funcionarios   
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    if len(matriculas) > 0:
+    if len(funcioario) > 0:
         return 0
 
     print("Cartão ponto sendo configurado, aguarde!")
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_funcionarios
@@ -1987,7 +2003,7 @@ def cartaoPontoRepetido():
         """
     ) 
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_funcionarios
@@ -2000,9 +2016,9 @@ def cartaoPontoRepetido():
 
 #Coloca a data de nomeação na data de posse
 #O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
-def dataNomeacaoMaiorDataPosse():
+def cargos_dt_nomeacao_maior_dt_posse():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_cargos
@@ -2015,9 +2031,9 @@ def dataNomeacaoMaiorDataPosse():
 
 #Colaca os dados da conta bancaria de acordo com o cadastro de conta bancaria da pessoa
 #Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
-def contaBancariaFuncionarioInvalida():
+def funcionarios_conta_bancaria_invalida():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_funcionarios hff
@@ -2053,9 +2069,9 @@ def contaBancariaFuncionarioInvalida():
 
 #Coloca previdencia federal para os historicos de funcionarios com mais do que uma previdencia informada
 #Apenas uma previdência pode ser informada
-def previdenciaMaiorQueUm():
+def funcionarios_sem_previdencia():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE 
                 bethadba.hist_funcionarios hff
@@ -2085,9 +2101,9 @@ def previdenciaMaiorQueUm():
 
 #Ajusta os afastamentos com data inicial menor que data de admissão
 #A data inicial não poderá ser menor que a data de admissão
-def dataInicialAfastamentoMenorDataAdmissao():
+def afastamentos_dt_afastamento_menor_dt_admissao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 dt_afastamento, 
@@ -2103,25 +2119,25 @@ def dataInicialAfastamentoMenorDataAdmissao():
     )
 
     for i in resultado:
-        dataInicial = i[0]  
-        dataFinal = i[1]
-        idEntidade = i[2]
-        idFuncionario = i[3]
-        dataAdmissao = i[4]
+        dt_inicial = i[0]  
+        dt_final = i[1]
+        entidade = i[2]
+        funcionario = i[3]
+        dt_admissao = i[4]
 
-        if dataFinal < dataAdmissao:
-            dataFinal = dataAdmissao
+        if dt_final < dt_admissao:
+            dt_final = dt_admissao
 
-        u = "UPDATE bethadba.afastamentos SET dt_afastamento = '{}', dt_ultimo_dia = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_afastamento = '{}';".format(dataAdmissao, dataFinal, idFuncionario, idEntidade, dataInicial)
+        u = "UPDATE bethadba.afastamentos SET dt_afastamento = '{}', dt_ultimo_dia = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_afastamento = '{}';".format(dt_admissao, dt_final, funcionario, entidade, dt_inicial)
 
         print(u)
-        updateInsertDelete(u)
+        executar(u)
 
 #Renomeia as areas de atuação com descrição repetido
 #Já existe uma área de atuação com a descrição informada
-def areasAtuacaoDescricaoRepetido():
+def areas_atuacao_nome_repetido():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT 
                 list(i_areas_atuacao), 
@@ -2137,23 +2153,23 @@ def areasAtuacaoDescricaoRepetido():
     )
 
     for i in resultado:
-        ids = i[0].split(',')
+        lista = i[0].split(',')
         nome = i[1]
 
-        for index, identificador in enumerate(ids):
-            if index == 0:
+        for j, identificador in enumerate(lista):
+            if j == 0:
                 continue
             
-            u = "UPDATE bethadba.areas_atuacao SET nome = '{}'  WHERE i_areas_atuacao = {};".format((nome + " |" + str(index)), identificador)
+            u = "UPDATE bethadba.areas_atuacao SET nome = '{}'  WHERE i_areas_atuacao = {};".format((nome + " |" + str(j)), identificador)
 
             print(u)
-            updateInsertDelete(u)
+            executar(u)
 
 #Coloca 0 - Outros para os dependentes sem motivo de termino
 #O motivo de término é obrigatório
-def dependenteMotivoTerminoNulo():
+def dependentes_sem_dt_fim():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE
                 bethadba.dependentes
@@ -2167,9 +2183,9 @@ def dependenteMotivoTerminoNulo():
 
 #Coloca a configuração de feroas mais utilizada para os cargos sem configuração de ferias
 #A configuração de férias é obrigatória
-def cargoConfiguracaoFeriasNulo():
+def cargos_sem_configuracao_ferias():
 
-    updateInsertDelete(
+    executar(
         """
             UPDATE
                 bethadba.cargos_compl
@@ -2183,84 +2199,85 @@ def cargoConfiguracaoFeriasNulo():
     )  
 
 #Alterações realizadas manualmente
-def alteracao():
-    alteracao = open("vertical-pessoal-desktop-to-cloud\\src\\sql\\alteracao.sql", "r", encoding = 'utf-8')    
-    updateInsertDelete(
+def executar_alteracao_manual():
+    alteracao = open("vertical-pessoal-desktop-to-cloud\\src\\sql\\alteracao_manual.sql", "r", encoding = 'utf-8')    
+    executar(
         """
           {}                           
         """.format(alteracao.read())
     )
     alteracao.close()    
-    print("Executado arquivo de alterações.")
+    print("Executado arquivo de alterações manuais.")
 
-#--------------------Executar--------------------#
-campoAdicionalDescricaoRepetido()
-pessoaDataVencimentoCNHMenorDataEmissao()
-pessoaDataPrimeiraCNHMaiorNascimento()
-dependentesOutros()
-pessoaDataNascimentoNulo()
-#cpfNulo()
-cpfRepetido()
-pisRepetido()
-pisInvalido()
-cnpjNulo()
-logradourosDescricaoCaracterEspecial()
-logradourosDescricaoRepetido()
-tiposBasesRepetido()
-logradourosSemCidade()
-atosNumeroNulo()
-atosRepetido()
-cargoCboNulo()
-eSocialNuloVinculoEmpregaticio()
-vinculoEmpregaticioRepetido()
-eSocialNuloMotivoRescisao()
-fechamentoFolha(competenciaFechamentoFolha)
-folhaFeriasDataPagamentoNulo()
-eSocialNuloMotivoAposentadoria()
-historicoSalarialZerado()
-#dataFinalLancamentoMaiorDataRescisao()
-movimentacaoPessoalRepetido()
-tipoAfastamentoRepetido()
-#alteracaoFuncionarioMaiorDataRescisao()
-alteracaoSalarialMaiorDataRescisao()
-alteracaoCargoMaiorDataRescisao()
-classificacaoErradaTipoAfastamento()
-tipoAtoRepetido()
-descricaoHorarioPontoRepetido()
-descricaoTurmaRepetido()
-nivelOrganogramaSeparadorNulo()
-atoNaturezaTextoJuridicoNulo()
-atoFonteDivulgacaoMenorPublicacao()
-tipoAfastamentoConfiguracaoCancelamentoFerias()
-descricaoConfigOrganogramaMaior30()
-descricaoConfigOrganogramaRepetido()
-cpfInvalido()
-cnpjInvalido()
-RgRepetido()
-cargoDescricaoRepetido()
-terminoVigenciaMaior2099()
-emailInvalido()
-numeroEnderecoVazio()
-nomeRuaVazio()
-funcionariosSemPrevidencia()
-eventoMediaVantagemSemComposicao()
-eventoMediaVantagemComposicao()
-dataAdmissaoMatriculaMaiorDataLotacaoFisica()
-descricaoMotivoAlteracaoPontoMaior30()
-observacaoAfastamentoMaior150()
-dataInicialAfastamentoMaiorDataFinal()
-motivoAposentadoriaNulo()
-gruposFuncionaisRepetido()
-dataInicialDependenteMaiorTitular()
-telefoneLotacaoFisicaMaior11()
-dataCriacaoAtoNulo()
-descricaoNivelSalarialRepetido()
-cartaoPontoRepetido()
-dataNomeacaoMaiorDataPosse()
-contaBancariaFuncionarioInvalida()
-previdenciaMaiorQueUm()
-#dataInicialAfastamentoMenorDataAdmissao()
-areasAtuacaoDescricaoRepetido()
-dependenteMotivoTerminoNulo()
-cargoConfiguracaoFeriasNulo()
-alteracao()
+caracteristicas_nome_repetido()
+dependentes_grau_outros()
+pessoas_sem_dt_nascimento()
+pessoas_cnh_dt_vencimento_menor_dt_emissao()
+pessoas_dt_primeira_cnh_maior_dt_nascimento()
+pessoas_sem_cpf()
+pessoas_cpf_repetido()
+pessoas_pis_repetido()
+pessoas_pis_invalido()
+pessoas_sem_cnpj()
+ruas_nome_caracter_especial()
+ruas_nome_repetido()
+tipos_bases_repetido()
+ruas_sem_cidade()
+atos_sem_numero()
+atos_repetido()
+cargos_sem_cbo()
+vinculos_sem_esocial()
+vinculos_descricao_repetido()
+motivos_resc_sem_esocial()
+folha_fechamento(folha_fechamento_competencia)
+folhas_ferias_sem_dt_pagamento()
+motivos_apos_sem_esocial()
+hist_salariais_sem_salario()
+variaveis_dt_inical_maior_dt_rescisao()
+tipos_movpes_descricao_repetido()
+tipos_afast_descricao_repetido()
+hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
+hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
+hist_salariais_dt_alteracoes_maior_dt_rescisao()
+hist_cargos_dt_alteracoes_maior_dt_rescisao()
+tipos_afast_classif_invalida()
+tipos_atos_nome_repetido()
+horarios_ponto_descricao_repetido()
+turmas_descricao_repetido()
+niveis_organ_separador_invalido()
+atos_sem_natureza_texto_juridico()
+atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
+canc_ferias_sem_tipos_afast()
+config_organograma_descricao_invalida()
+config_organ_descricao_repetido()
+pessoas_cpf_invalido()
+pessoas_cnpj_invalido()
+pessoas_rg_repetido()
+cargos_descricao_repetido()
+historico_cargo_descricao_repetida()
+bases_calc_outras_empresas_vigencia_invalida()
+pessoas_email_invalido()
+pessoas_enderecos_sem_numero()
+ruas_sem_nome()
+funcionarios_sem_previdencia()
+mediasvant_sem_composicao()
+mediasvant_eve_composicao_invalida()
+locais_mov_dt_inicial_menor_dt_admissao()
+motivos_altponto_descricao_invalida()
+afastamentos_observacao_invalida()
+ferias_dt_gozo_ini_maior_dt_gozo_fin()
+rescisoes_sem_motivos_apos()
+grupos_nome_repetido()
+func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
+locais_trab_fone_invalido()
+atos_sem_dt_inicial()
+niveis_descricao_repetido()
+funcionarios_cartao_ponto_repetido()
+cargos_dt_nomeacao_maior_dt_posse()
+funcionarios_conta_bancaria_invalida()
+funcionarios_sem_previdencia()
+afastamentos_dt_afastamento_menor_dt_admissao()
+areas_atuacao_nome_repetido()
+dependentes_sem_dt_fim()
+cargos_sem_configuracao_ferias()
+executar_alteracao_manual()

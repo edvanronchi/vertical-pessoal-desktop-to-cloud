@@ -1,20 +1,20 @@
 import pyodbc
 from variaveis import *
 
-cnxn = pyodbc.connect(f'DSN={database}', ConnectionIdleTimeout=0)
-cursor = cnxn.cursor()
+conexao = pyodbc.connect(f'DSN={odbc}', ConnectionIdleTimeout=0)
+cursor = conexao.cursor()
 
-#Pesquisar dados
-def select(query: str) -> list:
-    cursor.execute(query)
-    row  = cursor.fetchall()
+#Pesquisar dados.
+def consultar(comando: str) -> list:
+    cursor.execute(comando)
+    linha  = cursor.fetchall()
 
-    return row
+    return linha
 
-#Atualizar, deletar, inserir dados
-def updateInsertDelete(query: str):
+#Executa ações de atualizar, deletar, inserir dados desabilitando os gatilhos.
+def executar(comando: str):
 
-    if bethaDBA:
+    if bethadba:
         cursor.execute(
             """
                 CALL bethadba.dbp_conn_gera(1, 2021, 300);
@@ -23,7 +23,7 @@ def updateInsertDelete(query: str):
                 {}
                 COMMIT; 
                 set option fire_triggers = 'on';
-            """.format(query)
+            """.format(comando)
         )
 
         return
@@ -36,5 +36,5 @@ def updateInsertDelete(query: str):
             {}
             COMMIT; 
             CALL bethadba.pg_habilitartriggers('on');   
-        """.format(query)
+        """.format(comando)
     )

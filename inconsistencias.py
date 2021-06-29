@@ -33,8 +33,6 @@ def pessoa_data_nascimento_maior_data_admissao():
 
     print('Pessoas com data de nascimento maior que data de admissão: '+ str(quantidade))
 
-    return quantidade
-
 #Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
 def pessoa_data_vencimento_cnh_menor_data_emissao():
 
