@@ -1,7 +1,7 @@
 from validate_email import validate_email 
 from variaveis import *
-from src.functions import *
-from src.database import consultar,executar
+from src.funcao import *
+from src.conexao import consultar,executar
 import re
 
 #Renomeia os campos adicionais com descrição repetida /(def)(.*)(?<!:)/g

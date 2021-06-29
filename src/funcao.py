@@ -1,5 +1,5 @@
 from validate_docbr import CPF, CNPJ, PIS
-from src.database import consultar
+from src.conexao import consultar
 from random import randint
 
 #Tabelas que tem o nome da coluna especifica

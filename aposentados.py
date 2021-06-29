@@ -1,13 +1,13 @@
 from variaveis import *
-from src.functions import *
-from src.database import *
+from src.funcao import *
+from src.conexao import *
 
 #Busca os aposentados que foram demitidos com motivo de aposentadoria e vinculo de aposentadoria
-def mostrarAposentados():
+def mostrar_aposentados():
 
-    vinculosAposentados = []
+    aposentados_vinculado = []
 
-    resultado = select(
+    resultado = consultar(
         """ 
             SELECT 
                 hf.i_entidades, 
@@ -31,13 +31,13 @@ def mostrarAposentados():
     )
 
     for i in resultado:
-        idEntidade = i[0]
-        idFuncionario = i[1]
-        idPessoa = i[2]
-        dtRescisao = str(i[3]).replace("-", "")
+        entidade = i[0]
+        funcionario = i[1]
+        pessoa = i[2]
+        dt_rescisao = str(i[3]).replace("-", "")
 
         #Busca os vinculos dos aposentados
-        vinculos = select(
+        vinculo = consultar(
             """
                 SELECT 
                     hf.i_entidades,
@@ -56,44 +56,44 @@ def mostrarAposentados():
                 ORDER BY 
                     r.dt_rescisao DESC,
                     hf.i_funcionarios
-            """.format(idPessoa, dtRescisao, idFuncionario)          
+            """.format(pessoa, dt_rescisao, funcionario)          
         )
 
-        if len(vinculos) == 0:
+        if len(vinculo) == 0:
             continue
 
-        print("Matricula aposentado: {}".format(idFuncionario))
+        print("Matricula aposentado: {}".format(funcionario))
         print("Data aposentado: {}".format(i[3]))
-        print("Matricula demitido: {}".format(vinculos[0][1]))
-        print("Data demitido: {}".format(vinculos[0][2]))
+        print("Matricula demitido: {}".format(vinculo[0][1]))
+        print("Data demitido: {}".format(vinculo[0][2]))
         print("---------------------------------------")
 
-        vinculosAposentados.append({
-            'aposentado': idFuncionario,
-            'demitido': vinculos[0][1],
-            'entidade': idEntidade     
+        aposentados_vinculado.append({
+            'aposentado': funcionario,
+            'demitido': vinculo[0][1],
+            'entidade': entidade     
         })
 
-    return vinculosAposentados
+    return aposentados_vinculado
 
 #Faz o vinculo do aposentado com sua matricula anterior
-def vincularAposentados(vincular):
-    resultado = select("SELECT * FROM bethadba.caracteristicas WHERE i_caracteristicas = 19999")
+def vincular_aposentados(vincular):
+    resultado = consultar("SELECT * FROM bethadba.caracteristicas WHERE i_caracteristicas = 19999")
 
     if len(resultado) == 0:
-        updateInsertDelete("INSERT INTO bethadba.caracteristicas (i_caracteristicas, nome, tipo_dado) VALUES(19999, 'Vinculo Matricula Aposen.', 2);")
+        executar("INSERT INTO bethadba.caracteristicas (i_caracteristicas, nome, tipo_dado) VALUES(19999, 'Vinculo Matricula Aposen.', 2);")
 
-        idMax = select("SELECT MAX(ordem)+1 AS id from bethadba.funcionarios_caract_cfg")[0][0]
+        maximo = consultar("SELECT MAX(ordem)+1 AS id from bethadba.funcionarios_caract_cfg")[0][0]
 
-        updateInsertDelete("INSERT INTO bethadba.funcionarios_caract_cfg (i_caracteristicas, ordem, permite_excluir, dt_expiracao) VALUES(19999, {}, 'S', '2999-12-31');".format(idMax))
+        executar("INSERT INTO bethadba.funcionarios_caract_cfg (i_caracteristicas, ordem, permite_excluir, dt_expiracao) VALUES(19999, {}, 'S', '2999-12-31');".format(maximo))
 
     if not vincular:
         return
 
-    vinculos = mostrarAposentados()    
-    for i in vinculos:
+    vinculo = mostrar_aposentados()    
+    for i in vinculo:
 
-        buscaDadosAdicionais = select(
+        funcionarios_prop_adic = consultar(
             """
                 SELECT 
                     * 
@@ -106,8 +106,8 @@ def vincularAposentados(vincular):
             """.format(i['aposentado'], i['entidade'])
         )
 
-        if len(buscaDadosAdicionais) > 0:
-            updateInsertDelete(
+        if len(funcionarios_prop_adic) > 0:
+            executar(
                 """
                     UPDATE 
                         bethadba.funcionarios_prop_adic
@@ -125,7 +125,7 @@ def vincularAposentados(vincular):
             print("Registro atualizado: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
         
         else:
-            updateInsertDelete(
+            executar(
                 """
                     INSERT INTO 
                         bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_numerico) 
@@ -136,6 +136,5 @@ def vincularAposentados(vincular):
 
             print("Registro inserido: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
 
-#--------------------Executar-------------------------
-mostrarAposentados()
-vincularAposentados(False)
+mostrar_aposentados()
+vincular_aposentados(False)
