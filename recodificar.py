@@ -1,6 +1,6 @@
 from variaveis import *
-from src.functions import *
-from src.database import *
+from src.funcao import *
+from src.conexao import *
 from os import path
 
 desabilitarTriggers = "CALL bethadba.dbp_conn_gera(1, 2021, 300);\nCALL bethadba.pg_setoption('wait_for_commit','on');\nCALL bethadba.pg_habilitartriggers('off');\nset option fire_triggers = 'off';\n\n"
