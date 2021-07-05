@@ -1,12 +1,12 @@
 from validate_email import validate_email 
 from variaveis import *
-from src.functions import *
-from src.database import *
+from src.funcoes import *
+from src.conexao import *
 
 #Busca as pessoas com data de nascimento maior que data de admissão
 def pessoa_data_nascimento_maior_data_admissao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_funcionarios,
@@ -36,7 +36,7 @@ def pessoa_data_nascimento_maior_data_admissao():
 #Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
 def pessoa_data_vencimento_cnh_menor_data_emissao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 pessoas_fis_compl.i_pessoas
@@ -59,7 +59,7 @@ def pessoa_data_vencimento_cnh_menor_data_emissao():
 #Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
 def pessoaDataVencimentoCNHMaiorNascimento():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT i_pessoas,
                     (SELECT a.dt_nascimento
@@ -88,7 +88,7 @@ def pessoaDataVencimentoCNHMaiorNascimento():
 #Busca os campos adicionais com descrição repetido
 def campoAdicionalDescricaoRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT 
                 LIST(i_caracteristicas), 
@@ -115,7 +115,7 @@ def campoAdicionalDescricaoRepetido():
 #Verifica se o dependente está cadastrado como 10 - OUTROS
 def dependentesOutros():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_dependentes,
@@ -139,7 +139,7 @@ def dependentesOutros():
 #Pessoas com data de nascimento nulo
 def pessoaDataNascimentoNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 p.i_pessoas,
@@ -166,7 +166,7 @@ def pessoaDataNascimentoNulo():
 #Pessoas com data de nascimento maior que data de dependencia
 def pessoaDataNascimentoMaiorDataDependecia():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 d.i_dependentes,
@@ -193,7 +193,7 @@ def pessoaDataNascimentoMaiorDataDependecia():
 #Pessoas com data de nascimento maior que data de nascimento do responsavel
 def pessoaDataNascimentoMaiorDataNascimentoResponsavel():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 pf.i_pessoas as idPai,
@@ -230,7 +230,7 @@ def pessoaDataNascimentoMaiorDataNascimentoResponsavel():
 #Verifica os CPF's nulos
 def cpfNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 p.i_pessoas,
@@ -257,7 +257,7 @@ def cpfNulo():
 #As Pessoas (0,0) possuem o mesmo CPF!
 def cpfRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 list(pf.i_pessoas),
@@ -285,7 +285,7 @@ def cpfRepetido():
 #As Pessoas (0,0) possuem o mesmo número do PIS!
 def pisRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 list(pf.i_pessoas),
@@ -313,7 +313,7 @@ def pisRepetido():
 #PIS inválido
 def pisInvalido():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT
                 i_pessoas,
@@ -330,7 +330,7 @@ def pisInvalido():
     for i in resultado:
         pis = i[1]
 
-        if not validarPis(pis):
+        if not pis_validar(pis):
             quantidade += 1
 
     if quantidade == 0:
@@ -343,7 +343,7 @@ def pisInvalido():
 #Verifica os PIS's repetidos
 def cnpjNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 pj.i_pessoas,
@@ -369,7 +369,7 @@ def cnpjNulo():
 #Verifica a descrição dos logradouros que tem caracter especial no inicio da descrição
 def logradourosDescricaoCaracterEspecial():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 SUBSTRING(nome, 1, 1) as nome_com_caracter 
@@ -392,7 +392,7 @@ def logradourosDescricaoCaracterEspecial():
 #Verifica os logradouros com descrição repetidos
 def logradourosDescricaoRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_ruas), 
@@ -421,7 +421,7 @@ def logradourosDescricaoRepetido():
 #Renomeia os tipos bases repetidos
 def tiposBasesRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_bases), 
@@ -448,7 +448,7 @@ def tiposBasesRepetido():
 #Verifica os logradouros sem cidades
 def logradourosSemCidade():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_ruas,
@@ -472,7 +472,7 @@ def logradourosSemCidade():
 #Verifica os atos com número nulos
 def atosNumeroNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_atos
@@ -495,7 +495,7 @@ def atosNumeroNulo():
 #Verifica os atos repetidos
 def atosRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_atos),
@@ -524,7 +524,7 @@ def atosRepetido():
 #Verifica os CBO's nulos nos cargos
 def cargoCboNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 * 
@@ -547,7 +547,7 @@ def cargoCboNulo():
 #Verifica categoria eSocial nulo no vinculo empregaticio
 def eSocialNuloVinculoEmpregaticio():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_vinculos,
@@ -573,7 +573,7 @@ def eSocialNuloVinculoEmpregaticio():
 #Renomeia os vinculos empregaticios repetidos
 def vinculoEmpregaticioRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_vinculos), 
@@ -600,7 +600,7 @@ def vinculoEmpregaticioRepetido():
 #Verifica categoria eSocial nulo no motivo de rescisão
 def eSocialNuloMotivoRescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_motivos_resc,
@@ -625,7 +625,7 @@ def eSocialNuloMotivoRescisao():
 #Verifica as folha que não foram fechadas confome competencia passada por parametro
 def fechamentoFolha(competencia):
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT * FROM bethadba.processamentos WHERE i_competencias < {} AND pagto_realizado = 'N'
         """.format(competencia)
@@ -644,7 +644,7 @@ def fechamentoFolha(competencia):
 #A data de pagamento é obrigatória
 def folhaFeriasDataPagamentoNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 bethadba.dbf_getdatapagamentoferias(ferias.i_entidades,ferias.i_funcionarios,ferias.i_periodos,ferias.i_ferias) AS dataPagamento,
@@ -670,7 +670,7 @@ def folhaFeriasDataPagamentoNulo():
 #Verifica categoria eSocial nulo no motivo de aposentadoria
 def eSocialNuloMotivoAposentadoria():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_motivos_apos,
@@ -695,7 +695,7 @@ def eSocialNuloMotivoAposentadoria():
 #Verifica historicos salariais com salario zerado ou nulo
 
 def historicoSalarialZerado():
-    resultado = select(
+    resultado = consultar(
         """
             SELECT * FROM bethadba.hist_salariais WHERE salario IN (0, NULL)
         """
@@ -713,7 +713,7 @@ def historicoSalarialZerado():
 #Verifica data final maior que data de demissão
 
 def dataFinalLancamentoMaiorDataRescisao():
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 r.i_entidades, 
@@ -747,7 +747,7 @@ def dataFinalLancamentoMaiorDataRescisao():
 #Busca as movimetação de pessoal repetidos
 def movimentacaoPessoalRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_movpes), 
@@ -774,7 +774,7 @@ def movimentacaoPessoalRepetido():
 #Busca os tipos de afastamentos repetidos
 def tipoAfastamentoRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_afast), 
@@ -801,7 +801,7 @@ def tipoAfastamentoRepetido():
 #Busca as alterações de historicos dos funcionarios maior que a data de rescisão
 def alteracaoFuncionarioMaiorDataRescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 hf.i_funcionarios,
@@ -832,7 +832,7 @@ def alteracaoFuncionarioMaiorDataRescisao():
 #Busca as alterações de salario dos funcionarios maior que a data de rescisão
 def alteracaoSalarialMaiorDataRescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 hs.i_funcionarios,
@@ -863,7 +863,7 @@ def alteracaoSalarialMaiorDataRescisao():
 #Busca as alterações de cargo dos funcionarios maior que a data de rescisão
 def alteracaoCargoMaiorDataRescisao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 hc.i_funcionarios,
@@ -894,7 +894,7 @@ def alteracaoCargoMaiorDataRescisao():
 #Busca as classificações que estão com código errado no tipo de afastamento
 def classificacaoErradaTipoAfastamento():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 descricao
@@ -917,7 +917,7 @@ def classificacaoErradaTipoAfastamento():
 #Busca os tipos de atos repetidos
 def tipoAtoRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_tipos_atos), 
@@ -944,7 +944,7 @@ def tipoAtoRepetido():
 #Busca as descrições repetidas no horario ponto
 def descricaoHorarioPontoRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -972,7 +972,7 @@ def descricaoHorarioPontoRepetido():
 #Busca as descrições repetidas na turma
 def descricaoTurmaRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1000,7 +1000,7 @@ def descricaoTurmaRepetido():
 #Buscar niveis de organogramas com separadores nulos
 def nivelOrganogramaSeparadorNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 * 
@@ -1023,7 +1023,7 @@ def nivelOrganogramaSeparadorNulo():
 #Verifica a natureza de texto juridico se é nulo nos atos
 def atoNaturezaTextoJuridicoNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 * 
@@ -1046,7 +1046,7 @@ def atoNaturezaTextoJuridicoNulo():
 #Verifica se a data de fonte de divulgação é menor que a data de publicacao do ato
 def atoFonteDivulgacaoMenorPublicacao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 a.i_atos,
@@ -1073,7 +1073,7 @@ def atoFonteDivulgacaoMenorPublicacao():
 #Ter ao menos um tipo de afastamento na configuração do cancelamento de férias
 def tipoAfastamentoConfiguracaoCancelamentoFerias():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 *
@@ -1096,7 +1096,7 @@ def tipoAfastamentoConfiguracaoCancelamentoFerias():
 #Verifica descricao de cofiguração de organograma se é maior que 30 caracteres
 def descricaoConfigOrganogramaMaior30():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_config_organ,
@@ -1121,7 +1121,7 @@ def descricaoConfigOrganogramaMaior30():
 #Verifica descricao de cofiguração de organograma repetido
 def descricaoConfigOrganogramaRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT 
                 list(i_config_organ), 
@@ -1148,7 +1148,7 @@ def descricaoConfigOrganogramaRepetido():
 #Verifica se o CPF é invalido
 def cpfInvalido():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT
                 i_pessoas,
@@ -1165,7 +1165,7 @@ def cpfInvalido():
     for i in resultado:
         cpf = i[1]
         
-        if not validarCpf(cpf):
+        if not cpf_validar(cpf):
             quantidade += 1
 
     if quantidade == 0:
@@ -1178,7 +1178,7 @@ def cpfInvalido():
 #Verifica se o CNPJ é invalido
 def cnpjInvalido():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT
                 i_pessoas,
@@ -1193,7 +1193,7 @@ def cnpjInvalido():
     for i in resultado:
         cnpj = i[1]
        
-        if not validarCnpj(cnpj):
+        if not cnpj_validar(cnpj):
             quantidade += 1
 
     if quantidade == 0:
@@ -1206,7 +1206,7 @@ def cnpjInvalido():
 #Verifica os RG's repetidos
 def RgRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 list(i_pessoas),
@@ -1234,7 +1234,7 @@ def RgRepetido():
 #Já existe um cargo com a descrição informada
 def cargoDescricaoRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 list(i_cargos),
@@ -1251,7 +1251,7 @@ def cargoDescricaoRepetido():
                 quantidade > 1
             ORDER BY
                 quantidade
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1267,7 +1267,7 @@ def cargoDescricaoRepetido():
 #Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
 def terminoVigenciaMaior2099():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 dt_vigencia_fin
@@ -1290,7 +1290,7 @@ def terminoVigenciaMaior2099():
 #Verifica os emails invalidos
 def emailInvalido():
     
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_pessoas,
@@ -1321,7 +1321,7 @@ def emailInvalido():
 #Verifica o número de endereço se está vazio
 def numeroEnderecoVazio():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_pessoas 
@@ -1344,7 +1344,7 @@ def numeroEnderecoVazio():
 #Verifica o nome de rua se está vazio
 def nomeRuaVazio():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 * 
@@ -1368,7 +1368,7 @@ def nomeRuaVazio():
 #Verifica os funcionarios sem previdencia
 def funcionariosSemPrevidencia():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 hf.i_funcionarios,
@@ -1389,7 +1389,7 @@ def funcionariosSemPrevidencia():
                 hf.i_entidades
             ORDER BY	
                 hf.i_funcionarios
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1405,7 +1405,7 @@ def funcionariosSemPrevidencia():
 #Os eventos de composição da média são obrigatórios
 def eventoMediaVantagemSemComposicao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 DISTINCT(m.i_eventos),
@@ -1432,7 +1432,7 @@ def eventoMediaVantagemSemComposicao():
 #Eventos de composição não pode ser eventos de média/vantagem
 def eventoMediaVantagemComposicao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_eventos_medias,
@@ -1456,7 +1456,7 @@ def eventoMediaVantagemComposicao():
 #Verifica a data de admissão da matrícula se é posterior a data de início da matrícula nesta lotação física
 def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT 
                 f.dt_admissao,
@@ -1487,7 +1487,7 @@ def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
 #A descrição não pode conter mais de 30 caracteres
 def descricaoMotivoAlteracaoPontoMaior30():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 i_motivos_altponto,
@@ -1511,7 +1511,7 @@ def descricaoMotivoAlteracaoPontoMaior30():
 #Verifica o motivo nos afastamentos se contem no máximo 150 caracteres
 def observacaoAfastamentoMaior150():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 LENGTH(observacao) AS tamanho_observacao, 
@@ -1538,7 +1538,7 @@ def observacaoAfastamentoMaior150():
 #A quantidade de dias não pode ser menor que 0
 def dataInicialAfastamentoMaiorDataFinal():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_entidades, 
@@ -1566,7 +1566,7 @@ def dataInicialAfastamentoMaiorDataFinal():
 #O motivo de rescisão é obrigatório
 def motivoAposentadoriaNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_entidades,
@@ -1592,7 +1592,7 @@ def motivoAposentadoriaNulo():
 #Verifica os grupos funcionais repetidos
 def gruposFuncionaisRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT
                 list(i_entidades),
@@ -1607,7 +1607,7 @@ def gruposFuncionaisRepetido():
                 nome 
             HAVING 
                 quantidade > 1
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1624,7 +1624,7 @@ def gruposFuncionaisRepetido():
 #Plano de saude
 def dataInicialDependenteMaiorTitular():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 fps.i_entidades,
@@ -1654,7 +1654,7 @@ def dataInicialDependenteMaiorTitular():
 #O telefone pode conter no máximo 11 caracteres
 def telefoneLotacaoFisicaMaior11():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_entidades,
@@ -1681,7 +1681,7 @@ def telefoneLotacaoFisicaMaior11():
 #A data de criação é obrigatória
 def dataCriacaoAtoNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_atos, 
@@ -1705,7 +1705,7 @@ def dataCriacaoAtoNulo():
 #Busca as descrições repetidas dos niveis salariais
 def descricaoNivelSalarialRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1734,7 +1734,7 @@ def descricaoNivelSalarialRepetido():
 #Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
 def cartaoPontoRepetido():
 
-    matriculas = select(
+    matriculas = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1750,13 +1750,13 @@ def cartaoPontoRepetido():
                 quantidade > 1 
             ORDER BY 
                 i_funcionarios   
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
     if len(matriculas) > 0:
         return 0
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 num_cp, 
@@ -1788,7 +1788,7 @@ def cartaoPontoRepetido():
 #O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
 def dataNomeacaoMaiorDataPosse():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_funcionarios 
@@ -1812,7 +1812,7 @@ def dataNomeacaoMaiorDataPosse():
 #Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
 def contaBancariaFuncionarioInvalida():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 f.i_funcionarios,
@@ -1847,7 +1847,7 @@ def contaBancariaFuncionarioInvalida():
 #Apenas uma previdência pode ser informada
 def previdenciaMaiorQueUm():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_funcionarios,
@@ -1874,7 +1874,7 @@ def previdenciaMaiorQueUm():
 #A data inicial não poderá ser menor que a data de admissão
 def dataInicialAfastamentoMenorDataAdmissao():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 dt_afastamento, 
@@ -1902,7 +1902,7 @@ def dataInicialAfastamentoMenorDataAdmissao():
 #Já existe uma área de atuação com a descrição informada
 def areasAtuacaoDescricaoRepetido():
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT 
                 list(i_areas_atuacao), 
@@ -1930,7 +1930,7 @@ def areasAtuacaoDescricaoRepetido():
 #O motivo de término é obrigatório
 def dependenteMotivoTerminoNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_pessoas ,
@@ -1957,7 +1957,7 @@ def dependenteMotivoTerminoNulo():
 #A configuração de férias é obrigatória
 def cargoConfiguracaoFeriasNulo():
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 i_cargos, i_entidades 
@@ -2002,7 +2002,7 @@ cargoCboNulo()
 eSocialNuloVinculoEmpregaticio()
 vinculoEmpregaticioRepetido()
 eSocialNuloMotivoRescisao()
-fechamentoFolha(competenciaFechamentoFolha)
+fechamentoFolha(folha_fechamento_competencia)
 folhaFeriasDataPagamentoNulo()
 eSocialNuloMotivoAposentadoria()
 historicoSalarialZerado()
