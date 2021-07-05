@@ -1,0 +1,1 @@
+# Diretório responsavel por armazenar as planilhas com as inconsistências.

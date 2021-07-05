@@ -1,12 +1,12 @@
 from variaveis import *
-from src.functions import *
-from src.database import *
+from src.funcao import *
+from src.conexao import *
 from os import path
 
 desabilitarTriggers = "CALL bethadba.dbp_conn_gera(1, 2021, 300);\nCALL bethadba.pg_setoption('wait_for_commit','on');\nCALL bethadba.pg_habilitartriggers('off');\nset option fire_triggers = 'off';\n\n"
 
-#recodificarGeral = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_geral.sql", "a")
-#recodificarGeral.writelines(desabilitarTriggers)
+recodificarGeral = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_geral.sql", "a")
+recodificarGeral.writelines(desabilitarTriggers)
 
 def recodificarFuncionarios(idEntidadesAgrupadas):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_funcionarios.sql", "a")
@@ -138,7 +138,7 @@ def recodificarCargos(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -193,7 +193,7 @@ def recodificarPeriodosTrab(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -248,7 +248,7 @@ def recodificarTurmas(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -306,7 +306,7 @@ def recodificarDespesas(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -361,7 +361,7 @@ def recodificarNiveis(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -417,7 +417,7 @@ def recodificarHorariosPonto(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -472,7 +472,7 @@ def recodificarGrupos(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -527,7 +527,7 @@ def recodificarLocaisTrab(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
@@ -582,14 +582,14 @@ def recodificarRelogios(idEntidadesAgrupadas):
             querys += "\n"
 
             recodificar.writelines(querys)
-            #recodificarGeral.writelines(querys)
+            recodificarGeral.writelines(querys)
 
             idMax += 1
 
     print("Código SQL gerado para tabela: relogios")
 
 #--------------------Executar-------------------------#
-#recodificarFuncionarios(idEntidadesAgrupadas)
+recodificarFuncionarios(idEntidadesAgrupadas)
 #recodificarCargos(idEntidadesAgrupadas)
 #recodificarPeriodosTrab(idEntidadesAgrupadas)
 #recodificarTurmas(idEntidadesAgrupadas)
