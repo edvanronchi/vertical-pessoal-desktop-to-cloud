@@ -1,4 +1,4 @@
-from src.funcao import *
+from src.funcoes import *
 from src.conexao import *
 from datetime import date, datetime, timedelta
 from os import path

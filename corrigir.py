@@ -1,7 +1,7 @@
 from validate_email import validate_email 
 from variaveis import *
-from src.funcao import *
-from src.conexao import consultar,executar
+from src.funcoes import *
+from src.conexao import consultar ,executar
 import re
 
 #Renomeia os campos adicionais com descrição repetida /(def)(.*)(?<!:)/g
@@ -23,7 +23,7 @@ def caracteristicas_nome_repetido():
     )
 
     for i in resultado:
-        lista = ','.split(i[0])
+        lista = i[0].split(',')
         nome = i[1]
 
         for j, identificador in enumerate(lista):
@@ -32,6 +32,7 @@ def caracteristicas_nome_repetido():
             
             u = "UPDATE bethadba.caracteristicas SET nome = '{}'  WHERE i_caracteristicas = {};".format((nome + " |" + str(j)), identificador)
 
+            print(u)
             executar(u)
 
 #Adiciona o valor 1 - Filho para os dependentes que estão cadastrados como 10 - OUTROS
@@ -279,7 +280,7 @@ def pessoas_cpf_repetido():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 list(pf.i_pessoas),
                 cpf,
                 count(cpf) AS quantidade
@@ -309,7 +310,7 @@ def pessoas_pis_repetido():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 list(pf.i_pessoas),
                 num_pis,
                 count(num_pis) AS quantidade
@@ -339,7 +340,7 @@ def pessoas_pis_invalido():
 
     resultado = consultar(
         """
-           consultar
+           SELECT
                 i_pessoas,
                 num_pis
             FROM 
@@ -862,7 +863,7 @@ def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
                 hff.dt_alteracoes = historico.dt_alteracoes_novo
             FROM 
                 ( 
-                    consultar
+                    SELECT
                         hf.i_funcionarios,
                         hf.i_entidades,
                         hf.dt_alteracoes,
@@ -889,7 +890,7 @@ def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 hf.i_funcionarios,
                 hf.i_entidades,
                 hf.dt_alteracoes,
@@ -945,7 +946,7 @@ def hist_salariais_dt_alteracoes_maior_dt_rescisao():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 hs.i_funcionarios,
                 hs.i_entidades,
                 hs.dt_alteracoes,
@@ -1003,7 +1004,7 @@ def hist_cargos_dt_alteracoes_maior_dt_rescisao():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 hc.i_funcionarios,
                 hc.i_entidades,
                 hc.dt_alteracoes,
@@ -1333,7 +1334,7 @@ def pessoas_cpf_invalido():
 
     resultado = consultar(
         """
-           consultar
+           SELECT
                 i_pessoas,
                 cpf
             FROM 
@@ -1357,7 +1358,7 @@ def pessoas_cnpj_invalido():
 
     resultado = consultar(
         """
-           consultar
+           SELECT
                 i_pessoas,
                 cnpj
             FROM 
@@ -1379,7 +1380,7 @@ def pessoas_rg_repetido():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 list(i_pessoas),
                 rg,
                 count(rg) AS quantidade
@@ -1409,7 +1410,7 @@ def cargos_descricao_repetido():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 list(i_cargos),
                 list(i_entidades),
                 nome,
@@ -1459,7 +1460,7 @@ def historico_cargo_descricao_repetida():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 list(i_cargos),
                 list(i_entidades),
                 nome,
@@ -1705,7 +1706,7 @@ def motivos_altponto_descricao_invalida():
                 ma.descricao = SUBSTRING(ma.descricao, 1, 30)
             FROM 
                 ( 
-                    consultar
+                    SELECT
                         i_motivos_altponto,
                         LENGTH(descricao) AS tamanho_descricao
                     FROM
@@ -1799,7 +1800,7 @@ def grupos_nome_repetido():
 
     resultado = consultar(
         """
-            consultar
+            SELECT
                 list(i_entidades),
                 list(i_grupos),
                 nome,
@@ -2069,7 +2070,7 @@ def funcionarios_conta_bancaria_invalida():
 
 #Coloca previdencia federal para os historicos de funcionarios com mais do que uma previdencia informada
 #Apenas uma previdência pode ser informada
-def funcionarios_sem_previdencia():
+def funcionarios_com_mais_de_uma_previdencia():
 
     executar(
         """
@@ -2198,17 +2199,6 @@ def cargos_sem_configuracao_ferias():
         """
     )  
 
-#Alterações realizadas manualmente
-def executar_alteracao_manual():
-    alteracao = open("vertical-pessoal-desktop-to-cloud\\src\\sql\\alteracao_manual.sql", "r", encoding = 'utf-8')    
-    executar(
-        """
-          {}                           
-        """.format(alteracao.read())
-    )
-    alteracao.close()    
-    print("Executado arquivo de alterações manuais.")
-
 caracteristicas_nome_repetido()
 dependentes_grau_outros()
 pessoas_sem_dt_nascimento()
@@ -2275,9 +2265,8 @@ niveis_descricao_repetido()
 funcionarios_cartao_ponto_repetido()
 cargos_dt_nomeacao_maior_dt_posse()
 funcionarios_conta_bancaria_invalida()
-funcionarios_sem_previdencia()
+funcionarios_com_mais_de_uma_previdencia()
 afastamentos_dt_afastamento_menor_dt_admissao()
 areas_atuacao_nome_repetido()
 dependentes_sem_dt_fim()
 cargos_sem_configuracao_ferias()
-executar_alteracao_manual()

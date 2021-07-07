@@ -86,7 +86,7 @@ def pessoaDataVencimentoCNHMaiorNascimento():
     return quantidade    
 
 #Busca os campos adicionais com descrição repetido
-def campoAdicionalDescricaoRepetido():
+def caracteristicas_nome_repetido():
 
     resultado = consultar(
         """
@@ -1366,7 +1366,7 @@ def nomeRuaVazio():
     return quantidade
 
 #Verifica os funcionarios sem previdencia
-def funcionariosSemPrevidencia():
+def funcionarios_sem_previdencia():
 
     resultado = consultar(
         """
@@ -1982,7 +1982,7 @@ def cargoConfiguracaoFeriasNulo():
 pessoa_data_vencimento_cnh_menor_data_emissao()
 pessoa_data_vencimento_cnh_menor_data_emissao()
 pessoaDataVencimentoCNHMaiorNascimento()
-campoAdicionalDescricaoRepetido()
+caracteristicas_nome_repetido()
 dependentesOutros()
 pessoaDataNascimentoNulo()
 pessoaDataNascimentoMaiorDataDependecia()
@@ -2030,7 +2030,7 @@ terminoVigenciaMaior2099()
 emailInvalido()
 numeroEnderecoVazio()
 nomeRuaVazio()
-funcionariosSemPrevidencia()
+funcionarios_sem_previdencia()
 eventoMediaVantagemSemComposicao()
 eventoMediaVantagemComposicao()
 dataAdmissaoMatriculaMaiorDataLotacaoFisica()
