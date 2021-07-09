@@ -2,6 +2,8 @@ src/sql/*.sql
 src/planilhas/*
 !src/planilhas/README.md
 __pycache__/
-teste.py
-.env
+venv/
 target/
+.idea
+.env
+teste.py
