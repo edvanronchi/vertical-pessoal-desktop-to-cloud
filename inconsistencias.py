@@ -1955,7 +1955,7 @@ def dependenteMotivoTerminoNulo():
 
 #Busca os cargos sem configuração de ferias
 #A configuração de férias é obrigatória
-def cargoConfiguracaoFeriasNulo():
+def cargos_sem_configuracao_ferias():
 
     resultado = consultar(
         """
@@ -2050,4 +2050,4 @@ previdenciaMaiorQueUm()
 dataInicialAfastamentoMenorDataAdmissao()
 areasAtuacaoDescricaoRepetido()
 dependenteMotivoTerminoNulo()
-cargoConfiguracaoFeriasNulo()
+cargos_sem_configuracao_ferias()

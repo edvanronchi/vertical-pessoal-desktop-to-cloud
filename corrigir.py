@@ -2269,4 +2269,4 @@ funcionarios_com_mais_de_uma_previdencia()
 afastamentos_dt_afastamento_menor_dt_admissao()
 areas_atuacao_nome_repetido()
 dependentes_sem_dt_fim()
-cargos_sem_configuracao_ferias()
+#cargos_sem_configuracao_ferias() - Em analise
