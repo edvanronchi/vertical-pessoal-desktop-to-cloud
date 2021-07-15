@@ -1,10 +1,21 @@
 from validate_docbr import CPF, CNPJ, PIS
 from src.conexao import consultar
 from random import randint
+import re
+
+def email_validar(email: str) -> bool:
+
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+ 
+    if (re.match(regex, email)):
+        return True
+ 
+    return False
 
 #Tabelas que tem o nome da coluna especifica
 def tabela_coluna(colunas: list = []) -> list:
-    colunas = ",".join(colunas)
+
+    colunas = str(colunas).replace("[", "").replace("]", "").replace(" ", "")
 
     resultado = consultar(
         """

@@ -1,5 +1,5 @@
 from variaveis import *
-from src.funcao import *
+from src.funcoes import *
 from src.conexao import *
 
 #Busca os aposentados que foram demitidos com motivo de aposentadoria e vinculo de aposentadoria
@@ -137,4 +137,4 @@ def vincular_aposentados(vincular):
             print("Registro inserido: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
 
 mostrar_aposentados()
-vincular_aposentados(False)
+#vincular_aposentados(False)

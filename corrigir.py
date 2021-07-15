@@ -1,10 +1,10 @@
-from validate_email import validate_email 
+from datetime import timedelta
 from variaveis import *
 from src.funcoes import *
 from src.conexao import consultar ,executar
 import re
 
-#Renomeia os campos adicionais com descrição repetida /(def)(.*)(?<!:)/g
+#Renomeia os campos adicionais com descrição repetida
 def caracteristicas_nome_repetido():
 
     resultado = consultar(
@@ -171,6 +171,43 @@ def pessoas_sem_dt_nascimento():
         """
     )
 
+#Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
+def pessoas_dt_primeira_cnh_maior_dt_nascimento():
+    
+    resultado = consultar(
+        """ 
+            SELECT 
+                pf.i_pessoas,
+                pf.dt_nascimento,
+                pfc.dt_emissao_cnh,
+                pfc.dt_primeira_cnh
+            FROM   
+                bethadba.pessoas_fisicas pf 
+            INNER JOIN
+                bethadba.pessoas_fis_compl pfc ON (pf.i_pessoas = pfc.i_pessoas)
+            WHERE  
+                pf.dt_nascimento > pfc.dt_primeira_cnh or pf.dt_nascimento > pfc.dt_emissao_cnh;
+        """
+    )
+
+    for i in resultado:
+        i_pessoas = i[0]
+        dt_nascimento = i[1]
+        dt_emissao_cnh = i[2]
+        dt_primeira_cnh = i[3]
+
+        if dt_nascimento > dt_emissao_cnh and dt_nascimento > dt_primeira_cnh:
+            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(dt_nascimento, i_pessoas)
+
+        elif dt_nascimento < dt_emissao_cnh:  
+            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(dt_emissao_cnh, i_pessoas)
+
+        elif dt_nascimento < dt_primeira_cnh:  
+            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(dt_primeira_cnh, i_pessoas)
+
+        print(u)
+        executar(u)
+    
 #Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
 def pessoas_cnh_dt_vencimento_menor_dt_emissao():
     executar(
@@ -194,61 +231,6 @@ def pessoas_cnh_dt_vencimento_menor_dt_emissao():
                 dt_primeira_cnh >= dt_vencto_cnh; 
         """
     )
-
-#Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
-def pessoas_dt_primeira_cnh_maior_dt_nascimento():
-
-    executar(
-        """
-            UPDATE 
-                bethadba.hist_pessoas_fis
-            SET    
-                hist_pessoas_fis.dt_primeira_cnh = NULL
-            FROM   
-                (
-                    SELECT 
-                        i_pessoas,
-                        (
-                            SELECT 
-                                a.dt_nascimento
-                            FROM   
-                                bethadba.pessoas_fisicas AS a
-                            WHERE  
-                                a.i_pessoas = hpf.i_pessoas
-                        ) nascimento,
-                        dt_emissao_cnh,
-                        NULL AS novaDataCNH
-                    FROM   
-                        bethadba.hist_pessoas_fis hpf
-                    WHERE  
-                        nascimento >= dt_primeira_cnh
-                ) AS d
-            WHERE  
-                hist_pessoas_fis.i_pessoas = d.i_pessoas;
-        """
-    )
-
-    executar(
-        """
-            UPDATE 
-                bethadba.pessoas_fis_compl
-            SET    
-                pessoas_fis_compl.dt_primeira_cnh = NULL
-            FROM   
-                (SELECT i_pessoas,
-                        (SELECT a.dt_nascimento
-                            FROM   bethadba.pessoas_fisicas AS a
-                            WHERE  a.i_pessoas = hpf.i_pessoas) nascimento,
-                        dt_emissao_cnh,
-                        NULL AS novaDataCNH
-                    FROM   bethadba.pessoas_fis_compl hpf
-                    WHERE  nascimento >= dt_primeira_cnh) AS d
-            WHERE  
-                pessoas_fis_compl.i_pessoas = d.i_pessoas;
-        """
-    )
-
-    print("Data da primeira CNH atualizada!")
 
 #Gera CPF aleatorio para pessoas com CPF nulo
 def pessoas_sem_cpf():
@@ -399,6 +381,35 @@ def ruas_nome_caracter_especial():
         """
     )
 
+#Adiona um nome aleatorio para o nome da rua que está vazio
+def ruas_sem_nome():
+
+    executar(
+        """
+            UPDATE 
+                bethadba.ruas
+            SET 
+                nome = 'Rua sem nome'
+            WHERE
+                nome = '' OR
+                nome IS NULL;    
+        """
+    )
+
+#Coloca a cidade da entidade
+def ruas_sem_cidade():
+
+    executar(
+        """
+            UPDATE 
+                bethadba.ruas
+            SET
+                i_cidades = (SELECT TOP 1 i_cidades FROM bethadba.entidades)
+            WHERE 
+                i_cidades IS NULL;
+        """
+    )
+
 #Renomeia os logradouros com descrição repetidos
 def ruas_nome_repetido():
 
@@ -429,6 +440,7 @@ def ruas_nome_repetido():
             
             u = "UPDATE bethadba.ruas SET nome = '{}'  WHERE i_ruas = {};".format((nome + " |" + str(j)), identificador)
 
+            print(u)
             executar(u)
 
 #Renomeia os tipos bases repetidos
@@ -460,20 +472,6 @@ def tipos_bases_repetido():
             u = "UPDATE bethadba.tipos_bases SET nome = '{}'  WHERE i_tipos_bases = {};".format((nome + " |" + str(j)), identificador)
 
             executar(u)
-
-#Coloca a cidade da entidade
-def ruas_sem_cidade():
-
-    executar(
-        """
-            UPDATE 
-                bethadba.ruas
-            SET
-                i_cidades = (SELECT TOP 1 i_cidades FROM bethadba.entidades)
-            WHERE 
-                i_cidades IS NULL;
-        """
-    )
 
 #Renomeia os atos com número nulo
 def atos_sem_numero():
@@ -851,39 +849,6 @@ def tipos_afast_descricao_repetido():
             
             print(u)
             executar(u)
-
-#Coloca a data de rescisão na data de alteração
-def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
-
-    executar(
-        """
-            UPDATE 
-                bethadba.hist_funcionarios hff
-            SET 
-                hff.dt_alteracoes = historico.dt_alteracoes_novo
-            FROM 
-                ( 
-                    SELECT
-                        hf.i_funcionarios,
-                        hf.i_entidades,
-                        hf.dt_alteracoes,
-                        r.dt_rescisao,
-                        STRING(r.dt_rescisao, ' ', SUBSTRING(hf.dt_alteracoes, 12, 8)) AS dt_alteracoes_novo
-                    FROM
-                        bethadba.hist_funcionarios hf
-                    INNER JOIN 
-                        bethadba.rescisoes r ON (hf.i_funcionarios = r.i_funcionarios AND hf.i_entidades = r.i_entidades)
-                    WHERE
-                        hf.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59')
-                    ORDER BY 
-                        hf.dt_alteracoes DESC
-                ) AS historico
-            WHERE
-                hff.i_funcionarios = historico.i_funcionarios AND
-                hff.i_entidades = historico.i_entidades AND
-                hff.dt_alteracoes = historico.dt_alteracoes;
-        """
-    )
 
 #Coloca a data de rescisão na data de alteração
 def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
@@ -1452,48 +1417,7 @@ def cargos_descricao_repetido():
                     i_entidades = {} AND i_cargos = {};
             """.format(nome_novo, entidade[j], cargo[j])
 
-            executar(u1)
-            
-#Renomeia os cargos com descricão repetidos
-#Já existe um cargo com a descrição informada
-def historico_cargo_descricao_repetida():
-
-    resultado = consultar(
-        """
-            SELECT
-                list(i_cargos),
-                list(i_entidades),
-                nome,
-                count(nome) AS quantidade
-            FROM 
-                bethadba.hist_cargos_cadastro 
-            WHERE   
-                i_entidades IN ({})
-            GROUP BY 
-                nome 
-            HAVING 
-                quantidade > 1
-            ORDER BY
-                quantidade
-        """.format(lista_entidade)
-    )
-
-    for i in resultado:
-        cargo = i[0].split(',')
-        entidade = i[1].split(',')
-        nome = i[2]
-        
-        for j in range(len(entidade)):
-            
-            if j == 0:
-                continue
-            
-            nome_novo = nome + " |" + str(j)
-
-            if len(nome) > 97:
-                nome_novo = nome[:97] + " |" + str(j) 
-
-            u1 = """
+            u2 = """
                 UPDATE 
                     bethadba.hist_cargos_cadastro 
                 SET 
@@ -1503,8 +1427,10 @@ def historico_cargo_descricao_repetida():
             """.format(nome_novo, entidade[j], cargo[j])
 
             print(u1)
+            print(u2)
 
             executar(u1)
+            executar(u2)
 
 #Adiciona um valor fixo para o termino de vigencia maior que 2099
 #Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
@@ -1537,13 +1463,13 @@ def pessoas_email_invalido():
     )
 
     for i in resultado:
-        pessoa = i[0]
+        i_pessoa = i[0]
         email = i[1]
 
-        if not validate_email(email) or len(email) < 5:
+        if not email_validar(email):
+            u = "UPDATE bethadba.pessoas SET email = NULL WHERE i_pessoas = {};".format(i_pessoa)
 
-            u = "UPDATE bethadba.pessoas SET email = NULL WHERE i_Pessoas = {};".format(pessoa)
-
+            print(u)
             executar(u)
 
 #Remove o número do endereço que está vazio
@@ -1557,21 +1483,6 @@ def pessoas_enderecos_sem_numero():
                 numero = null
             WHERE
                 numero = '';    
-        """
-    )
-
-#Adiona um nome aleatorio para o nome da rua que está vazio
-def ruas_sem_nome():
-
-    executar(
-        """
-            UPDATE 
-                bethadba.ruas
-            SET 
-                nome = 'Rua sem nome'
-            WHERE
-                nome = '' OR
-                nome IS NULL;    
         """
     )
 
@@ -1969,7 +1880,7 @@ def niveis_descricao_repetido():
 #Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
 def funcionarios_cartao_ponto_repetido():
 
-    funcioario = consultar(
+    funcionario = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -1988,8 +1899,8 @@ def funcionarios_cartao_ponto_repetido():
         """.format(lista_entidade)
     )
 
-    if len(funcioario) > 0:
-        return 0
+    if len(funcionario) == 0:
+        return
 
     print("Cartão ponto sendo configurado, aguarde!")
 
@@ -2199,20 +2110,56 @@ def cargos_sem_configuracao_ferias():
         """
     )  
 
+#Coloca a data de admissão na data de opção do FGTS
+#Quando a data de admissão for posterior a 04/10/1988, a data da opção do FGTS deve ser igual a data de admissão
+def opcao_fgts_diferente_dt_admissao():
+
+    executar(
+        """
+            UPDATE
+                bethadba.funcionarios
+            SET 
+                dt_opcao_fgts = dt_admissao
+            WHERE
+                dt_admissao > '1988-10-04' AND 
+                dt_admissao != dt_opcao_fgts;                               
+        """
+    )  
+
+#Coloca forma de pagamento em dinheiro
+#Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
+def funcionarios_conta_bancaria_sem_dados():
+
+    executar(
+        """
+            UPDATE
+                bethadba.hist_funcionarios
+            SET 
+                forma_pagto = 'D'
+            WHERE
+                forma_pagto = 'R' AND 
+                i_pessoas_contas IS NULL;                            
+        """
+    )  
+
+#-----------------------Executar---------------------#
+#pessoas_sem_cpf() - Em analise
+#hist_funcionarios_dt_alteracoes_maior_dt_rescisao() - Em analise
+#cargos_sem_configuracao_ferias() - Em analise
 caracteristicas_nome_repetido()
 dependentes_grau_outros()
 pessoas_sem_dt_nascimento()
-pessoas_cnh_dt_vencimento_menor_dt_emissao()
 pessoas_dt_primeira_cnh_maior_dt_nascimento()
-pessoas_sem_cpf()
+pessoas_cnh_dt_vencimento_menor_dt_emissao()
 pessoas_cpf_repetido()
 pessoas_pis_repetido()
 pessoas_pis_invalido()
 pessoas_sem_cnpj()
 ruas_nome_caracter_especial()
+ruas_sem_nome()
+ruas_sem_cidade()
 ruas_nome_repetido()
 tipos_bases_repetido()
-ruas_sem_cidade()
 atos_sem_numero()
 atos_repetido()
 cargos_sem_cbo()
@@ -2226,8 +2173,6 @@ hist_salariais_sem_salario()
 variaveis_dt_inical_maior_dt_rescisao()
 tipos_movpes_descricao_repetido()
 tipos_afast_descricao_repetido()
-hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
-hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
 hist_salariais_dt_alteracoes_maior_dt_rescisao()
 hist_cargos_dt_alteracoes_maior_dt_rescisao()
 tipos_afast_classif_invalida()
@@ -2244,11 +2189,9 @@ pessoas_cpf_invalido()
 pessoas_cnpj_invalido()
 pessoas_rg_repetido()
 cargos_descricao_repetido()
-historico_cargo_descricao_repetida()
 bases_calc_outras_empresas_vigencia_invalida()
 pessoas_email_invalido()
 pessoas_enderecos_sem_numero()
-ruas_sem_nome()
 funcionarios_sem_previdencia()
 mediasvant_sem_composicao()
 mediasvant_eve_composicao_invalida()
@@ -2269,4 +2212,5 @@ funcionarios_com_mais_de_uma_previdencia()
 afastamentos_dt_afastamento_menor_dt_admissao()
 areas_atuacao_nome_repetido()
 dependentes_sem_dt_fim()
-#cargos_sem_configuracao_ferias() - Em analise
+opcao_fgts_diferente_dt_admissao()
+funcionarios_conta_bancaria_sem_dados()

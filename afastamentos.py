@@ -1,11 +1,11 @@
 from src.funcoes import *
 from src.conexao import *
-from datetime import date, datetime, timedelta
+from datetime import timedelta
 from os import path
 
 #Busca afastamentos concomitantes
 def afastamentos():
-    concomiante = open(path.dirname(path.realpath(__file__)) + "\src\sql\\afastamentos_concomitantes.sql", "a")
+    concomitantes = open(path.dirname(path.realpath(__file__)) + "\src\sql\\afastamentos_concomitantes.sql", "a")
     
     lista_funcionario = consultar(
         """
@@ -60,13 +60,13 @@ def afastamentos():
 
                     u = "UPDATE bethadba.afastamentos SET dt_ultimo_dia = '{}' WHERE dt_afastamento = '{}' AND i_entidades = {} AND i_funcionarios = {};".format((dt_inicial - timedelta(days = 1)), dt_inicial_anterior, entidade, funcionario)
                     
-                    concomiante.writelines(u + "\n")
+                    concomitantes.writelines(u + "\n")
 
                 elif tabela_anterior == "ferias" and tabela == "afastamentos":
 
                     u = "UPDATE bethadba.afastamentos SET dt_afastamento = '{}' WHERE dt_afastamento = '{}' AND i_entidades = {} AND i_funcionarios = {};".format((dt_final_anterior + timedelta(days = 1)), dt_inicial, entidade, funcionario)
                     
-                    concomiante.writelines(u + "\n")
+                    concomitantes.writelines(u + "\n")
                           
                 else:
 
@@ -91,6 +91,7 @@ def afastamentos():
             
             print("Update manual: afastamentos ou ferias posteriores a rescisão!")
             print(funcionario)
+            print(entidade)
             print(dt_inicial)
             print(dt_final)
             print("===")

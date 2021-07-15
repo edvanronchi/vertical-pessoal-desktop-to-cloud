@@ -1,19 +1,19 @@
 from variaveis import *
-from src.funcao import *
+from src.funcoes import *
 from src.conexao import *
 from os import path
 
-desabilitarTriggers = "CALL bethadba.dbp_conn_gera(1, 2021, 300);\nCALL bethadba.pg_setoption('wait_for_commit','on');\nCALL bethadba.pg_habilitartriggers('off');\nset option fire_triggers = 'off';\n\n"
+desabilitar_triggers = "CALL bethadba.dbp_conn_gera(1, 2021, 300);\nCALL bethadba.pg_setoption('wait_for_commit','on');\nCALL bethadba.pg_habilitartriggers('off');\nset option fire_triggers = 'off';\n\n"
 
-recodificarGeral = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_geral.sql", "a")
-recodificarGeral.writelines(desabilitarTriggers)
+recodificar_geral = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_geral.sql", "a")
+recodificar_geral.writelines(desabilitar_triggers)
 
-def recodificarFuncionarios(idEntidadesAgrupadas):
+def recodificar_funcionarios(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_funcionarios.sql", "a")
     
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -29,30 +29,30 @@ def recodificarFuncionarios(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_funcionarios   
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_funcionarios'])
+    tabelas = tabela_coluna(['i_entidades', 'i_funcionarios'])
 
-    idMax = select("SELECT (MAX(i_funcionarios)+1) AS id FROM bethadba.funcionarios")[0][0]
+    id_max = consultar("SELECT (MAX(i_funcionarios)+1) AS id FROM bethadba.funcionarios")[0][0]
 
-    idCampoAdicional = select("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Matrícula do funcionário'")[0][0]
+    idCampoAdicional = consultar("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Matrícula do funcionário'")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue
 
-            valorCaracter = "{}-{}".format(idEntidade, identificador)
+            valorCaracter = "{}-{}".format(id_entidade, identificador)
 
             queryDadosAdicionais = ""
 
-            buscaDadosAdicionais = select(
+            buscaDadosAdicionais = consultar(
                 """
                     SELECT 
                         * 
@@ -62,13 +62,13 @@ def recodificarFuncionarios(idEntidadesAgrupadas):
                         i_caracteristicas = {} AND 
                         i_funcionarios = {} AND 
                         i_entidades = {};
-                """.format(idCampoAdicional, identificador, idEntidade)
+                """.format(idCampoAdicional, identificador, id_entidade)
             )
 
             if len(buscaDadosAdicionais) > 0:
-                queryDadosAdicionais = "UPDATE bethadba.funcionarios_prop_adic SET valor_caracter = {} WHERE i_caracteristicas = {} AND i_entidades = {} AND i_funcionarios = {};".format(valorCaracter, idCampoAdicional, idEntidade, identificador)
+                queryDadosAdicionais = "UPDATE bethadba.funcionarios_prop_adic SET valor_caracter = {} WHERE i_caracteristicas = {} AND i_entidades = {} AND i_funcionarios = {};".format(valorCaracter, idCampoAdicional, id_entidade, identificador)
             else:
-                queryDadosAdicionais = "INSERT INTO bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_caracter) VALUES ({}, {}, {}, {});".format(idCampoAdicional, idEntidade, identificador, valorCaracter)
+                queryDadosAdicionais = "INSERT INTO bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_caracter) VALUES ({}, {}, {}, {});".format(idCampoAdicional, id_entidade, identificador, valorCaracter)
                    
             recodificar.writelines(queryDadosAdicionais)
 
@@ -76,25 +76,25 @@ def recodificarFuncionarios(idEntidadesAgrupadas):
 
             for tabela in tabelas:
                 
-                u = "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificar.writelines("COMMIT;\n")
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
-    print("Código SQL gerado para tabela: funcionarios!")
+    print("Código SQL gerado para tabela: funcionarios")
 
-def recodificarCargos(idEntidadesAgrupadas):
+def recodificar_cargos(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_cargos.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
            SELECT 
                 list(i_entidades), 
@@ -110,46 +110,46 @@ def recodificarCargos(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_cargos   
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_cargos'])
+    tabelas = tabela_coluna(['i_entidades', 'i_cargos'])
 
-    idMax = select("SELECT (MAX(i_cargos)+1) AS id FROM bethadba.cargos")[0][0]
+    id_max = consultar("SELECT (MAX(i_cargos)+1) AS id FROM bethadba.cargos")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue      
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_cargos = {} WHERE i_cargos = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_cargos = {} WHERE i_cargos = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: cargos")
 
-def recodificarPeriodosTrab(idEntidadesAgrupadas):
+def recodificar_periodos_trab(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_periodos_trab.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -165,46 +165,46 @@ def recodificarPeriodosTrab(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_periodos_trab    
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_periodos_trab'])
+    tabelas = tabela_coluna(['i_entidades', 'i_periodos_trab'])
 
-    idMax = select("SELECT (MAX(i_periodos_trab)+1) AS id FROM bethadba.periodos_trab")[0][0]
+    id_max = consultar("SELECT (MAX(i_periodos_trab)+1) AS id FROM bethadba.periodos_trab")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue      
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_periodos_trab = {} WHERE i_periodos_trab = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_periodos_trab = {} WHERE i_periodos_trab = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: periodos_trab")
 
-def recodificarTurmas(idEntidadesAgrupadas):
+def recodificar_turmas(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_turmas.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -220,46 +220,46 @@ def recodificarTurmas(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_turmas      
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_turmas'])
+    tabelas = tabela_coluna(['i_entidades', 'i_turmas'])
 
-    idMax = select("SELECT (MAX(i_turmas)+1) AS id FROM bethadba.turmas")[0][0]
+    id_max = consultar("SELECT (MAX(i_turmas)+1) AS id FROM bethadba.turmas")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue      
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_turmas = {} WHERE i_turmas = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_turmas = {} WHERE i_turmas = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: turmas")
 
-def recodificarDespesas(idEntidadesAgrupadas):
+def recodificar_despesas(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_despesas.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -277,47 +277,47 @@ def recodificarDespesas(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_despesas  
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_despesas', 'ano_exerc'])
+    tabelas = tabela_coluna(['i_entidades', 'i_despesas', 'ano_exerc'])
 
-    idMax = select("SELECT (MAX(i_despesas)+1) AS id FROM bethadba.despesas")[0][0]
+    id_max = consultar("SELECT (MAX(i_despesas)+1) AS id FROM bethadba.despesas")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
         anoExercicio = i[2]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue      
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_despesas = {} WHERE i_despesas = {} AND i_entidades = {} AND ano_exerc = {};\n".format(tabela, idMax, identificador, idEntidade, anoExercicio)
+                u = "UPDATE bethadba.{} SET i_despesas = {} WHERE i_despesas = {} AND i_entidades = {} AND ano_exerc = {};\n".format(tabela, id_max, identificador, id_entidade, anoExercicio)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: despesas")
 
-def recodificarNiveis(idEntidadesAgrupadas):
+def recodificar_niveis(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_niveis.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -333,47 +333,47 @@ def recodificarNiveis(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_niveis      
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_niveis'])
+    tabelas = tabela_coluna(['i_entidades', 'i_niveis'])
 
-    idMax = select("SELECT (MAX(i_niveis)+1) AS id FROM bethadba.niveis")[0][0]
+    id_max = consultar("SELECT (MAX(i_niveis)+1) AS id FROM bethadba.niveis")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue      
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_niveis = {} WHERE i_niveis = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_niveis = {} WHERE i_niveis = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: niveis")
 
 
-def recodificarHorariosPonto(idEntidadesAgrupadas):
+def recodificar_horarios_ponto(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_horarios_ponto.sql", "a")
  
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -389,46 +389,46 @@ def recodificarHorariosPonto(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_horarios_ponto      
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_horarios_ponto'])
+    tabelas = tabela_coluna(['i_entidades', 'i_horarios_ponto'])
 
-    idMax = select("SELECT (MAX(i_horarios_ponto)+1) AS id FROM bethadba.horarios_ponto")[0][0]
+    id_max = consultar("SELECT (MAX(i_horarios_ponto)+1) AS id FROM bethadba.horarios_ponto")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue  
            
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_horarios_ponto = {} WHERE i_horarios_ponto = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_horarios_ponto = {} WHERE i_horarios_ponto = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: horarios_ponto")
 
-def recodificarGrupos(idEntidadesAgrupadas):
+def recodificar_grupos(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_grupos.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -444,46 +444,46 @@ def recodificarGrupos(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_grupos      
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_grupos'])
+    tabelas = tabela_coluna(['i_entidades', 'i_grupos'])
 
-    idMax = select("SELECT (MAX(i_grupos)+1) AS id FROM bethadba.grupos")[0][0]
+    id_max = consultar("SELECT (MAX(i_grupos)+1) AS id FROM bethadba.grupos")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue    
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_grupos = {} WHERE i_grupos = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_grupos = {} WHERE i_grupos = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: grupos")
 
-def recodificarLocaisTrab(idEntidadesAgrupadas):
+def recodificar_locais_trab(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_locais_trab.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -499,46 +499,46 @@ def recodificarLocaisTrab(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_locais_trab      
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_locais_trab'])
+    tabelas = tabela_coluna(['i_entidades', 'i_locais_trab'])
 
-    idMax = select("SELECT (MAX(i_locais_trab)+1) AS id FROM bethadba.locais_trab")[0][0]
+    id_max = consultar("SELECT (MAX(i_locais_trab)+1) AS id FROM bethadba.locais_trab")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue    
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_locais_trab = {} WHERE i_locais_trab = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_locais_trab = {} WHERE i_locais_trab = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: locais_trab")
 
-def recodificarRelogios(idEntidadesAgrupadas):
+def recodificar_relogios(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_relogios.sql", "a")
 
-    recodificar.writelines(desabilitarTriggers)
+    recodificar.writelines(desabilitar_triggers)
 
-    resultado = select(
+    resultado = consultar(
         """
             SELECT 
                 list(i_entidades), 
@@ -554,48 +554,48 @@ def recodificarRelogios(idEntidadesAgrupadas):
                 quantidade > 1 
             ORDER BY 
                 i_relogios       
-        """.format(idEntidadesAgrupadas)
+        """.format(lista_entidade)
     )
 
-    tabelas = tabelaColuna(['i_entidades', 'i_relogios'])
+    tabelas = tabela_coluna(['i_entidades', 'i_relogios'])
 
-    idMax = select("SELECT (MAX(i_relogios)+1) AS id FROM bethadba.relogios")[0][0]
+    id_max = consultar("SELECT (MAX(i_relogios)+1) AS id FROM bethadba.relogios")[0][0]
 
     for i in resultado:
-        idsEntidade = i[0].split(',')
+        ids_entidade = i[0].split(',')
 
         identificador = i[1]
 
-        for idEntidade in idsEntidade:
+        for id_entidade in ids_entidade:
 
-            if idEntidade == idEntidadePrincipal:
+            if id_entidade == entidade:
                 continue    
             
             querys = ""
 
             for tabela in tabelas:
           
-                u = "UPDATE bethadba.{} SET i_relogios = {} WHERE i_relogios = {} AND i_entidades = {};\n".format(tabela, idMax, identificador, idEntidade)
+                u = "UPDATE bethadba.{} SET i_relogios = {} WHERE i_relogios = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
 
                 querys += u
             
             querys += "\n"
 
             recodificar.writelines(querys)
-            recodificarGeral.writelines(querys)
+            recodificar_geral.writelines(querys)
 
-            idMax += 1
+            id_max += 1
 
     print("Código SQL gerado para tabela: relogios")
 
 #--------------------Executar-------------------------#
-recodificarFuncionarios(idEntidadesAgrupadas)
-#recodificarCargos(idEntidadesAgrupadas)
-#recodificarPeriodosTrab(idEntidadesAgrupadas)
-#recodificarTurmas(idEntidadesAgrupadas)
-#recodificarDespesas(idEntidadesAgrupadas)
-#recodificarNiveis(idEntidadesAgrupadas)
-#recodificarHorariosPonto(idEntidadesAgrupadas)
-#recodificarGrupos(idEntidadesAgrupadas)
-#recodificarLocaisTrab(idEntidadesAgrupadas)
-#recodificarRelogios(idEntidadesAgrupadas)
+recodificar_funcionarios(lista_entidade)
+recodificar_cargos(lista_entidade)
+recodificar_periodos_trab(lista_entidade)
+recodificar_turmas(lista_entidade)
+recodificar_despesas(lista_entidade)
+recodificar_niveis(lista_entidade)
+#recodificar_horarios_ponto(lista_entidade)
+recodificar_grupos(lista_entidade)
+recodificar_locais_trab(lista_entidade)
+recodificar_relogios(lista_entidade)

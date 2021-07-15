@@ -1,4 +1,3 @@
-from validate_email import validate_email 
 from variaveis import *
 from src.funcoes import *
 from src.conexao import *
@@ -57,29 +56,28 @@ def pessoa_data_vencimento_cnh_menor_data_emissao():
     return quantidade
 
 #Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
-def pessoaDataVencimentoCNHMaiorNascimento():
+def pessoas_dt_primeira_cnh_maior_dt_nascimento():
 
     resultado = consultar(
         """
-            SELECT i_pessoas,
-                    (SELECT a.dt_nascimento
-                FROM   
-                    bethadba.pessoas_fisicas AS a
-                WHERE  
-                    a.i_pessoas = hpf.i_pessoas) nascimento,
-                dt_emissao_cnh,
-                NULL AS novaDataCNH
+            SELECT 
+                pf.i_pessoas,
+                pf.dt_nascimento,
+                pfc.dt_emissao_cnh,
+                pfc.dt_primeira_cnh
             FROM   
-                bethadba.pessoas_fis_compl hpf
+                bethadba.pessoas_fisicas pf 
+            INNER JOIN
+                bethadba.pessoas_fis_compl pfc ON (pf.i_pessoas = pfc.i_pessoas)
             WHERE  
-                nascimento >= dt_primeira_cnh; 
+                pf.dt_nascimento >= pfc.dt_primeira_cnh or pf.dt_nascimento >= pfc.dt_emissao_cnh;
         """
     )
 
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Pessoas com data de nascimento maior que emissão da 1ª habilitação: '+ str(quantidade))
 
@@ -106,14 +104,14 @@ def caracteristicas_nome_repetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
-    print('Campos adicionais com descrição repetido: '+ str(quantidade))
+    print('Campos adicionais com descrição repetida: '+ str(quantidade))
 
     return quantidade
 
 #Verifica se o dependente está cadastrado como 10 - OUTROS
-def dependentesOutros():
+def dependentes_grau_outros():
 
     resultado = consultar(
         """
@@ -130,14 +128,14 @@ def dependentesOutros():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Dependentes cadastrados como OUTROS: '+ str(quantidade))
 
     return quantidade
 
 #Pessoas com data de nascimento nulo
-def pessoaDataNascimentoNulo():
+def pessoas_sem_dt_nascimento():
 
     resultado = consultar(
         """
@@ -157,14 +155,14 @@ def pessoaDataNascimentoNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Pessoas com data de nascimento nulo: '+ str(quantidade))
 
     return quantidade
 
 #Pessoas com data de nascimento maior que data de dependencia
-def pessoaDataNascimentoMaiorDataDependecia():
+def pessoas_cnh_dt_vencimento_menor_dt_emissao():
 
     resultado = consultar(
         """
@@ -184,14 +182,14 @@ def pessoaDataNascimentoMaiorDataDependecia():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Pessoas com data de nascimento maior do que data de dependencia: '+ str(quantidade))
 
     return quantidade
 
 #Pessoas com data de nascimento maior que data de nascimento do responsavel
-def pessoaDataNascimentoMaiorDataNascimentoResponsavel():
+def pessoas_dt_primeira_cnh_maior_dt_nascimento_responsavel():
 
     resultado = consultar(
         """
@@ -221,14 +219,14 @@ def pessoaDataNascimentoMaiorDataNascimentoResponsavel():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Pessoas com data de nascimento maior do que data de nascimento do responsavel: '+ str(quantidade))
 
     return quantidade
 
 #Verifica os CPF's nulos
-def cpfNulo():
+def pessoas_sem_cpf():
 
     resultado = consultar(
         """
@@ -247,7 +245,7 @@ def cpfNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('CPF nulo(s): '+ str(quantidade))
 
@@ -255,7 +253,7 @@ def cpfNulo():
 
 #Verifica os CPF's repetidos
 #As Pessoas (0,0) possuem o mesmo CPF!
-def cpfRepetido():
+def pessoas_cpf_repetido():
 
     resultado = consultar(
         """
@@ -275,7 +273,7 @@ def cpfRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('CPF repetido(s): '+ str(quantidade))
 
@@ -283,7 +281,7 @@ def cpfRepetido():
 
 #Verifica os PIS's repetidos
 #As Pessoas (0,0) possuem o mesmo número do PIS!
-def pisRepetido():
+def pessoas_pis_repetido():
 
     resultado = consultar(
         """
@@ -303,7 +301,7 @@ def pisRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('PIS repetido(s): '+ str(quantidade))
 
@@ -311,7 +309,7 @@ def pisRepetido():
 
 #Verifica se o PIS é valido
 #PIS inválido
-def pisInvalido():
+def pessoas_pis_invalido():
 
     resultado = consultar(
         """
@@ -334,14 +332,14 @@ def pisInvalido():
             quantidade += 1
 
     if quantidade == 0:
-        return 0
+        return
 
     print('PIS invalido(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica os PIS's repetidos
-def cnpjNulo():
+def pessoas_sem_cnpj():
 
     resultado = consultar(
         """
@@ -360,14 +358,14 @@ def cnpjNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('CNPJ nulo(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica a descrição dos logradouros que tem caracter especial no inicio da descrição
-def logradourosDescricaoCaracterEspecial():
+def ruas_nome_caracter_especial():
 
     resultado = consultar(
         """
@@ -383,14 +381,14 @@ def logradourosDescricaoCaracterEspecial():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Logradouros que tem caracter especial no inicio da descrição: '+ str(quantidade))
 
     return quantidade
 
 #Verifica os logradouros com descrição repetidos
-def logradourosDescricaoRepetido():
+def ruas_nome_repetido():
 
     resultado = consultar(
         """
@@ -412,14 +410,14 @@ def logradourosDescricaoRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Logradouros repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Renomeia os tipos bases repetidos
-def tiposBasesRepetido():
+def tipos_bases_repetido():
 
     resultado = consultar(
         """
@@ -439,15 +437,15 @@ def tiposBasesRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Tipos bases repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica os logradouros sem cidades
-def logradourosSemCidade():
 
+def ruas_sem_cidade():
     resultado = consultar(
         """
             SELECT 
@@ -463,14 +461,14 @@ def logradourosSemCidade():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Logradouros sem cidade(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica os atos com número nulos
-def atosNumeroNulo():
+def atos_sem_numero():
 
     resultado = consultar(
         """
@@ -486,14 +484,14 @@ def atosNumeroNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Atos com número nulo: '+ str(quantidade))
 
     return quantidade
 
 #Verifica os atos repetidos
-def atosRepetido():
+def atos_repetido():
 
     resultado = consultar(
         """
@@ -515,14 +513,14 @@ def atosRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Atos repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica os CBO's nulos nos cargos
-def cargoCboNulo():
+def cargos_sem_cbo():
 
     resultado = consultar(
         """
@@ -538,14 +536,14 @@ def cargoCboNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('CBO do cargo nulo(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica categoria eSocial nulo no vinculo empregaticio
-def eSocialNuloVinculoEmpregaticio():
+def vinculos_sem_esocial():
 
     resultado = consultar(
         """
@@ -564,14 +562,14 @@ def eSocialNuloVinculoEmpregaticio():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('eSocial nulo nos vinculos empregraticios: '+ str(quantidade))
 
     return quantidade
 
 #Renomeia os vinculos empregaticios repetidos
-def vinculoEmpregaticioRepetido():
+def vinculos_descricao_repetido():
 
     resultado = consultar(
         """
@@ -591,14 +589,14 @@ def vinculoEmpregaticioRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Vinculo(s) empregaticio(s) repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica categoria eSocial nulo no motivo de rescisão
-def eSocialNuloMotivoRescisao():
+def motivos_resc_sem_esocial():
 
     resultado = consultar(
         """
@@ -616,14 +614,14 @@ def eSocialNuloMotivoRescisao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('eSocial nulo no motivo de rescisão: '+ str(quantidade))
 
     return quantidade
 
 #Verifica as folha que não foram fechadas confome competencia passada por parametro
-def fechamentoFolha(competencia):
+def folha_fechamento(competencia):
 
     resultado = consultar(
         """
@@ -634,7 +632,7 @@ def fechamentoFolha(competencia):
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Folhas que não foram fechadas até a competencia ' + str(competencia) + ': '+ str(quantidade))
 
@@ -642,7 +640,7 @@ def fechamentoFolha(competencia):
 
 #Verifica as folhas de ferias sem data de pagamento
 #A data de pagamento é obrigatória
-def folhaFeriasDataPagamentoNulo():
+def folhas_ferias_sem_dt_pagamento():
 
     resultado = consultar(
         """
@@ -661,14 +659,14 @@ def folhaFeriasDataPagamentoNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Folhas de ferias sem data de pagamento: '+ str(quantidade))
 
     return quantidade
 
 #Verifica categoria eSocial nulo no motivo de aposentadoria
-def eSocialNuloMotivoAposentadoria():
+def motivos_apos_sem_esocial():
 
     resultado = consultar(
         """
@@ -686,7 +684,7 @@ def eSocialNuloMotivoAposentadoria():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('eSocial nulo no motivo de aposentadoria: '+ str(quantidade))
 
@@ -694,7 +692,7 @@ def eSocialNuloMotivoAposentadoria():
 
 #Verifica historicos salariais com salario zerado ou nulo
 
-def historicoSalarialZerado():
+def hist_salariais_sem_salario():
     resultado = consultar(
         """
             SELECT * FROM bethadba.hist_salariais WHERE salario IN (0, NULL)
@@ -704,7 +702,7 @@ def historicoSalarialZerado():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Historico salarial com salario zerado: '+ str(quantidade))
 
@@ -712,7 +710,7 @@ def historicoSalarialZerado():
 
 #Verifica data final maior que data de demissão
 
-def dataFinalLancamentoMaiorDataRescisao():
+def variaveis_dt_inical_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT 
@@ -738,14 +736,14 @@ def dataFinalLancamentoMaiorDataRescisao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Variaveis com data final maior que data de rescisão: '+ str(quantidade))
 
     return quantidade
 
 #Busca as movimetação de pessoal repetidos
-def movimentacaoPessoalRepetido():
+def tipos_movpes_descricao_repetido():
 
     resultado = consultar(
         """
@@ -765,14 +763,14 @@ def movimentacaoPessoalRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Movimetação de pessoal repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Busca os tipos de afastamentos repetidos
-def tipoAfastamentoRepetido():
+def tipos_afast_descricao_repetido():
 
     resultado = consultar(
         """
@@ -792,14 +790,14 @@ def tipoAfastamentoRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Movimetação de pessoal repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Busca as alterações de historicos dos funcionarios maior que a data de rescisão
-def alteracaoFuncionarioMaiorDataRescisao():
+def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
 
     resultado = consultar(
         """
@@ -823,14 +821,14 @@ def alteracaoFuncionarioMaiorDataRescisao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Data alteração de historico do funcionario maior que data de rescisão: '+ str(quantidade))
 
     return quantidade
 
 #Busca as alterações de salario dos funcionarios maior que a data de rescisão
-def alteracaoSalarialMaiorDataRescisao():
+def hist_salariais_dt_alteracoes_maior_dt_rescisao():
 
     resultado = consultar(
         """
@@ -854,14 +852,14 @@ def alteracaoSalarialMaiorDataRescisao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Data alteração salarial do funcionario maior que data de rescisão: '+ str(quantidade))
 
     return quantidade
 
 #Busca as alterações de cargo dos funcionarios maior que a data de rescisão
-def alteracaoCargoMaiorDataRescisao():
+def hist_cargos_dt_alteracoes_maior_dt_rescisao():
 
     resultado = consultar(
         """
@@ -885,14 +883,14 @@ def alteracaoCargoMaiorDataRescisao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Data alteração de cargo do funcionario maior que data de rescisão: '+ str(quantidade))
 
     return quantidade
 
 #Busca as classificações que estão com código errado no tipo de afastamento
-def classificacaoErradaTipoAfastamento():
+def tipos_afast_classif_invalida():
 
     resultado = consultar(
         """
@@ -908,14 +906,14 @@ def classificacaoErradaTipoAfastamento():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Classificações que estão com código errado no tipo de afastamento: '+ str(quantidade))
 
     return quantidade
 
 #Busca os tipos de atos repetidos
-def tipoAtoRepetido():
+def tipos_atos_nome_repetido():
 
     resultado = consultar(
         """
@@ -935,14 +933,14 @@ def tipoAtoRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Tipo de ato repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Busca as descrições repetidas no horario ponto
-def descricaoHorarioPontoRepetido():
+def horarios_ponto_descricao_repetido():
 
     resultado = consultar(
         """
@@ -963,14 +961,14 @@ def descricaoHorarioPontoRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Descricao do horario ponto repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Busca as descrições repetidas na turma
-def descricaoTurmaRepetido():
+def turmas_descricao_repetido():
 
     resultado = consultar(
         """
@@ -991,14 +989,14 @@ def descricaoTurmaRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Descricao da turma repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Buscar niveis de organogramas com separadores nulos
-def nivelOrganogramaSeparadorNulo():
+def niveis_organ_separador_invalido():
 
     resultado = consultar(
         """
@@ -1014,14 +1012,14 @@ def nivelOrganogramaSeparadorNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Separadores nulos nos niveis de organogramas: '+ str(quantidade))
 
     return quantidade
 
 #Verifica a natureza de texto juridico se é nulo nos atos
-def atoNaturezaTextoJuridicoNulo():
+def atos_sem_natureza_texto_juridico():
 
     resultado = consultar(
         """
@@ -1037,14 +1035,14 @@ def atoNaturezaTextoJuridicoNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Natureza texto juridico do ato nulo: '+ str(quantidade))
 
     return quantidade
 
 #Verifica se a data de fonte de divulgação é menor que a data de publicacao do ato
-def atoFonteDivulgacaoMenorPublicacao():
+def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
 
     resultado = consultar(
         """
@@ -1064,14 +1062,14 @@ def atoFonteDivulgacaoMenorPublicacao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Data de fonte de divulgação é menor que a data de publicacao do ato: '+ str(quantidade))
 
     return quantidade
 
 #Ter ao menos um tipo de afastamento na configuração do cancelamento de férias
-def tipoAfastamentoConfiguracaoCancelamentoFerias():
+def canc_ferias_sem_tipos_afast():
 
     resultado = consultar(
         """
@@ -1087,14 +1085,14 @@ def tipoAfastamentoConfiguracaoCancelamentoFerias():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Tipo de afastamento na configuração do cancelamento de férias vazio: '+ str(quantidade))
 
     return quantidade
 
 #Verifica descricao de cofiguração de organograma se é maior que 30 caracteres
-def descricaoConfigOrganogramaMaior30():
+def config_organograma_descricao_invalida():
 
     resultado = consultar(
         """
@@ -1112,14 +1110,14 @@ def descricaoConfigOrganogramaMaior30():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Descricao de cofiguração de organograma maior que 30 caracteres: '+ str(quantidade))
 
     return quantidade
 
 #Verifica descricao de cofiguração de organograma repetido
-def descricaoConfigOrganogramaRepetido():
+def config_organ_descricao_repetido():
 
     resultado = consultar(
         """
@@ -1139,14 +1137,14 @@ def descricaoConfigOrganogramaRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Descricao de cofiguração de organograma repetido(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica se o CPF é invalido
-def cpfInvalido():
+def pessoas_cpf_invalido():
 
     resultado = consultar(
         """
@@ -1169,14 +1167,14 @@ def cpfInvalido():
             quantidade += 1
 
     if quantidade == 0:
-        return 0
+        return
 
     print('CPF invalido(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica se o CNPJ é invalido
-def cnpjInvalido():
+def pessoas_cnpj_invalido():
 
     resultado = consultar(
         """
@@ -1197,14 +1195,14 @@ def cnpjInvalido():
             quantidade += 1
 
     if quantidade == 0:
-        return 0
+        return
 
     print('CNPJ invalido(s): '+ str(quantidade))
 
     return quantidade
 
 #Verifica os RG's repetidos
-def RgRepetido():
+def pessoas_rg_repetido():
 
     resultado = consultar(
         """
@@ -1224,7 +1222,7 @@ def RgRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('RG repetido(s): '+ str(quantidade))
 
@@ -1232,7 +1230,7 @@ def RgRepetido():
 
 #Verifica os cargos com descricao repetidos
 #Já existe um cargo com a descrição informada
-def cargoDescricaoRepetido():
+def cargos_descricao_repetido():
 
     resultado = consultar(
         """
@@ -1257,7 +1255,7 @@ def cargoDescricaoRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Cargo(s) repetido(s): '+ str(quantidade))
 
@@ -1265,7 +1263,7 @@ def cargoDescricaoRepetido():
 
 #Verifica o termino de vigencia maior que 2099
 #Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
-def terminoVigenciaMaior2099():
+def bases_calc_outras_empresas_vigencia_invalida():
 
     resultado = consultar(
         """
@@ -1281,15 +1279,15 @@ def terminoVigenciaMaior2099():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Vigencia maior que 2099 em bases de calculos de outras empresas: '+ str(quantidade))
 
     return quantidade
 
 #Verifica os emails invalidos
-def emailInvalido():
-    
+def pessoas_email_invalido():
+
     resultado = consultar(
         """
             SELECT 
@@ -1305,21 +1303,21 @@ def emailInvalido():
     quantidade = 0
 
     for i in resultado:
-        idPessoa = i[0]
+        id_pessoa = i[0]
         email = i[1]
 
-        if not validate_email(email) or len(email) < 5:
+        if not email_validar(email):
             quantidade += 1
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Email invalido: '+ str(quantidade))
 
     return quantidade
 
 #Verifica o número de endereço se está vazio
-def numeroEnderecoVazio():
+def pessoas_enderecos_sem_numero():
 
     resultado = consultar(
         """
@@ -1335,14 +1333,14 @@ def numeroEnderecoVazio():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Número de endereço vazio: '+ str(quantidade))
 
     return quantidade
 
 #Verifica o nome de rua se está vazio
-def nomeRuaVazio():
+def ruas_sem_nome():
 
     resultado = consultar(
         """
@@ -1359,7 +1357,7 @@ def nomeRuaVazio():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Nome da rua vazio: '+ str(quantidade))
 
@@ -1395,7 +1393,7 @@ def funcionarios_sem_previdencia():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Funcionario sem previdencia: '+ str(quantidade))
 
@@ -1403,7 +1401,7 @@ def funcionarios_sem_previdencia():
 
 #Verifica os eventos de média/vantagem que não tem eventos vinculados
 #Os eventos de composição da média são obrigatórios
-def eventoMediaVantagemSemComposicao():
+def mediasvant_sem_composicao():
 
     resultado = consultar(
         """
@@ -1422,7 +1420,7 @@ def eventoMediaVantagemSemComposicao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Eventos de média/vantagem compondo outros eventos: '+ str(quantidade))
 
@@ -1430,7 +1428,7 @@ def eventoMediaVantagemSemComposicao():
 
 #Verifica os eventos de média/vantagem se estão compondo outros eventos de média/vantagem
 #Eventos de composição não pode ser eventos de média/vantagem
-def eventoMediaVantagemComposicao():
+def mediasvant_eve_composicao_invalida():
 
     resultado = consultar(
         """
@@ -1447,14 +1445,14 @@ def eventoMediaVantagemComposicao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Eventos de média/vantagem sem composição de eventos: '+ str(quantidade))
 
     return quantidade
 
 #Verifica a data de admissão da matrícula se é posterior a data de início da matrícula nesta lotação física
-def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
+def locais_mov_dt_inicial_menor_dt_admissao():
 
     resultado = consultar(
         """
@@ -1477,7 +1475,7 @@ def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Data admissão matricula maior que data inicial de lotação fisica: '+ str(quantidade))
 
@@ -1485,7 +1483,7 @@ def dataAdmissaoMatriculaMaiorDataLotacaoFisica():
 
 #Verifica a descrição do motivo de alteração do ponto se contem mais que 30 caracteres
 #A descrição não pode conter mais de 30 caracteres
-def descricaoMotivoAlteracaoPontoMaior30():
+def motivos_altponto_descricao_invalida():
 
     resultado = consultar(
         """
@@ -1502,14 +1500,14 @@ def descricaoMotivoAlteracaoPontoMaior30():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Descricao de motivos de alteração do ponto maior que 30 caracteres: '+ str(quantidade))
 
     return quantidade
 
 #Verifica o motivo nos afastamentos se contem no máximo 150 caracteres
-def observacaoAfastamentoMaior150():
+def afastamentos_observacao_invalida():
 
     resultado = consultar(
         """
@@ -1528,15 +1526,15 @@ def observacaoAfastamentoMaior150():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Motivos nos afastamentos maior que 150 caracteres: '+ str(quantidade))
 
     return quantidade
 
-#Verifica a data inicial no afastamento se é maior que a data final 
+#Verifica a data inicial no afastamento de ferias se é maior que a data final 
 #A quantidade de dias não pode ser menor que 0
-def dataInicialAfastamentoMaiorDataFinal():
+def ferias_dt_gozo_ini_maior_dt_gozo_fin():
 
     resultado = consultar(
         """
@@ -1556,15 +1554,15 @@ def dataInicialAfastamentoMaiorDataFinal():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
-    print('Data inicial no afastamento é maior que a data final: '+ str(quantidade))
+    print('Data inicial no afastamento de férias é maior que a data final: '+ str(quantidade))
 
     return quantidade
 
 #Busca as rescisões de aposentadoria com motivo nulo
 #O motivo de rescisão é obrigatório
-def motivoAposentadoriaNulo():
+def rescisoes_sem_motivos_apos():
 
     resultado = consultar(
         """
@@ -1583,14 +1581,14 @@ def motivoAposentadoriaNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Rescisões de aposentadoria com motivo nulo: '+ str(quantidade))
 
     return quantidade
 
 #Verifica os grupos funcionais repetidos
-def gruposFuncionaisRepetido():
+def grupos_nome_repetido():
 
     resultado = consultar(
         """
@@ -1613,7 +1611,7 @@ def gruposFuncionaisRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Grupos funcionais repetido(s): '+ str(quantidade))
 
@@ -1622,7 +1620,7 @@ def gruposFuncionaisRepetido():
 #Verifica a data inicial de beneficio do dependente se é melhor que a do titular
 #A data inicial do benefício não pode ser menor que a data de admissão
 #Plano de saude
-def dataInicialDependenteMaiorTitular():
+def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
 
     resultado = consultar(
         """
@@ -1644,7 +1642,7 @@ def dataInicialDependenteMaiorTitular():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('A data inicial do dependente maior do que do titular (Plano de Saude): '+ str(quantidade))
 
@@ -1652,7 +1650,7 @@ def dataInicialDependenteMaiorTitular():
 
 #Verifica se o número de telefone na lotação fisica é maior que 11 caracteres
 #O telefone pode conter no máximo 11 caracteres
-def telefoneLotacaoFisicaMaior11():
+def locais_trab_fone_invalido():
 
     resultado = consultar(
         """
@@ -1671,7 +1669,7 @@ def telefoneLotacaoFisicaMaior11():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Número de telefone na lotação fisica é maior que 11 caracteres: '+ str(quantidade))
 
@@ -1679,7 +1677,7 @@ def telefoneLotacaoFisicaMaior11():
 
 #Busca os atos com data inicial nulo
 #A data de criação é obrigatória
-def dataCriacaoAtoNulo():
+def atos_sem_dt_inicial():
 
     resultado = consultar(
         """
@@ -1696,14 +1694,14 @@ def dataCriacaoAtoNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Data de criação do ato é obrigatorio: '+ str(quantidade))
 
     return quantidade
 
 #Busca as descrições repetidas dos niveis salariais
-def descricaoNivelSalarialRepetido():
+def niveis_descricao_repetido():
 
     resultado = consultar(
         """
@@ -1724,7 +1722,7 @@ def descricaoNivelSalarialRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Descricao de niveis salariais repetido(s): '+ str(quantidade))
 
@@ -1732,7 +1730,7 @@ def descricaoNivelSalarialRepetido():
 
 #Busca os cartões pontos que estão diferente de sua matricula ou repetidos
 #Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
-def cartaoPontoRepetido():
+def funcionarios_cartao_ponto_repetido():
 
     matriculas = consultar(
         """
@@ -1754,7 +1752,7 @@ def cartaoPontoRepetido():
     )
 
     if len(matriculas) > 0:
-        return 0
+        return
 
     resultado = consultar(
         """
@@ -1778,7 +1776,7 @@ def cartaoPontoRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Cartão ponto repetido(s): '+ str(quantidade))
 
@@ -1786,7 +1784,7 @@ def cartaoPontoRepetido():
 
 #Busca os funcionarios com data de nomeação maior que a data de posse
 #O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
-def dataNomeacaoMaiorDataPosse():
+def cargos_dt_nomeacao_maior_dt_posse():
 
     resultado = consultar(
         """
@@ -1802,7 +1800,7 @@ def dataNomeacaoMaiorDataPosse():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Data de nomeação maior que data de posse: '+ str(quantidade))
 
@@ -1810,7 +1808,7 @@ def dataNomeacaoMaiorDataPosse():
 
 #Busca as contas bancarias dos funcionarios que estão invalidas
 #Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
-def contaBancariaFuncionarioInvalida():
+def funcionarios_conta_bancaria_invalida():
 
     resultado = consultar(
         """
@@ -1837,7 +1835,7 @@ def contaBancariaFuncionarioInvalida():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Historicos de funcionarios que estão com conta bancaria errada: '+ str(quantidade))
 
@@ -1845,7 +1843,7 @@ def contaBancariaFuncionarioInvalida():
 
 #Busca os historicos de funcionarios com mais do que uma previdencia informada
 #Apenas uma previdência pode ser informada
-def previdenciaMaiorQueUm():
+def funcionarios_com_mais_de_uma_previdencia():
 
     resultado = consultar(
         """
@@ -1864,7 +1862,7 @@ def previdenciaMaiorQueUm():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Historicos de funcionarios com mais do que uma previdencia informada: '+ str(quantidade))
 
@@ -1872,7 +1870,7 @@ def previdenciaMaiorQueUm():
 
 #Busca os afastamentos com data inicial menor que data de admissão
 #A data inicial não poderá ser menor que a data de admissão
-def dataInicialAfastamentoMenorDataAdmissao():
+def afastamentos_dt_afastamento_menor_dt_admissao():
 
     resultado = consultar(
         """
@@ -1892,7 +1890,7 @@ def dataInicialAfastamentoMenorDataAdmissao():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Afastamentos com data inicial menor que data de admissão: '+ str(quantidade))
 
@@ -1900,7 +1898,7 @@ def dataInicialAfastamentoMenorDataAdmissao():
 
 #Busca as areas de atuação com descrição repetido
 #Já existe uma área de atuação com a descrição informada
-def areasAtuacaoDescricaoRepetido():
+def areas_atuacao_nome_repetido():
 
     resultado = consultar(
         """
@@ -1920,7 +1918,7 @@ def areasAtuacaoDescricaoRepetido():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Áreas de atuação com descrição repetido: '+ str(quantidade))
 
@@ -1928,7 +1926,7 @@ def areasAtuacaoDescricaoRepetido():
 
 #Busca os dependentes sem motivo de termino
 #O motivo de término é obrigatório
-def dependenteMotivoTerminoNulo():
+def dependentes_sem_dt_fim():
 
     resultado = consultar(
         """
@@ -1947,7 +1945,7 @@ def dependenteMotivoTerminoNulo():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Dependente sem motivo de termino: '+ str(quantidade))
 
@@ -1972,82 +1970,138 @@ def cargos_sem_configuracao_ferias():
     quantidade = len(resultado)
 
     if quantidade == 0:
-        return 0
+        return
 
     print('Cargos sem configuração de ferias: '+ str(quantidade))
 
     return quantidade
 
+#Busca a data da opção do FGTS diferente que a data de admissão
+#Quando a data de admissão for posterior a 04/10/1988, a data da opção do FGTS deve ser igual a data de admissão
+def opcao_fgts_diferente_dt_admissao():
+
+    resultado = consultar(
+        """
+            SELECT 
+                i_funcionarios, 
+                i_entidades, 
+                dt_admissao, 
+                dt_opcao_fgts 
+            FROM 
+                bethadba.funcionarios 
+            WHERE
+                dt_admissao > '1988-10-04' AND 
+                dt_admissao != dt_opcao_fgts
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Data da opção do FGTS diferente que a data de admissão: '+ str(quantidade))
+
+    return quantidade
+
+#Busca os funcionarios com recebimento credito em conta sem dados da conta bancaria
+#Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
+def funcionarios_conta_bancaria_sem_dados():
+
+    resultado = consultar(
+        """
+            SELECT 
+                i_funcionarios,
+                i_entidades
+            FROM 
+                bethadba.hist_funcionarios hf 
+            WHERE 
+                forma_pagto = 'R' AND 
+                i_pessoas_contas IS NULL
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Funcionarios com recebimento credito em conta sem dados da conta bancaria: '+ str(quantidade))
+
+    return quantidade
+
 #-----------------------Executar---------------------#
+#pessoas_sem_cpf() - Em analise
+#hist_funcionarios_dt_alteracoes_maior_dt_rescisao() - Em analise
+#cargos_sem_configuracao_ferias() - Em analise
+pessoa_data_nascimento_maior_data_admissao()
 pessoa_data_vencimento_cnh_menor_data_emissao()
-pessoa_data_vencimento_cnh_menor_data_emissao()
-pessoaDataVencimentoCNHMaiorNascimento()
 caracteristicas_nome_repetido()
-dependentesOutros()
-pessoaDataNascimentoNulo()
-pessoaDataNascimentoMaiorDataDependecia()
-pessoaDataNascimentoMaiorDataNascimentoResponsavel()
-#cpfNulo()
-cpfRepetido()
-pisRepetido()
-pisInvalido()
-cnpjNulo()
-logradourosDescricaoCaracterEspecial()
-logradourosDescricaoRepetido()
-tiposBasesRepetido()
-logradourosSemCidade()
-atosNumeroNulo()
-atosRepetido()
-cargoCboNulo()
-eSocialNuloVinculoEmpregaticio()
-vinculoEmpregaticioRepetido()
-eSocialNuloMotivoRescisao()
-fechamentoFolha(folha_fechamento_competencia)
-folhaFeriasDataPagamentoNulo()
-eSocialNuloMotivoAposentadoria()
-historicoSalarialZerado()
-dataFinalLancamentoMaiorDataRescisao()
-movimentacaoPessoalRepetido()
-tipoAfastamentoRepetido()
-alteracaoFuncionarioMaiorDataRescisao()
-alteracaoSalarialMaiorDataRescisao()
-alteracaoCargoMaiorDataRescisao()
-classificacaoErradaTipoAfastamento()
-tipoAtoRepetido()
-descricaoHorarioPontoRepetido()
-descricaoTurmaRepetido()
-nivelOrganogramaSeparadorNulo()
-atoNaturezaTextoJuridicoNulo()
-atoFonteDivulgacaoMenorPublicacao()
-tipoAfastamentoConfiguracaoCancelamentoFerias()
-descricaoConfigOrganogramaMaior30()
-descricaoConfigOrganogramaRepetido()
-cpfInvalido()
-cnpjInvalido()
-RgRepetido()
-cargoDescricaoRepetido()
-terminoVigenciaMaior2099()
-emailInvalido()
-numeroEnderecoVazio()
-nomeRuaVazio()
+dependentes_grau_outros()
+pessoas_sem_dt_nascimento()
+pessoas_cnh_dt_vencimento_menor_dt_emissao()
+pessoas_dt_primeira_cnh_maior_dt_nascimento()
+pessoas_dt_primeira_cnh_maior_dt_nascimento_responsavel()
+pessoas_cpf_repetido()
+pessoas_pis_repetido()
+pessoas_pis_invalido()
+pessoas_sem_cnpj()
+ruas_nome_caracter_especial()
+ruas_sem_nome()
+ruas_sem_cidade()
+ruas_nome_repetido()
+tipos_bases_repetido()
+atos_sem_numero()
+atos_repetido()
+cargos_sem_cbo()
+vinculos_sem_esocial()
+vinculos_descricao_repetido()
+motivos_resc_sem_esocial()
+folha_fechamento(folha_fechamento_competencia)
+folhas_ferias_sem_dt_pagamento()
+motivos_apos_sem_esocial()
+hist_salariais_sem_salario()
+variaveis_dt_inical_maior_dt_rescisao()
+tipos_movpes_descricao_repetido()
+tipos_afast_descricao_repetido()
+hist_salariais_dt_alteracoes_maior_dt_rescisao()
+hist_cargos_dt_alteracoes_maior_dt_rescisao()
+tipos_afast_classif_invalida()
+tipos_atos_nome_repetido()
+horarios_ponto_descricao_repetido()
+turmas_descricao_repetido()
+niveis_organ_separador_invalido()
+atos_sem_natureza_texto_juridico()
+atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
+canc_ferias_sem_tipos_afast()
+config_organograma_descricao_invalida()
+config_organ_descricao_repetido()
+pessoas_cpf_invalido()
+pessoas_cnpj_invalido()
+pessoas_rg_repetido()
+cargos_descricao_repetido()
+bases_calc_outras_empresas_vigencia_invalida()
+pessoas_email_invalido()
+pessoas_enderecos_sem_numero()
 funcionarios_sem_previdencia()
-eventoMediaVantagemSemComposicao()
-eventoMediaVantagemComposicao()
-dataAdmissaoMatriculaMaiorDataLotacaoFisica()
-descricaoMotivoAlteracaoPontoMaior30()
-observacaoAfastamentoMaior150()
-dataInicialAfastamentoMaiorDataFinal()
-motivoAposentadoriaNulo()
-gruposFuncionaisRepetido()
-dataInicialDependenteMaiorTitular()
-telefoneLotacaoFisicaMaior11()
-dataCriacaoAtoNulo()
-descricaoNivelSalarialRepetido()
-cartaoPontoRepetido()
-dataNomeacaoMaiorDataPosse()
-contaBancariaFuncionarioInvalida()
-previdenciaMaiorQueUm()
-dataInicialAfastamentoMenorDataAdmissao()
-areasAtuacaoDescricaoRepetido()
-dependenteMotivoTerminoNulo()
-cargos_sem_configuracao_ferias()
+mediasvant_sem_composicao()
+mediasvant_eve_composicao_invalida()
+locais_mov_dt_inicial_menor_dt_admissao()
+motivos_altponto_descricao_invalida()
+afastamentos_observacao_invalida()
+ferias_dt_gozo_ini_maior_dt_gozo_fin()
+rescisoes_sem_motivos_apos()
+grupos_nome_repetido()
+func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
+locais_trab_fone_invalido()
+atos_sem_dt_inicial()
+niveis_descricao_repetido()
+funcionarios_cartao_ponto_repetido()
+cargos_dt_nomeacao_maior_dt_posse()
+funcionarios_conta_bancaria_invalida()
+funcionarios_com_mais_de_uma_previdencia()
+afastamentos_dt_afastamento_menor_dt_admissao()
+areas_atuacao_nome_repetido()
+dependentes_sem_dt_fim()
+opcao_fgts_diferente_dt_admissao()
+funcionarios_conta_bancaria_sem_dados()
