@@ -2030,6 +2030,100 @@ def funcionarios_conta_bancaria_sem_dados():
 
     return quantidade
 
+
+
+"""
+Configuração dirf repetida - Em analise
+
+select
+    chave_dsk1 = campoDirf,
+    nomeCampoDsk = 
+    case campo
+        when '0A-01' then '050101'
+        when '0A-03' then '050102'
+        when 'AA-01' then '05010201'
+        when 'AA-02-01' then '0501020201'
+        when 'AA-02-02' then '0501020202'
+        when 'AA-02-03' then '0501020203'
+        when 'AA-02-04' then '0501020204'
+        when '03-04' then '030401'
+        when '04-01' then '040101'   
+        when '04-01-01' then '040102'     
+        when '04-03' then '040301'
+        when '04-03-01' then '040302'
+        when '04-06' then '040601'        
+    else 
+        bethadba.dbf_retira_alfa_de_inteiros(campo) 
+    end ,
+    campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)
+        when '0301' then 'TOTAL_REND_INC_FERIAS'
+        when '0302' then 'CONTRIB_PREV_OFICIAL'
+        when '030301' then 'CONTRIB_PREV_PRIVADA'
+        when '030302' then 'CONTRIB_FAPI'
+        when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'
+        when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'
+        when '030401' then 'PENSAO_ALIMENTICIA'
+        when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'
+        when '0305' then 'IRRF'
+        when '040101' then 'PARC_ISENTA_APOSENT'
+        when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'
+        when '0402' then 'DIARIAS_AJUDAS_CUSTO'
+        when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'
+        when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'
+        when '0404' then 'LUCROS_DIVIDENDOS'
+        when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'
+        when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'
+        when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'
+        when '040701' then 'REND_ISENTOS_OUTROS'
+        when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'
+        when '050101' then 'TOTAL_REND_13_SALARIO'
+        when '050102' then 'IRRF_13_SALARIO'
+        when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'
+        when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'
+        when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'
+        when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'
+        when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'
+        when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'
+        when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'
+        when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'
+        when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'
+        when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'
+        when '0605' then 'RRA_IRRF'
+        when '0606' then 'RRA_RENDIMENTOS_ISENTOS'
+        when '0700' then 'INFORMACOES_COMPLEMENTARES'
+        when 'ABOPEC' then 'ABONO_PECUNIARIO' end,
+        eventos =  list(i_eventos)
+    from bethadba.comprends        
+    where campo not in ('05-01','0A-02')
+      and campoDirf is not null
+    group by campoDirf, nomeCampoDsk, chave_dsk1
+    
+    union all
+    
+    select chave_dsk1 = campoDirf,
+        nomeCampoDsk = 
+        case campo
+            when '03-01' then '0601'
+            when '03-02' then '0603'
+            when '03-05' then '0605'
+            when '03-04' then '0604'
+        else 
+            bethadba.dbf_retira_alfa_de_inteiros(campo) 
+        end ,
+        campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)        
+            when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'
+            when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'
+            when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'
+            when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'
+            when '0605' then 'RRA_IRRF'
+            when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end, 
+        eventos =  list(i_eventos)
+    from bethadba.comprends
+    where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05')
+      and campoDirf is not null
+    group by campoDirf, nomeCampoDsk, chave_dsk1
+"""
+
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 #hist_funcionarios_dt_alteracoes_maior_dt_rescisao() - Em analise
