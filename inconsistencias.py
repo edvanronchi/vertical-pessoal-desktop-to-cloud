@@ -2030,6 +2030,29 @@ def funcionarios_conta_bancaria_sem_dados():
 
     return quantidade
 
+#Funcionarios com marcacoes com origem invalida
+def funcionarios_maracoes_invalida():
+
+    resultado = consultar(
+        """
+            SELECT 
+                i_funcionarios
+            FROM 
+                bethadba.apuracoes_marc am 
+            WHERE 
+                origem_marc NOT IN ('O','I','A') 
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Funcionarios com marcacoes com origem invalida: '+ str(quantidade))
+
+    return quantidade
+
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 #hist_funcionarios_dt_alteracoes_maior_dt_rescisao() - Em analise
@@ -2105,3 +2128,4 @@ areas_atuacao_nome_repetido()
 dependentes_sem_dt_fim()
 opcao_fgts_diferente_dt_admissao()
 funcionarios_conta_bancaria_sem_dados()
+funcionarios_maracoes_invalida()
