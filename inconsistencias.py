@@ -1,3 +1,4 @@
+import numpy
 from variaveis import *
 from src.funcoes import *
 from src.conexao import *
@@ -21,8 +22,9 @@ def pessoa_data_nascimento_maior_data_admissao():
             INNER JOIN 
                 bethadba.pessoas p ON (f.i_pessoas = p.i_pessoas)
             WHERE
-                pf.dt_nascimento > f.dt_admissao;
-        """
+                pf.dt_nascimento > f.dt_admissao
+                AND f.i_entidades IN ({});
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -32,7 +34,7 @@ def pessoa_data_nascimento_maior_data_admissao():
 
     print('Pessoas com data de nascimento maior que data de admissão: '+ str(quantidade))
 
-#Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
+#Busca as pessoas com data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
 def pessoa_data_vencimento_cnh_menor_data_emissao():
 
     resultado = consultar(
@@ -88,7 +90,7 @@ def caracteristicas_nome_repetido():
 
     resultado = consultar(
         """
-           SELECT 
+            SELECT 
                 LIST(i_caracteristicas), 
                 TRIM(nome), 
                 COUNT(nome) 
@@ -189,7 +191,7 @@ def pessoas_cnh_dt_vencimento_menor_dt_emissao():
     return quantidade
 
 #Pessoas com data de nascimento maior que data de nascimento do responsavel
-def pessoas_dt_primeira_cnh_maior_dt_nascimento_responsavel():
+def pessoas_dt_nasc_maior_dt_nasc_responsavel():
 
     resultado = consultar(
         """
@@ -625,8 +627,8 @@ def folha_fechamento(competencia):
 
     resultado = consultar(
         """
-            SELECT * FROM bethadba.processamentos WHERE i_competencias < {} AND pagto_realizado = 'N'
-        """.format(competencia)
+            SELECT * FROM bethadba.processamentos WHERE i_competencias < {} AND pagto_realizado = 'N' AND i_entidades IN ({})
+        """.format(competencia, lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -652,8 +654,8 @@ def folhas_ferias_sem_dt_pagamento():
             FROM 
                 bethadba.ferias 
             WHERE 
-                dataPagamento IS NULL;
-        """
+                dataPagamento IS NULL AND i_entidades IN ({}); 
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -695,8 +697,8 @@ def motivos_apos_sem_esocial():
 def hist_salariais_sem_salario():
     resultado = consultar(
         """
-            SELECT * FROM bethadba.hist_salariais WHERE salario IN (0, NULL)
-        """
+            SELECT * FROM bethadba.hist_salariais WHERE salario IN (0, NULL) AND i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -708,29 +710,27 @@ def hist_salariais_sem_salario():
 
     return quantidade
 
-#Verifica data final maior que data de demissão
-
+#Verifica variaveis com data inicial ou data final maior que data de rescisão
 def variaveis_dt_inical_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT 
-                r.i_entidades, 
-                r.i_funcionarios,
-                DATEFORMAT(f.dt_admissao,'dd/MM/yyyy') AS dt_admissao,
-                DATEFORMAT(f.dt_admissao,'01/MM/yyyy') AS dt_admissao_novo,
-                DATEFORMAT(r.dt_rescisao,'dd/MM/yyyy') AS dt_resc,
-                DATEFORMAT(r.dt_rescisao,'01/MM/yyyy') AS dt_resc_novo,
-                DATEFORMAT(v.dt_inicial,'dd/MM/yyyy') AS ini_variavel,
-                DATEFORMAT(v.dt_final,'dd/MM/yyyy') AS fim_variavel 
+                v.i_entidades, 
+                v.i_funcionarios,
+                v.i_eventos,
+                v.i_processamentos,
+                v.i_tipos_proc, 
+                v.dt_inicial, 
+                v.dt_final
             FROM 
                 bethadba.rescisoes r 
-            INNER JOIN  
+            INNER JOIN 
                 bethadba.variaveis v ON (r.i_funcionarios = v.i_funcionarios AND r.i_entidades = v.i_entidades)
             INNER JOIN  
                 bethadba.funcionarios f ON (r.i_funcionarios = f.i_funcionarios AND r.i_entidades = f.i_entidades)
             WHERE 
-                v.dt_final > DATEFORMAT(r.dt_rescisao,'yyyy-MM-01') OR v.dt_inicial > DATEFORMAT(r.dt_rescisao,'yyyy-MM-01')
-        """
+                (v.dt_final > r.dt_rescisao OR v.dt_inicial > r.dt_rescisao) AND f.i_entidades IN ({});
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -813,9 +813,10 @@ def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
                 bethadba.rescisoes r ON (hf.i_funcionarios = r.i_funcionarios AND hf.i_entidades = r.i_entidades)
             WHERE
                 hf.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59')
+                AND hf.i_entidades IN ({})
             ORDER BY 
             	hf.i_funcionarios, hf.dt_alteracoes DESC
-        """
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -843,10 +844,10 @@ def hist_salariais_dt_alteracoes_maior_dt_rescisao():
             INNER JOIN 
                 bethadba.rescisoes r ON (hs.i_funcionarios = r.i_funcionarios AND hs.i_entidades = r.i_entidades)
             WHERE
-                hs.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59')
+                hs.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59') AND hs.i_entidades IN ({})
             ORDER BY 
                 hs.dt_alteracoes DESC
-        """
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -874,10 +875,11 @@ def hist_cargos_dt_alteracoes_maior_dt_rescisao():
             INNER JOIN 
                 bethadba.rescisoes r ON (hc.i_funcionarios = r.i_funcionarios AND hc.i_entidades = r.i_entidades)
             WHERE
-                hc.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59')
+                hc.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59') AND 
+                hc.i_entidades IN ({})
             ORDER BY 
                 hc.dt_alteracoes DESC
-        """
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1468,8 +1470,8 @@ def locais_mov_dt_inicial_menor_dt_admissao():
             INNER JOIN
                 bethadba.locais_mov lm ON (f.i_funcionarios = lm.i_funcionarios AND f.i_entidades = lm.i_entidades)
             WHERE 
-                f.dt_admissao > lm.dt_inicial 
-        """
+                f.dt_admissao > lm.dt_inicial AND f.i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1547,8 +1549,9 @@ def ferias_dt_gozo_ini_maior_dt_gozo_fin():
             FROM 
                 bethadba.ferias 
             WHERE 
-                dt_gozo_ini > dt_gozo_fin
-        """
+                dt_gozo_ini > dt_gozo_fin AND 
+                i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1574,8 +1577,9 @@ def rescisoes_sem_motivos_apos():
                 bethadba.rescisoes 
             WHERE 
                 i_motivos_resc = 7 AND 
-                i_motivos_apos IS NULL
-        """
+                i_motivos_apos IS NULL AND 
+                i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1662,8 +1666,9 @@ def locais_trab_fone_invalido():
             FROM 
                 bethadba.locais_trab
             WHERE 
-                quantidade > 11     
-        """
+                quantidade > 11 AND
+                i_entidades IN ({});      
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1712,11 +1717,13 @@ def niveis_descricao_repetido():
                 count(nome) AS quantidade
             FROM 
                 bethadba.niveis 
+            WHERE
+                i_entidades IN ({}) 
             GROUP BY 
                 TRIM(nome)  
             HAVING
                 quantidade > 1
-        """
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1764,13 +1771,14 @@ def funcionarios_cartao_ponto_repetido():
                 bethadba.hist_funcionarios 
             WHERE
                 bate_cartao = 'S' AND num_cp IS NOT NULL
+                AND i_entidades IN ({}) 
             GROUP BY 
                 num_cp
             HAVING
                 quantidade > 1
             ORDER BY 
                 quantidade DESC
-        """.format()
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1793,8 +1801,8 @@ def cargos_dt_nomeacao_maior_dt_posse():
             FROM 
                 bethadba.hist_cargos
             WHERE
-                dt_nomeacao > dt_posse
-        """
+                dt_nomeacao > dt_posse AND i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1828,8 +1836,8 @@ def funcionarios_conta_bancaria_invalida():
             INNER JOIN 
                 bethadba.pessoas_contas pc ON (f.i_pessoas = pc.i_pessoas AND pc.i_pessoas_contas = hf.i_pessoas_contas)	
             WHERE 
-                (pc.i_bancos != hf.i_bancos OR pc.i_agencias != hf.i_agencias) AND hf.forma_pagto = 'R'
-        """
+                (pc.i_bancos != hf.i_bancos OR pc.i_agencias != hf.i_agencias) AND hf.forma_pagto = 'R' AND f.i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1855,8 +1863,8 @@ def funcionarios_com_mais_de_uma_previdencia():
             FROM 
                 bethadba.hist_funcionarios
             WHERE
-                quantidade > 1;
-        """
+                quantidade > 1 AND i_entidades IN ({});
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1883,8 +1891,8 @@ def afastamentos_dt_afastamento_menor_dt_admissao():
             FROM 
                 bethadba.afastamentos a
             WHERE 
-                a.dt_afastamento < data_admissao;
-        """
+                a.dt_afastamento < data_admissao AND a.i_entidades IN ({});
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1964,7 +1972,8 @@ def cargos_sem_configuracao_ferias():
             WHERE
                 i_config_ferias IS NULL OR 
                 i_config_ferias_subst IS NULL
-        """
+                AND i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -1992,7 +2001,8 @@ def opcao_fgts_diferente_dt_admissao():
             WHERE
                 dt_admissao > '1988-10-04' AND 
                 dt_admissao != dt_opcao_fgts
-        """
+                AND i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -2018,7 +2028,8 @@ def funcionarios_conta_bancaria_sem_dados():
             WHERE 
                 forma_pagto = 'R' AND 
                 i_pessoas_contas IS NULL
-        """
+                AND i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -2030,7 +2041,7 @@ def funcionarios_conta_bancaria_sem_dados():
 
     return quantidade
 
-#Funcionarios com marcacoes com origem invalida
+#Busca os funcionarios com marcacoes com origem invalida
 def funcionarios_maracoes_invalida():
 
     resultado = consultar(
@@ -2041,7 +2052,8 @@ def funcionarios_maracoes_invalida():
                 bethadba.apuracoes_marc am 
             WHERE 
                 origem_marc NOT IN ('O','I','A') 
-        """
+                AND i_entidades IN ({})
+        """.format(lista_entidade)
     )
 
     quantidade = len(resultado)
@@ -2052,111 +2064,67 @@ def funcionarios_maracoes_invalida():
     print('Funcionarios com marcacoes com origem invalida: '+ str(quantidade))
 
     return quantidade
-    
-"""
-Configuração dirf repetida - Em analise
 
-select
-    chave_dsk1 = campoDirf,
-    nomeCampoDsk = 
-    case campo
-        when '0A-01' then '050101'
-        when '0A-03' then '050102'
-        when 'AA-01' then '05010201'
-        when 'AA-02-01' then '0501020201'
-        when 'AA-02-02' then '0501020202'
-        when 'AA-02-03' then '0501020203'
-        when 'AA-02-04' then '0501020204'
-        when '03-04' then '030401'
-        when '04-01' then '040101'   
-        when '04-01-01' then '040102'     
-        when '04-03' then '040301'
-        when '04-03-01' then '040302'
-        when '04-06' then '040601'        
-    else 
-        bethadba.dbf_retira_alfa_de_inteiros(campo) 
-    end ,
-    campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)
-        when '0301' then 'TOTAL_REND_INC_FERIAS'
-        when '0302' then 'CONTRIB_PREV_OFICIAL'
-        when '030301' then 'CONTRIB_PREV_PRIVADA'
-        when '030302' then 'CONTRIB_FAPI'
-        when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'
-        when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'
-        when '030401' then 'PENSAO_ALIMENTICIA'
-        when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'
-        when '0305' then 'IRRF'
-        when '040101' then 'PARC_ISENTA_APOSENT'
-        when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'
-        when '0402' then 'DIARIAS_AJUDAS_CUSTO'
-        when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'
-        when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'
-        when '0404' then 'LUCROS_DIVIDENDOS'
-        when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'
-        when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'
-        when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'
-        when '040701' then 'REND_ISENTOS_OUTROS'
-        when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'
-        when '050101' then 'TOTAL_REND_13_SALARIO'
-        when '050102' then 'IRRF_13_SALARIO'
-        when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'
-        when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'
-        when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'
-        when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'
-        when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'
-        when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'
-        when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'
-        when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'
-        when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'
-        when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'
-        when '0605' then 'RRA_IRRF'
-        when '0606' then 'RRA_RENDIMENTOS_ISENTOS'
-        when '0700' then 'INFORMACOES_COMPLEMENTARES'
-        when 'ABOPEC' then 'ABONO_PECUNIARIO' end,
-        eventos =  list(i_eventos)
-    from bethadba.comprends        
-    where campo not in ('05-01','0A-02')
-      and campoDirf is not null
-    group by campoDirf, nomeCampoDsk, chave_dsk1
-    
-    union all
-    
-    select chave_dsk1 = campoDirf,
-        nomeCampoDsk = 
-        case campo
-            when '03-01' then '0601'
-            when '03-02' then '0603'
-            when '03-05' then '0605'
-            when '03-04' then '0604'
-        else 
-            bethadba.dbf_retira_alfa_de_inteiros(campo) 
-        end ,
-        campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)        
-            when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'
-            when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'
-            when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'
-            when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'
-            when '0605' then 'RRA_IRRF'
-            when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end, 
-        eventos =  list(i_eventos)
-    from bethadba.comprends
-    where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05')
-      and campoDirf is not null
-    group by campoDirf, nomeCampoDsk, chave_dsk1
-"""
+#Busca as ocorrencias do ponto com nome repetido
+#Já existe uma ocorrência de ponto com a descrição informada
+def ocorrencia_ponto_nome_repetido():
+
+    resultado = consultar(
+        """
+            SELECT 
+                LIST(i_ocorrencias_ponto), 
+                TRIM(nome), 
+                COUNT(nome) 
+            FROM 
+                bethadba.ocorrencias_ponto
+            GROUP BY 
+                TRIM(nome) 
+            HAVING 
+                COUNT(nome) > 1
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Ocorrencias do ponto com nome repetido: '+ str(quantidade))
+
+    return quantidade
+
+#Busca as as configurações de dirf com eventos repetidos
+def configuracao_dirf_com_eventos_repetidos():
+
+    resultado = consultar("SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  list(i_eventos)     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  list(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1")
+
+    quantidade = 0
+
+    for i in resultado:
+        lista_eventos = i[3].split(',')
+
+        if len(buscar_duplicatas(lista_eventos)) > 0:
+            quantidade += 1
+
+    if quantidade == 0:
+        return
+
+    print('Configurações de dirf com eventos repetidos: '+ str(quantidade))
+
+    return quantidade
 
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
-#hist_funcionarios_dt_alteracoes_maior_dt_rescisao() - Em analise
+hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
 #cargos_sem_configuracao_ferias() - Em analise
-pessoa_data_nascimento_maior_data_admissao()
 pessoa_data_vencimento_cnh_menor_data_emissao()
 caracteristicas_nome_repetido()
 dependentes_grau_outros()
+pessoa_data_nascimento_maior_data_admissao()
 pessoas_sem_dt_nascimento()
 pessoas_cnh_dt_vencimento_menor_dt_emissao()
 pessoas_dt_primeira_cnh_maior_dt_nascimento()
-pessoas_dt_primeira_cnh_maior_dt_nascimento_responsavel()
+pessoas_dt_nasc_maior_dt_nasc_responsavel()
 pessoas_cpf_repetido()
 pessoas_pis_repetido()
 pessoas_pis_invalido()
@@ -2221,3 +2189,5 @@ dependentes_sem_dt_fim()
 opcao_fgts_diferente_dt_admissao()
 funcionarios_conta_bancaria_sem_dados()
 funcionarios_maracoes_invalida()
+ocorrencia_ponto_nome_repetido()
+configuracao_dirf_com_eventos_repetidos()

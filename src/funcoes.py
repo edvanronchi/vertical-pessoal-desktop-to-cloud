@@ -1,7 +1,11 @@
+from iteration_utilities import duplicates, unique_everseen
 from validate_docbr import CPF, CNPJ, PIS
 from src.conexao import consultar
 from random import randint
 import re
+
+def buscar_duplicatas(listNums: list) -> list:
+	return list(unique_everseen(duplicates(listNums)))
 
 def email_validar(email: str) -> bool:
 
@@ -96,3 +100,6 @@ def cnpj_validar(cnpj) -> bool:
     valida = CNPJ()
     
     return valida.validate(cnpj)
+
+def remove_repetidos(li: list) -> list:
+    return sorted(dict(zip(li, li)).keys())

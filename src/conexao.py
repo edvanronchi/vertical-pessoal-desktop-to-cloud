@@ -7,9 +7,8 @@ cursor = conexao.cursor()
 #Pesquisar dados.
 def consultar(comando: str) -> list:
     cursor.execute(comando)
-    linha  = cursor.fetchall()
-
-    return linha
+    
+    return cursor.fetchall()
 
 #Executa ações de atualizar, deletar, inserir dados desabilitando os gatilhos.
 def executar(comando: str):

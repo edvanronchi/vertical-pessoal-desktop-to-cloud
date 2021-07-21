@@ -1,5 +1,6 @@
 from src.funcoes import *
 from src.conexao import *
+from variaveis import * 
 from datetime import timedelta
 from os import path
 
@@ -13,8 +14,10 @@ def afastamentos():
                 i_funcionarios,
                 i_entidades
             FROM  
-                bethadba.funcionarios;
-        """
+                bethadba.funcionarios 
+            WHERE
+                i_entidades IN ({});
+        """.format(lista_entidade)
     )
 
     for i in lista_funcionario:
@@ -96,4 +99,5 @@ def afastamentos():
             print(dt_final)
             print("===")
 
+#-----------------------Executar---------------------#
 afastamentos()

@@ -3,7 +3,7 @@ from src.funcoes import *
 from src.conexao import *
 
 #Busca os aposentados que foram demitidos com motivo de aposentadoria e vinculo de aposentadoria
-def mostrar_aposentados():
+def mostrar_aposentados() -> dict:
 
     aposentados_vinculado = []
 
@@ -20,6 +20,8 @@ def mostrar_aposentados():
                 bethadba.funcionarios f ON (hf.i_funcionarios = f.i_funcionarios)	
             INNER JOIN 
                 bethadba.rescisoes r ON (r.i_motivos_resc = 7 AND hf.i_vinculos = 11 AND r.i_funcionarios = hf.i_funcionarios)
+            WHERE
+                i_entidades IN ({})
             GROUP BY 
                 hf.i_entidades, 
                 hf.i_funcionarios,
@@ -27,7 +29,7 @@ def mostrar_aposentados():
                 dt_rescisao
             ORDER BY 
                 f.i_pessoas
-        """
+        """.format(lista_entidade)
     )
 
     for i in resultado:
@@ -136,5 +138,6 @@ def vincular_aposentados(vincular):
 
             print("Registro inserido: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
 
+#-----------------------Executar---------------------#
 mostrar_aposentados()
 #vincular_aposentados(False)

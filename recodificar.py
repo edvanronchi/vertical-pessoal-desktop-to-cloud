@@ -66,19 +66,18 @@ def recodificar_funcionarios(lista_entidade):
             )
 
             if len(buscaDadosAdicionais) > 0:
-                queryDadosAdicionais = "UPDATE bethadba.funcionarios_prop_adic SET valor_caracter = {} WHERE i_caracteristicas = {} AND i_entidades = {} AND i_funcionarios = {};".format(valorCaracter, idCampoAdicional, id_entidade, identificador)
+                queryDadosAdicionais = "UPDATE bethadba.funcionarios_prop_adic SET valor_caracter = {} WHERE i_caracteristicas = {} AND i_entidades = {} AND i_funcionarios = {};\n".format(valorCaracter, idCampoAdicional, id_entidade, identificador)
             else:
-                queryDadosAdicionais = "INSERT INTO bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_caracter) VALUES ({}, {}, {}, {});".format(idCampoAdicional, id_entidade, identificador, valorCaracter)
+                queryDadosAdicionais = "INSERT INTO bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_caracter) VALUES ({}, {}, {}, {});\n".format(idCampoAdicional, id_entidade, identificador, valorCaracter)
                    
             recodificar.writelines(queryDadosAdicionais)
 
             querys = ""
+            querys += "UPDATE bethadba.funcionarios_subst SET i_substituto = {} WHERE i_substituto = {} AND i_entidades = {};\n".format(id_max, identificador, id_entidade)
+            querys += "UPDATE bethadba.funcionarios_subst SET i_substituido = {} WHERE i_substituido = {} AND i_entidades = {};\n".format(id_max, identificador, id_entidade)
 
-            for tabela in tabelas:
-                
-                u = "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
-
-                querys += u
+            for tabela in tabelas:            
+                querys += "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
             
             querys += "\n"
 
@@ -591,11 +590,11 @@ def recodificar_relogios(lista_entidade):
 #--------------------Executar-------------------------#
 recodificar_funcionarios(lista_entidade)
 recodificar_cargos(lista_entidade)
-recodificar_periodos_trab(lista_entidade)
-recodificar_turmas(lista_entidade)
+#recodificar_periodos_trab(lista_entidade)
+#recodificar_turmas(lista_entidade)
 recodificar_despesas(lista_entidade)
 recodificar_niveis(lista_entidade)
 #recodificar_horarios_ponto(lista_entidade)
 recodificar_grupos(lista_entidade)
-recodificar_locais_trab(lista_entidade)
-recodificar_relogios(lista_entidade)
+#recodificar_locais_trab(lista_entidade)
+#recodificar_relogios(lista_entidade)
