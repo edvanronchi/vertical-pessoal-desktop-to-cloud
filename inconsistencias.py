@@ -1,4 +1,3 @@
-import numpy
 from variaveis import *
 from src.funcoes import *
 from src.conexao import *
@@ -260,13 +259,13 @@ def pessoas_cpf_repetido():
     resultado = consultar(
         """
             SELECT
-                list(pf.i_pessoas),
-                cpf,
-                count(cpf) AS quantidade
+                LIST(pf.i_pessoas),
+                TRIM(cpf),
+                COUNT(cpf) AS quantidade
             FROM 
                 bethadba.pessoas_fisicas pf 
             GROUP BY 
-                cpf 
+                TRIM(cpf) 
             HAVING 
                 quantidade > 1
         """
@@ -288,13 +287,13 @@ def pessoas_pis_repetido():
     resultado = consultar(
         """
             SELECT
-                list(pf.i_pessoas),
-                num_pis,
-                count(num_pis) AS quantidade
+                LIST(pf.i_pessoas),
+                TRIM(num_pis),
+                COUNT(num_pis) AS quantidade
             FROM 
                 bethadba.pessoas_fisicas pf 
             GROUP BY 
-                num_pis 
+                TRIM(num_pis) 
             HAVING 
                 quantidade > 1
         """
@@ -395,10 +394,10 @@ def ruas_nome_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_ruas), 
+                LIST(i_ruas), 
                 TRIM(nome),
                 i_cidades, 
-                count(nome) AS quantidade
+                COUNT(nome) AS quantidade
             FROM 
                 bethadba.ruas 
             GROUP BY 
@@ -424,13 +423,13 @@ def tipos_bases_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_tipos_bases), 
-                nome, 
-                count(nome) AS quantidade
+                LIST(i_tipos_bases), 
+                TRIM(nome), 
+                COUNT(nome) AS quantidade
             FROM 
                 bethadba.tipos_bases 
             GROUP BY 
-                nome 
+                TRIM(nome) 
             HAVING 
                 quantidade > 1;
         """
@@ -493,19 +492,20 @@ def atos_sem_numero():
     return quantidade
 
 #Verifica os atos repetidos
+#Já existe um ato com o tipo e número oficial informado
 def atos_repetido():
 
     resultado = consultar(
         """
             SELECT 
-                list(i_atos),
-                num_ato,
+                LIST(i_atos),
+                TRIM(num_ato),
                 i_tipos_atos,
-                count(num_ato) AS quantidade
+                COUNT(num_ato) AS quantidade
             FROM 
                 bethadba.atos 
             GROUP BY 
-                num_ato,
+                TRIM(num_ato),
                 i_tipos_atos 
             HAVING 
                 quantidade > 1
@@ -576,13 +576,13 @@ def vinculos_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_vinculos), 
-                descricao,
-                count(descricao) AS quantidade 
+                LIST(i_vinculos), 
+                TRIM(descricao),
+                COUNT(descricao) AS quantidade 
             FROM 
                 bethadba.vinculos 
             GROUP BY 
-                descricao 
+                TRIM(descricao) 
             HAVING
                 quantidade > 1 
         """
@@ -748,13 +748,13 @@ def tipos_movpes_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_tipos_movpes), 
-                descricao,
-                count(descricao) AS quantidade 
+                LIST(i_tipos_movpes), 
+                TRIM(descricao),
+                COUNT(descricao) AS quantidade 
             FROM 
                 bethadba.tipos_movpes 
             GROUP BY 
-                descricao 
+                TRIM(descricao)
             HAVING
                 quantidade > 1
         """
@@ -775,9 +775,9 @@ def tipos_afast_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_tipos_afast), 
+                LIST(i_tipos_afast), 
                 TRIM(descricao),
-                count(descricao) AS quantidade 
+                COUNT(descricao) AS quantidade 
             FROM 
                 bethadba.tipos_afast 
             GROUP BY 
@@ -920,13 +920,13 @@ def tipos_atos_nome_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_tipos_atos), 
-                nome,
-                count(nome) AS quantidade 
+                LIST(i_tipos_atos), 
+                TRIM(nome),
+                COUNT(nome) AS quantidade 
             FROM 
                 bethadba.tipos_atos 
             GROUP BY 
-                nome 
+                TRIM(nome) 
             HAVING
                 quantidade > 1
         """
@@ -947,14 +947,14 @@ def horarios_ponto_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_entidades), 
-                list(i_horarios_ponto), 
-                descricao,
-                count(descricao) AS quantidade 
+                LIST(i_entidades), 
+                LIST(i_horarios_ponto), 
+                TRIM(descricao),
+                COUNT(descricao) AS quantidade 
             FROM 
                 bethadba.horarios_ponto 
             GROUP BY 
-                descricao 
+                TRIM(descricao) 
             HAVING
                 quantidade > 1
         """
@@ -975,14 +975,14 @@ def turmas_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_entidades), 
-                list(i_turmas), 
-                descricao,
-                count(descricao) AS quantidade 
+                LIST(i_entidades), 
+                LIST(i_turmas), 
+                TRIM(descricao),
+                COUNT(descricao) AS quantidade 
             FROM 
                 bethadba.turmas 
             GROUP BY 
-                descricao 
+                TRIM(descricao) 
             HAVING
                 quantidade > 1
         """
@@ -1124,13 +1124,13 @@ def config_organ_descricao_repetido():
     resultado = consultar(
         """
            SELECT 
-                list(i_config_organ), 
-                descricao, 
-                count(descricao) AS quantidade 
+                LIST(i_config_organ), 
+                TRIM(descricao), 
+                COUNT(descricao) AS quantidade 
             FROM 
                 bethadba.config_organ 
             GROUP BY 
-                descricao 
+                TRIM(descricao) 
             HAVING 
                 quantidade > 1
         """
@@ -1209,13 +1209,13 @@ def pessoas_rg_repetido():
     resultado = consultar(
         """
             SELECT
-                list(i_pessoas),
-                rg,
-                count(rg) AS quantidade
+                LIST(i_pessoas),
+                TRIM(rg),
+                COUNT(rg) AS quantidade
             FROM 
                 bethadba.pessoas_fisicas 
             GROUP BY 
-                rg 
+                TRIM(rg) 
             HAVING 
                 quantidade > 1
         """
@@ -1237,10 +1237,10 @@ def cargos_descricao_repetido():
     resultado = consultar(
         """
             SELECT
-                list(i_cargos),
-                list(i_entidades),
+                LIST(i_cargos),
+                LIST(i_entidades),
                 TRIM(nome),
-                count(nome) AS quantidade
+                COUNT(nome) AS quantidade
             FROM 
                 bethadba.cargos 
             WHERE   
@@ -1597,16 +1597,16 @@ def grupos_nome_repetido():
     resultado = consultar(
         """
             SELECT
-                list(i_entidades),
-                list(i_grupos),
-                nome,
-                count(nome) AS quantidade
+                LIST(i_entidades),
+                LIST(i_grupos),
+                TRIM(nome),
+                COUNT(nome) AS quantidade
             FROM 
                 bethadba.grupos
             WHERE
                 i_entidades IN ({}) 
             GROUP BY 
-                nome 
+                TRIM(nome) 
             HAVING 
                 quantidade > 1
         """.format(lista_entidade)
@@ -1711,10 +1711,10 @@ def niveis_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
-                list(i_entidades), 
-                list(i_niveis), 
+                LIST(i_entidades), 
+                LIST(i_niveis), 
                 TRIM(nome),
-                count(nome) AS quantidade
+                COUNT(nome) AS quantidade
             FROM 
                 bethadba.niveis 
             WHERE
@@ -1742,9 +1742,9 @@ def funcionarios_cartao_ponto_repetido():
     matriculas = consultar(
         """
             SELECT 
-                list(i_entidades), 
+                LIST(i_entidades), 
                 i_funcionarios, 
-                count(*) AS quantidade 
+                COUNT(*) AS quantidade 
             FROM 
                 bethadba.funcionarios 
             WHERE
@@ -1765,7 +1765,7 @@ def funcionarios_cartao_ponto_repetido():
         """
             SELECT 
                 num_cp, 
-                list(DISTINCT(i_funcionarios)), 
+                LIST(DISTINCT(i_funcionarios)), 
                 COUNT(DISTINCT(i_funcionarios)) AS quantidade
             FROM 
                 bethadba.hist_funcionarios 
@@ -1911,15 +1911,15 @@ def areas_atuacao_nome_repetido():
     resultado = consultar(
         """
            SELECT 
-                list(i_areas_atuacao), 
+                LIST(i_areas_atuacao), 
                 TRIM(nome), 
-                count(nome) 
+                COUNT(nome) 
             FROM 
                 bethadba.areas_atuacao 
             GROUP BY 
                 TRIM(nome) 
             HAVING 
-                count(nome) > 1
+                COUNT(nome) > 1
         """
     )
 
@@ -2096,7 +2096,7 @@ def ocorrencia_ponto_nome_repetido():
 #Busca as as configurações de dirf com eventos repetidos
 def configuracao_dirf_com_eventos_repetidos():
 
-    resultado = consultar("SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  list(i_eventos)     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  list(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1")
+    resultado = consultar("SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  LIST(i_eventos)     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  LIST(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1")
 
     quantidade = 0
 
@@ -2113,6 +2113,33 @@ def configuracao_dirf_com_eventos_repetidos():
 
     return quantidade
 
+#Verifica a descricao de motivo de alteração salarial repetindo
+#Já existe um motivo de alteração salarial com a descrição informada
+def motivo_alt_salarial_descricao_repetido():
+
+    resultado = consultar(
+        """
+           SELECT 
+                LIST(i_motivos_altsal), 
+                TRIM(descricao), 
+                COUNT(descricao) AS quantidade 
+            FROM 
+                bethadba.motivos_altsal 
+            GROUP BY 
+                TRIM(descricao) 
+            HAVING 
+                quantidade > 1
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Descrição de motivo de alteração salarial repetindo: '+ str(quantidade))
+
+    return quantidade
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
@@ -2191,3 +2218,4 @@ funcionarios_conta_bancaria_sem_dados()
 funcionarios_maracoes_invalida()
 ocorrencia_ponto_nome_repetido()
 configuracao_dirf_com_eventos_repetidos()
+motivo_alt_salarial_descricao_repetido()
