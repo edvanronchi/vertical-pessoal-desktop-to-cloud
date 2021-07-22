@@ -1666,7 +1666,7 @@ def locais_trab_fone_invalido():
             FROM 
                 bethadba.locais_trab
             WHERE 
-                quantidade > 11 AND
+                quantidade > 9 AND
                 i_entidades IN ({});      
         """.format(lista_entidade)
     )
@@ -2140,6 +2140,56 @@ def motivo_alt_salarial_descricao_repetido():
     print('Descrição de motivo de alteração salarial repetindo: '+ str(quantidade))
 
     return quantidade
+
+#Verifica se a taxa do evento está invalida
+#A taxa deve ser composta de no máximo 3 números inteiros e 4 decimais
+def evento_taxa_invalida():
+
+    resultado = consultar(
+        """
+            SELECT 
+                i_eventos, 
+                taxa 
+            FROM 
+                bethadba.eventos 
+            WHERE 
+                taxa > 999.9999
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Taxa de evento invalida: '+ str(quantidade))
+
+    return quantidade
+
+#Verifica se a licenca da licenca premio é maior do que 2 digitos
+#A licença não pode conter mais de 2 dígitos
+def licenca_premio_faixa_invalida():
+
+    resultado = consultar(
+        """
+            SELECT 
+                *
+            FROM 
+                bethadba.licpremio_faixas 
+            WHERE 
+                i_faixas > 99;
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('Faixa na licença premio maior que dois digitos: '+ str(quantidade))
+
+    return quantidade
+    
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
@@ -2219,3 +2269,5 @@ funcionarios_maracoes_invalida()
 ocorrencia_ponto_nome_repetido()
 configuracao_dirf_com_eventos_repetidos()
 motivo_alt_salarial_descricao_repetido()
+evento_taxa_invalida()
+licenca_premio_faixa_invalida()

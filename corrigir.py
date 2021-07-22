@@ -1,7 +1,6 @@
 from variaveis import *
 from src.funcoes import *
 from src.conexao import consultar ,executar
-import re
 
 #Gera CPF aleatorio para pessoas com CPF nulo
 def pessoas_sem_cpf():
@@ -1727,33 +1726,17 @@ def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
 #O telefone pode conter no máximo 11 caracteres
 def locais_trab_fone_invalido():
 
-    resultado = consultar(
+    executar(
         """
-            SELECT 
-                i_entidades,
-                i_locais_trab,
-                fone,
-                LENGTH(fone) AS quantidade
-            FROM 
+            UPDATE
                 bethadba.locais_trab
+            SET
+                fone = NULL
             WHERE 
-                quantidade > 11 AND
-                i_entidades IN ({});   
+                LENGTH(fone) > 9 AND
+                i_entidades IN ({});    
         """.format(lista_entidade)
     )
-
-    for i in resultado:
-        entidade = i[0]
-        local = i[1]
-        telefone = i[2]
-
-        telefone = re.sub('[^0-9]', '', telefone)
-
-        telefone = telefone[(len(telefone) - 8):]
-
-        u = "UPDATE bethadba.locais_trab SET fone = '{}' WHERE i_entidades = {} AND i_locais_trab = {};".format(telefone, entidade, local)
-        
-        executar(u)
         
 #Coloca a data de vigor na data de criação
 #A data de criação é obrigatória
@@ -2180,7 +2163,38 @@ def motivo_alt_salarial_descricao_repetido():
             u = "UPDATE bethadba.motivos_altsal SET descricao = '{}'  WHERE i_motivos_altsal = {};".format((descricao + " |" + str(index)), identificador)
 
             print(u)
-            executar(u)        
+            executar(u)   
+
+#Remove a taxa do evento que está invalido
+#A taxa deve ser composta de no máximo 3 números inteiros e 4 decimais
+def evento_taxa_invalida():
+
+    executar(
+        """
+            UPDATE 
+                bethadba.eventos 
+            SET
+                taxa = 0
+            WHERE 
+                taxa > 999.9999;
+        """
+    )  
+
+#Altera a faixa da licença premio
+#A licença não pode conter mais de 2 dígitos
+def licenca_premio_faixa_invalida():
+
+    executar(
+        """
+            UPDATE 
+                bethadba.licpremio_faixas 
+            SET
+                taxa = 99
+            WHERE 
+                taxa > 99;
+        """
+    )      
+
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
@@ -2260,3 +2274,5 @@ funcionarios_maracoes_invalida()
 ocorrencia_ponto_nome_repetido()
 #configuracao_dirf_com_eventos_repetidos()
 motivo_alt_salarial_descricao_repetido()
+evento_taxa_invalida()
+licenca_premio_faixa_invalida()
