@@ -546,7 +546,11 @@ def vinculos_sem_esocial():
             UPDATE 
                 bethadba.vinculos
             SET 
-                categoria_esocial = '101'
+                categoria_esocial =  (case tipo_func 
+                                WHEN 'A' then 701
+                                WHEN 'F' then 101
+                                ELSE null
+                                end)
             WHERE 
                 categoria_esocial IS NULL 
                 AND tipo_func <> 'B';                  
@@ -2165,6 +2169,36 @@ def formacao_vazio():
     print(u)
     executar(u)
 
+
+def contratacao_aprendiz_vazio():
+
+    executar(
+        """ 
+            update 
+                bethadba.hist_entidades_compl
+            set 
+                contratacao_aprendiz = 0,
+                contr_aprendiz_ent_educ = 'N' 
+            where 
+                contratacao_aprendiz is null 
+            and (contr_aprendiz_ent_educ is null or contr_aprendiz_ent_educ = 'N');
+        """
+    )
+
+
+def contratacao_pcd_vazio():
+
+    executar(
+        """
+            update 
+                bethadba.hist_entidades_compl
+            set 
+                contratacao_pcds = 0
+            where 
+                contratacao_pcds is null;
+        """
+    )
+
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 #hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
@@ -2247,3 +2281,5 @@ cargos_dt_nomeacao_maior_dt_posse()
 #evento_taxa_invalida()
 #licenca_premio_faixa_invalida()
 formacao_vazio()
+contratacao_aprendiz_vazio()
+contratacao_pcd_vazio()

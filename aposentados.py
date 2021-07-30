@@ -139,5 +139,5 @@ def vincular_aposentados(vincular):
             print("Registro inserido: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
 
 #-----------------------Executar---------------------#
-mostrar_aposentados()
-#vincular_aposentados(False)
+#mostrar_aposentados()
+vincular_aposentados(False)
