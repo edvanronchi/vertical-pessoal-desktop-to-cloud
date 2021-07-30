@@ -546,7 +546,11 @@ def vinculos_sem_esocial():
             UPDATE 
                 bethadba.vinculos
             SET 
-                categoria_esocial = '101'
+                categoria_esocial =  (case tipo_func 
+                                WHEN 'A' then 701
+                                WHEN 'F' then 101
+                                ELSE null
+                                end)
             WHERE 
                 categoria_esocial IS NULL 
                 AND tipo_func <> 'B';                  
