@@ -2208,6 +2208,49 @@ def formacao_vazio():
 
     print('Não foi encontrado Formação para conversão!')
 
+
+def contratacao_aprendiz_vazio():
+
+    resultado = consultar(
+        """ 
+            select 
+                * 
+            from   
+                bethadba.hist_entidades_compl
+            where 
+                contratacao_aprendiz is null 
+            and (contr_aprendiz_ent_educ is null or contr_aprendiz_ent_educ = 'N');            
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('O campo de contratação de menor aprendiz é obrigatório!')
+
+
+def contratacao_pcd_vazio():
+
+    resultado = consultar(
+        """
+            select 
+                *
+            from 
+                bethadba.hist_entidades_compl
+            where 
+                contratacao_pcds is null;
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade == 0:
+        return
+
+    print('O campo de contratação de PCD é obrigatório!')
+
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
@@ -2290,3 +2333,5 @@ motivo_alt_salarial_descricao_repetido()
 evento_taxa_invalida()
 licenca_premio_faixa_invalida()
 formacao_vazio()
+contratacao_aprendiz_vazio()
+contratacao_pcd_vazio()
