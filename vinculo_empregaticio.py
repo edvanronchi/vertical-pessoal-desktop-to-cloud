@@ -27,8 +27,14 @@ def ajustar_vinculo_empregaticio(conselheiro: str, vinculo: int, lista_entidade:
     )
 
     if conselheiro == 'S':
-        u = "UPDATE bethadba.vinculos SET tipo_vinculo = 3 WHERE i_vinculos = {};".format(vinculo)
-        
+        u = "UPDATE bethadba.vinculos SET tipo_vinculo = 3 WHERE i_vinculos = {};\n".format(vinculo)
+        u += "UPDATE bethadba.vinculos SET categoria_esocial = 771 WHERE i_vinculos = {};".format(vinculo)
+
+        print(u)
+        executar(u)
+    else:
+        u = "UPDATE bethadba.vinculos SET categoria_esocial = 701 WHERE i_vinculos = {};".format(vinculo)
+
         print(u)
         executar(u)
 
@@ -39,5 +45,5 @@ def ajustar_vinculo_empregaticio(conselheiro: str, vinculo: int, lista_entidade:
         executar(u)
 
 #-----------------------Executar---------------------#
-ajustar_vinculo_empregaticio('S', vinculo_empregaticio_autonomo_conselheiro, lista_entidade)
+#ajustar_vinculo_empregaticio('S', vinculo_empregaticio_autonomo_conselheiro, lista_entidade)
 ajustar_vinculo_empregaticio('N', vinculo_empregaticio_autonomo, lista_entidade)

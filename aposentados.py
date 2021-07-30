@@ -21,7 +21,7 @@ def mostrar_aposentados() -> dict:
             INNER JOIN 
                 bethadba.rescisoes r ON (r.i_motivos_resc = 7 AND hf.i_vinculos = 11 AND r.i_funcionarios = hf.i_funcionarios)
             WHERE
-                i_entidades IN ({})
+                f.i_entidades IN ({})
             GROUP BY 
                 hf.i_entidades, 
                 hf.i_funcionarios,

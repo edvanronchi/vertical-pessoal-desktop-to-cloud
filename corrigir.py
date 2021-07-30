@@ -199,13 +199,13 @@ def pessoas_dt_nasc_maior_dt_nasc_responsavel():
             UPDATE 
                 bethadba.pessoas_fisicas pff
             SET 
-                pff.dt_nascimento = subPessoa.dataNascimentoPai
+                pff.dt_nascimento = pessoa.data_nascimento_responsavel
             FROM 
                 ( 
                     SELECT 
-                        pf.i_pessoas as idPai,
-                        dt_nascimento as dataNascimentoPai, 
-                        i_dependentes as idFilho, 
+                        pf.i_pessoas as id_responsavel,
+                        dt_nascimento as data_nascimento_responsavel, 
+                        i_dependentes as id_dependente, 
                         (
                             SELECT 
                                 a.dt_nascimento 
@@ -213,42 +213,18 @@ def pessoas_dt_nasc_maior_dt_nasc_responsavel():
                                 bethadba.pessoas_fisicas a 
                             WHERE 
                                 a.i_pessoas = d.i_dependentes
-                        ) AS dataNascimentoFilho 
+                        ) AS data_nascimento_dependente 
                     FROM 
                         bethadba.pessoas_fisicas pf 
                     INNER JOIN 
                         bethadba.dependentes d ON (pf.i_pessoas = d.i_pessoas)
                     WHERE 
-                        dataNascimentoFilho < dataNascimentoPai 
-                        OR dataNascimentoFilho IS NULL
-                        AND grau = 1
-                ) AS subPessoa
+                        (data_nascimento_dependente < data_nascimento_responsavel OR
+                        data_nascimento_dependente IS NULL) AND
+                        grau = 1
+                ) AS pessoa
             WHERE 
-                pff.i_pessoas = subPessoa.idFilho; 
-        """
-    )
-
-    executar(
-        """
-            UPDATE 
-                bethadba.dependentes dpe
-            SET 
-                dpe.dt_ini_depende = subPessoa.dt_nascimento
-            FROM 
-                ( 
-                    SELECT 
-                        d.i_dependentes,
-                        pf.dt_nascimento,
-                        d.dt_ini_depende 
-                    FROM 
-                        bethadba.dependentes d 
-                    JOIN 
-                        bethadba.pessoas_fisicas pf  ON (d.i_dependentes = pf.i_pessoas)
-                    WHERE 
-                        dt_nascimento > dt_ini_depende
-                ) AS subPessoa
-            WHERE 
-                dpe.i_dependentes = subPessoa.i_dependentes;
+                pff.i_pessoas = pessoa.id_dependente; 
         """
     )
 
@@ -537,6 +513,7 @@ def atos_repetido():
             executar(u)
 
 #Adiciona o CBO mais utilizado no cargo
+#O campo CBO é obrigatório
 def cargos_sem_cbo():
 
     executar(
@@ -1081,15 +1058,9 @@ def turmas_descricao_repetido():
             if len(descricao) > 57:
                 descricao_novo = descricao[:57] + " |" + str(index) 
 
-            u = """
-                UPDATE 
-                    bethadba.turmas 
-                SET 
-                    descricao = '{}' 
-                WHERE 
-                    i_entidades = {} AND i_turmas = {};
-            """.format(descricao_novo, entidade[index], turma[index])
+            u = "UPDATE bethadba.turmas SET descricao = '{}' WHERE i_entidades = {} AND i_turmas = {};".format(descricao_novo, entidade[index], turma[index])
             
+            print(u)
             executar(u)
 
 #Coloca um ponto (.) nos separadores nulos
@@ -1340,23 +1311,8 @@ def cargos_descricao_repetido():
             if len(nome) > 97:
                 nome_novo = nome[:97] + " |" + str(index) 
 
-            u1 = """
-                UPDATE 
-                    bethadba.cargos 
-                SET 
-                    nome = '{}' 
-                WHERE 
-                    i_entidades = {} AND i_cargos = {};
-            """.format(nome_novo, entidade[index], cargo[index])
-
-            u2 = """
-                UPDATE 
-                    bethadba.hist_cargos_cadastro 
-                SET 
-                    nome = '{}' 
-                WHERE 
-                    i_entidades = {} AND i_cargos = {};
-            """.format(nome_novo, entidade[index], cargo[index])
+            u1 = "UPDATE bethadba.cargos SET nome = '{}' WHERE i_entidades = {} AND i_cargos = {};".format(nome_novo, entidade[index], cargo[index])
+            u2 = "UPDATE bethadba.hist_cargos_cadastro SET nome = '{}' WHERE i_entidades = {} AND i_cargos = {};".format(nome_novo, entidade[index], cargo[index])
 
             print(u1)
             print(u2)
@@ -1789,15 +1745,9 @@ def niveis_descricao_repetido():
             if len(nome) > 46:
                 descricao_novo = nome[:46] + " |" + str(index) 
 
-            u = """
-                UPDATE 
-                    bethadba.niveis 
-                SET 
-                    nome = '{}' 
-                WHERE 
-                    i_entidades = {} AND i_niveis = {};
-            """.format(descricao_novo, entidade[index], nivel[index])
+            u = "UPDATE bethadba.niveis SET nome = '{}' WHERE i_entidades = {} AND i_niveis = {};".format(descricao_novo, entidade[index], nivel[index])
             
+            print(u)
             executar(u)
 
 #Recodifica os cartões pontos que estão diferentes de sua matricula ou repetidos
@@ -2195,84 +2145,105 @@ def licenca_premio_faixa_invalida():
         """
     )      
 
+#Cria cadastro de formação para migração
+#O profissional XXXXXX deve possuir formações cadastradas!
+def formacao_vazio():
+
+    resultado = consultar(
+        """
+            SELECT * FROM bethadba.formacoes WHERE nome = 'Formação para conversão'
+        """
+    )
+
+    if len(resultado) > 0:
+        return
+
+    id_max = len(consultar("SELECT * FROM bethadba.formacoes")) + 1
+
+    u = "INSERT INTO formacoes (i_formacoes, nome, sigla_conselho, nivel_formacao, seguranca_trab, uf_conselho) VALUES({}, 'Formação para conversão', NULL, 1,'N', NULL);".format(id_max)
+
+    print(u)
+    executar(u)
+
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
-hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
+#hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
 #cargos_sem_configuracao_ferias() - Em analise
-#pessoa_data_vencimento_cnh_menor_data_emissao() - Em analise
-caracteristicas_nome_repetido()
-dependentes_grau_outros()
-pessoa_data_nascimento_maior_data_admissao()
+#pessoas_data_vencimento_cnh_menor_data_emissao() - Em analise
+#caracteristicas_nome_repetido()
+#dependentes_grau_outros()
+#pessoa_data_nascimento_maior_data_admissao()
 pessoas_sem_dt_nascimento()
-pessoas_cnh_dt_vencimento_menor_dt_emissao()
-pessoas_dt_primeira_cnh_maior_dt_nascimento()
+#pessoas_cnh_dt_vencimento_menor_dt_emissao()
+#pessoas_dt_primeira_cnh_maior_dt_nascimento()
 pessoas_dt_nasc_maior_dt_nasc_responsavel()
 pessoas_cpf_repetido()
 pessoas_pis_repetido()
-pessoas_pis_invalido()
+#pessoas_pis_invalido()
 pessoas_sem_cnpj()
-ruas_nome_caracter_especial()
-ruas_sem_nome()
-ruas_sem_cidade()
-ruas_nome_repetido()
-tipos_bases_repetido()
+#ruas_nome_caracter_especial()
+#ruas_sem_nome()
+#ruas_sem_cidade()
+#ruas_nome_repetido()
+#tipos_bases_repetido()
 atos_sem_numero()
 atos_repetido()
-cargos_sem_cbo()
+#cargos_sem_cbo()
 vinculos_sem_esocial()
 vinculos_descricao_repetido()
 motivos_resc_sem_esocial()
-folha_fechamento(folha_fechamento_competencia)
+#folha_fechamento(folha_fechamento_competencia)
 #folhas_ferias_sem_dt_pagamento() Em analise
 motivos_apos_sem_esocial()
-hist_salariais_sem_salario()
-variaveis_dt_inical_maior_dt_rescisao()
-tipos_movpes_descricao_repetido()
-tipos_afast_descricao_repetido()
-hist_salariais_dt_alteracoes_maior_dt_rescisao()
-hist_cargos_dt_alteracoes_maior_dt_rescisao()
-tipos_afast_classif_invalida()
-tipos_atos_nome_repetido()
-horarios_ponto_descricao_repetido()
+#hist_salariais_sem_salario()
+#variaveis_dt_inical_maior_dt_rescisao()
+#tipos_movpes_descricao_repetido()
+#tipos_afast_descricao_repetido()
+#hist_salariais_dt_alteracoes_maior_dt_rescisao()
+#hist_cargos_dt_alteracoes_maior_dt_rescisao()
+#tipos_afast_classif_invalida()
+#tipos_atos_nome_repetido()
+#horarios_ponto_descricao_repetido()
 turmas_descricao_repetido()
-niveis_organ_separador_invalido()
-atos_sem_natureza_texto_juridico()
-atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
-canc_ferias_sem_tipos_afast()
+#niveis_organ_separador_invalido()
+#atos_sem_natureza_texto_juridico()
+#atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
+#canc_ferias_sem_tipos_afast()
 config_organograma_descricao_invalida()
-config_organ_descricao_repetido()
-pessoas_cpf_invalido()
-pessoas_cnpj_invalido()
+#config_organ_descricao_repetido()
+#pessoas_cpf_invalido()
+#pessoas_cnpj_invalido()
 pessoas_rg_repetido()
 cargos_descricao_repetido()
-bases_calc_outras_empresas_vigencia_invalida()
-pessoas_email_invalido()
-pessoas_enderecos_sem_numero()
-funcionarios_sem_previdencia()
-mediasvant_sem_composicao()
-mediasvant_eve_composicao_invalida()
-locais_mov_dt_inicial_menor_dt_admissao()
-motivos_altponto_descricao_invalida()
-afastamentos_observacao_invalida()
-ferias_dt_gozo_ini_maior_dt_gozo_fin()
-rescisoes_sem_motivos_apos()
-grupos_nome_repetido()
-func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
-locais_trab_fone_invalido()
-atos_sem_dt_inicial()
+#bases_calc_outras_empresas_vigencia_invalida()
+#pessoas_email_invalido()
+#pessoas_enderecos_sem_numero()
+#funcionarios_sem_previdencia()
+#mediasvant_sem_composicao()
+#mediasvant_eve_composicao_invalida()
+#locais_mov_dt_inicial_menor_dt_admissao()
+#motivos_altponto_descricao_invalida()
+#afastamentos_observacao_invalida()
+#ferias_dt_gozo_ini_maior_dt_gozo_fin()
+#rescisoes_sem_motivos_apos()
+#grupos_nome_repetido()
+#func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
+#locais_trab_fone_invalido()
+#atos_sem_dt_inicial()
 niveis_descricao_repetido()
 funcionarios_cartao_ponto_repetido()
 cargos_dt_nomeacao_maior_dt_posse()
-funcionarios_conta_bancaria_invalida()
-funcionarios_com_mais_de_uma_previdencia()
-afastamentos_dt_afastamento_menor_dt_admissao()
-areas_atuacao_nome_repetido()
-dependentes_sem_dt_fim()
-opcao_fgts_diferente_dt_admissao()
-funcionarios_conta_bancaria_sem_dados()
-funcionarios_maracoes_invalida()
-ocorrencia_ponto_nome_repetido()
+#funcionarios_conta_bancaria_invalida()
+#funcionarios_com_mais_de_uma_previdencia()
+#afastamentos_dt_afastamento_menor_dt_admissao()
+#areas_atuacao_nome_repetido()
+#dependentes_sem_dt_fim()
+#opcao_fgts_diferente_dt_admissao()
+#funcionarios_conta_bancaria_sem_dados()
+#funcionarios_maracoes_invalida()
+#ocorrencia_ponto_nome_repetido()
 #configuracao_dirf_com_eventos_repetidos()
-motivo_alt_salarial_descricao_repetido()
-evento_taxa_invalida()
-licenca_premio_faixa_invalida()
+#motivo_alt_salarial_descricao_repetido()
+#evento_taxa_invalida()
+#licenca_premio_faixa_invalida()
+formacao_vazio()

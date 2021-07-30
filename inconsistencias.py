@@ -34,7 +34,7 @@ def pessoa_data_nascimento_maior_data_admissao():
     print('Pessoas com data de nascimento maior que data de admissão: '+ str(quantidade))
 
 #Busca as pessoas com data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
-def pessoa_data_vencimento_cnh_menor_data_emissao():
+def pessoas_data_vencimento_cnh_menor_data_emissao():
 
     resultado = consultar(
         """
@@ -135,7 +135,7 @@ def dependentes_grau_outros():
 
     return quantidade
 
-#Pessoas com data de nascimento nulo
+#Pessoas sem data de nascimento
 def pessoas_sem_dt_nascimento():
 
     resultado = consultar(
@@ -158,7 +158,7 @@ def pessoas_sem_dt_nascimento():
     if quantidade == 0:
         return
 
-    print('Pessoas com data de nascimento nulo: '+ str(quantidade))
+    print('Pessoas sem data de nascimento: '+ str(quantidade))
 
     return quantidade
 
@@ -195,9 +195,9 @@ def pessoas_dt_nasc_maior_dt_nasc_responsavel():
     resultado = consultar(
         """
             SELECT 
-                pf.i_pessoas as idPai,
-                dt_nascimento as dataNascimentoPai, 
-                i_dependentes as idFilho, 
+                pf.i_pessoas as id_responsavel,
+                dt_nascimento as data_nascimento_responsavel, 
+                i_dependentes as id_dependente, 
                 (
                     SELECT 
                         a.dt_nascimento 
@@ -205,15 +205,15 @@ def pessoas_dt_nasc_maior_dt_nasc_responsavel():
                         bethadba.pessoas_fisicas a 
                     WHERE 
                         a.i_pessoas = d.i_dependentes
-                ) AS dataNascimentoFilho 
+                ) AS data_nascimento_dependente 
             FROM 
                 bethadba.pessoas_fisicas pf 
             INNER JOIN 
                 bethadba.dependentes d ON (pf.i_pessoas = d.i_pessoas)
             WHERE 
-                dataNascimentoFilho < dataNascimentoPai 
-                OR dataNascimentoFilho IS NULL
-                AND grau = 1
+                (data_nascimento_dependente < data_nascimento_responsavel OR
+                data_nascimento_dependente IS NULL) AND
+                grau = 1
         """
     )
 
@@ -248,7 +248,7 @@ def pessoas_sem_cpf():
     if quantidade == 0:
         return
 
-    print('CPF nulo(s): '+ str(quantidade))
+    print('Pessoas sem CPF: '+ str(quantidade))
 
     return quantidade
 
@@ -304,7 +304,7 @@ def pessoas_pis_repetido():
     if quantidade == 0:
         return
 
-    print('PIS repetido(s): '+ str(quantidade))
+    print('Pessoas com PIS repetido(s): '+ str(quantidade))
 
     return quantidade
 
@@ -335,11 +335,11 @@ def pessoas_pis_invalido():
     if quantidade == 0:
         return
 
-    print('PIS invalido(s): '+ str(quantidade))
+    print('Pessoas com PIS invalido(s): '+ str(quantidade))
 
     return quantidade
 
-#Verifica os PIS's repetidos
+#Busca as pessoas sem CNPJ
 def pessoas_sem_cnpj():
 
     resultado = consultar(
@@ -361,7 +361,7 @@ def pessoas_sem_cnpj():
     if quantidade == 0:
         return
 
-    print('CNPJ nulo(s): '+ str(quantidade))
+    print('Pessoas sem CNPJ: '+ str(quantidade))
 
     return quantidade
 
@@ -444,9 +444,9 @@ def tipos_bases_repetido():
 
     return quantidade
 
-#Verifica os logradouros sem cidades
-
+#Verifica as ruas sem cidade
 def ruas_sem_cidade():
+
     resultado = consultar(
         """
             SELECT 
@@ -455,7 +455,7 @@ def ruas_sem_cidade():
             FROM 
                 bethadba.ruas 
             WHERE 
-                i_cidades IS NULL
+                i_cidades IS NULL;
         """
     )
 
@@ -464,7 +464,7 @@ def ruas_sem_cidade():
     if quantidade == 0:
         return
 
-    print('Logradouros sem cidade(s): '+ str(quantidade))
+    print('Ruas sem cidade: '+ str(quantidade))
 
     return quantidade
 
@@ -487,7 +487,7 @@ def atos_sem_numero():
     if quantidade == 0:
         return
 
-    print('Atos com número nulo: '+ str(quantidade))
+    print('Atos sem número: '+ str(quantidade))
 
     return quantidade
 
@@ -522,6 +522,7 @@ def atos_repetido():
     return quantidade
 
 #Verifica os CBO's nulos nos cargos
+#O campo CBO é obrigatório
 def cargos_sem_cbo():
 
     resultado = consultar(
@@ -540,7 +541,7 @@ def cargos_sem_cbo():
     if quantidade == 0:
         return
 
-    print('CBO do cargo nulo(s): '+ str(quantidade))
+    print('Cargos sem CBO: '+ str(quantidade))
 
     return quantidade
 
@@ -566,7 +567,7 @@ def vinculos_sem_esocial():
     if quantidade == 0:
         return
 
-    print('eSocial nulo nos vinculos empregraticios: '+ str(quantidade))
+    print('Vinculo empregaticio sem eSocial: '+ str(quantidade))
 
     return quantidade
 
@@ -618,7 +619,7 @@ def motivos_resc_sem_esocial():
     if quantidade == 0:
         return
 
-    print('eSocial nulo no motivo de rescisão: '+ str(quantidade))
+    print('Motivo de rescisão sem eSocial: '+ str(quantidade))
 
     return quantidade
 
@@ -688,7 +689,7 @@ def motivos_apos_sem_esocial():
     if quantidade == 0:
         return
 
-    print('eSocial nulo no motivo de aposentadoria: '+ str(quantidade))
+    print('Motivo aposentadoria sem eSocial: '+ str(quantidade))
 
     return quantidade
 
@@ -1371,8 +1372,8 @@ def funcionarios_sem_previdencia():
     resultado = consultar(
         """
             SELECT 
-                hf.i_funcionarios,
-                hf.i_entidades 
+                hf.i_entidades, 
+                hf.i_funcionarios
             FROM 
                 bethadba.hist_funcionarios hf
             INNER JOIN 
@@ -1397,7 +1398,7 @@ def funcionarios_sem_previdencia():
     if quantidade == 0:
         return
 
-    print('Funcionario sem previdencia: '+ str(quantidade))
+    print('Funcionarios sem previdencia: '+ str(quantidade))
 
     return quantidade
 
@@ -1413,9 +1414,9 @@ def mediasvant_sem_composicao():
             FROM 
                 bethadba.mediasvant m
             LEFT JOIN
-                mediasvant_eve me ON (m.i_eventos = me.i_eventos_medias)
+                bethadba.mediasvant_eve me ON (m.i_eventos = me.i_eventos_medias)
             WHERE 
-                me.i_eventos_medias IS NULL
+                me.i_eventos_medias IS NULL;
         """
     )
 
@@ -1701,7 +1702,7 @@ def atos_sem_dt_inicial():
     if quantidade == 0:
         return
 
-    print('Data de criação do ato é obrigatorio: '+ str(quantidade))
+    print('Atos sem data de criação: '+ str(quantidade))
 
     return quantidade
 
@@ -2189,12 +2190,29 @@ def licenca_premio_faixa_invalida():
     print('Faixa na licença premio maior que dois digitos: '+ str(quantidade))
 
     return quantidade
-    
+
+#Verifica se tem cadastro a formação para conversão
+#O profissional XXXXXX deve possuir formações cadastradas!
+def formacao_vazio():
+
+    resultado = consultar(
+        """
+            SELECT * FROM bethadba.formacoes WHERE nome = 'Formação para conversão'
+        """
+    )
+
+    quantidade = len(resultado)
+
+    if quantidade > 0:
+        return
+
+    print('Não foi encontrado Formação para conversão!')
+
 #-----------------------Executar---------------------#
 #pessoas_sem_cpf() - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
 #cargos_sem_configuracao_ferias() - Em analise
-pessoa_data_vencimento_cnh_menor_data_emissao()
+pessoas_data_vencimento_cnh_menor_data_emissao()
 caracteristicas_nome_repetido()
 dependentes_grau_outros()
 pessoa_data_nascimento_maior_data_admissao()
@@ -2271,3 +2289,4 @@ configuracao_dirf_com_eventos_repetidos()
 motivo_alt_salarial_descricao_repetido()
 evento_taxa_invalida()
 licenca_premio_faixa_invalida()
+formacao_vazio()
