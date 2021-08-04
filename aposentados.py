@@ -2,9 +2,9 @@ from variaveis import *
 from src.funcoes import *
 from src.conexao import *
 
-#Busca os aposentados que foram demitidos com motivo de aposentadoria e vinculo de aposentadoria
-def mostrar_aposentados() -> dict:
 
+# Busca os aposentados que foram demitidos com motivo de aposentadoria e vinculo de aposentadoria
+def mostrar_aposentados() -> dict:
     aposentados_vinculado = []
 
     resultado = consultar(
@@ -38,7 +38,7 @@ def mostrar_aposentados() -> dict:
         pessoa = i[2]
         dt_rescisao = str(i[3]).replace("-", "")
 
-        #Busca os vinculos dos aposentados
+        # Busca os vinculos dos aposentados
         vinculo = consultar(
             """
                 SELECT 
@@ -58,7 +58,7 @@ def mostrar_aposentados() -> dict:
                 ORDER BY 
                     r.dt_rescisao DESC,
                     hf.i_funcionarios
-            """.format(pessoa, dt_rescisao, funcionario)          
+            """.format(pessoa, dt_rescisao, funcionario)
         )
 
         if len(vinculo) == 0:
@@ -73,26 +73,30 @@ def mostrar_aposentados() -> dict:
         aposentados_vinculado.append({
             'aposentado': funcionario,
             'demitido': vinculo[0][1],
-            'entidade': entidade     
+            'entidade': entidade
         })
 
     return aposentados_vinculado
 
-#Faz o vinculo do aposentado com sua matricula anterior
+
+# Faz o vinculo do aposentado com sua matricula anterior
 def vincular_aposentados(vincular):
     resultado = consultar("SELECT * FROM bethadba.caracteristicas WHERE i_caracteristicas = 19999")
 
     if len(resultado) == 0:
-        executar("INSERT INTO bethadba.caracteristicas (i_caracteristicas, nome, tipo_dado) VALUES(19999, 'Vinculo Matricula Aposen.', 2);")
+        executar(
+            "INSERT INTO bethadba.caracteristicas (i_caracteristicas, nome, tipo_dado) VALUES(19999, 'Vinculo Matricula Aposen.', 2);")
 
         maximo = consultar("SELECT MAX(ordem)+1 AS id from bethadba.funcionarios_caract_cfg")[0][0]
 
-        executar("INSERT INTO bethadba.funcionarios_caract_cfg (i_caracteristicas, ordem, permite_excluir, dt_expiracao) VALUES(19999, {}, 'S', '2999-12-31');".format(maximo))
-
+        executar(
+            "INSERT INTO bethadba.funcionarios_caract_cfg (i_caracteristicas, ordem, permite_excluir, dt_expiracao) VALUES(19999, {}, 'S', '2999-12-31');".format(
+                maximo))
+        print("Criado o campo adicionao para migração!")
     if not vincular:
         return
 
-    vinculo = mostrar_aposentados()    
+    vinculo = mostrar_aposentados()
     for i in vinculo:
 
         funcionarios_prop_adic = consultar(
@@ -124,8 +128,10 @@ def vincular_aposentados(vincular):
                 """.format(i['entidade'], i['aposentado'], i['demitido'])
             )
 
-            print("Registro atualizado: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
-        
+            print("Registro atualizado: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'],
+                                                                                                 i['demitido'],
+                                                                                                 i['entidade']))
+
         else:
             executar(
                 """
@@ -136,8 +142,11 @@ def vincular_aposentados(vincular):
                 """.format(i['entidade'], i['aposentado'], i['demitido'])
             )
 
-            print("Registro inserido: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'], i['demitido'], i['entidade']))
+            print("Registro inserido: Aposentado -> {}, Demitido -> {}, Entidade -> {}".format(i['aposentado'],
+                                                                                               i['demitido'],
+                                                                                               i['entidade']))
 
-#-----------------------Executar---------------------#
-#mostrar_aposentados()
+
+# -----------------------Executar---------------------#
+# mostrar_aposentados()
 vincular_aposentados(False)

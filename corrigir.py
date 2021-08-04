@@ -1,10 +1,10 @@
 from variaveis import *
 from src.funcoes import *
-from src.conexao import consultar ,executar
+from src.conexao import consultar, executar
 
-#Gera CPF aleatorio para pessoas com CPF nulo
+
+# Gera CPF aleatorio para pessoas com CPF nulo
 def pessoas_sem_cpf():
-
     resultado = consultar(
         """ 
             SELECT 
@@ -23,12 +23,12 @@ def pessoas_sem_cpf():
         identificador = i[0]
 
         u = "UPDATE bethadba.pessoas_fisicas SET cpf = {} WHERE i_pessoas = {};".format(cpf_gerar(False), identificador)
-                
+
         executar(u)
 
-#Renomeia os campos adicionais com descrição repetida
-def caracteristicas_nome_repetido():
 
+# Renomeia os campos adicionais com descrição repetida
+def caracteristicas_nome_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -51,15 +51,16 @@ def caracteristicas_nome_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
-            u = "UPDATE bethadba.caracteristicas SET nome = '{}'  WHERE i_caracteristicas = {};".format((nome + " |" + str(index)), identificador)
+
+            u = "UPDATE bethadba.caracteristicas SET nome = '{}'  WHERE i_caracteristicas = {};".format(
+                (nome + " |" + str(index)), identificador)
 
             print(u)
             executar(u)
 
-#Adiciona o valor 1 - Filho para os dependentes que estão cadastrados como 10 - OUTROS
-def dependentes_grau_outros():
 
+# Adiciona o valor 1 - Filho para os dependentes que estão cadastrados como 10 - OUTROS
+def dependentes_grau_outros():
     executar(
         """
             UPDATE 
@@ -71,9 +72,9 @@ def dependentes_grau_outros():
         """
     )
 
-#Coloca a data '1900-01-01' nas datas das pessoas com data de nascimento maior que data de admissão
+
+# Coloca a data '1900-01-01' nas datas das pessoas com data de nascimento maior que data de admissão
 def pessoa_data_nascimento_maior_data_admissao():
-    
     executar(
         """
             UPDATE 
@@ -102,10 +103,10 @@ def pessoa_data_nascimento_maior_data_admissao():
                 pff.i_pessoas = subPessoa.i_pessoas;
         """.format(lista_entidade)
     )
-    
-#Coloca a data '1900-01-01' nas datas nulas
+
+
+# Coloca a data '1900-01-01' nas datas nulas
 def pessoas_sem_dt_nascimento():
-    
     executar(
         """
             UPDATE 
@@ -130,7 +131,8 @@ def pessoas_sem_dt_nascimento():
         """
     )
 
-#Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
+
+# Busca a data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
 def pessoas_cnh_dt_vencimento_menor_dt_emissao():
     executar(
         """
@@ -154,9 +156,9 @@ def pessoas_cnh_dt_vencimento_menor_dt_emissao():
         """
     )
 
-#Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
+
+# Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
 def pessoas_dt_primeira_cnh_maior_dt_nascimento():
-    
     resultado = consultar(
         """ 
             SELECT 
@@ -180,20 +182,23 @@ def pessoas_dt_primeira_cnh_maior_dt_nascimento():
         dt_primeira_cnh = i[3]
 
         if dt_nascimento > dt_emissao_cnh and dt_nascimento > dt_primeira_cnh:
-            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(dt_nascimento, i_pessoas)
+            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(
+                dt_nascimento, i_pessoas)
 
-        elif dt_nascimento < dt_emissao_cnh:  
-            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(dt_emissao_cnh, i_pessoas)
+        elif dt_nascimento < dt_emissao_cnh:
+            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(
+                dt_emissao_cnh, i_pessoas)
 
-        elif dt_nascimento < dt_primeira_cnh:  
-            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(dt_primeira_cnh, i_pessoas)
+        elif dt_nascimento < dt_primeira_cnh:
+            u = "UPDATE bethadba.pessoas_fis_compl SET dt_primeira_cnh = '{0}', dt_emissao_cnh = '{0}' WHERE i_pessoas = {1};".format(
+                dt_primeira_cnh, i_pessoas)
 
         print(u)
         executar(u)
-   
-#Atualiza a data de nascimento de acordo com a do responsavel
+
+
+# Atualiza a data de nascimento de acordo com a do responsavel
 def pessoas_dt_nasc_maior_dt_nasc_responsavel():
-    
     executar(
         """
             UPDATE 
@@ -228,10 +233,10 @@ def pessoas_dt_nasc_maior_dt_nasc_responsavel():
         """
     )
 
-#Coloca nulo para um dos CPF's repetidos
-#As Pessoas (0,0) possuem o mesmo CPF!
-def pessoas_cpf_repetido():
 
+# Coloca nulo para um dos CPF's repetidos
+# As Pessoas (0,0) possuem o mesmo CPF!
+def pessoas_cpf_repetido():
     resultado = consultar(
         """
             SELECT
@@ -253,16 +258,16 @@ def pessoas_cpf_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
+
             u = "UPDATE bethadba.pessoas_fisicas SET cpf = NULL WHERE i_pessoas = {};".format(identificador)
-            
+
             print(u)
             executar(u)
 
-#Coloca nulo para um dos PIS's repetidos
-#As Pessoas (0,0) possuem o mesmo número do PIS!
-def pessoas_pis_repetido():
 
+# Coloca nulo para um dos PIS's repetidos
+# As Pessoas (0,0) possuem o mesmo número do PIS!
+def pessoas_pis_repetido():
     resultado = consultar(
         """
             SELECT
@@ -284,16 +289,16 @@ def pessoas_pis_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
+
             u = "UPDATE bethadba.pessoas_fisicas SET num_pis = NULL WHERE i_pessoas = {};".format(identificador)
-            
+
             print(u)
             executar(u)
 
-#Verifica se o PIS é valido
-#PIS inválido
-def pessoas_pis_invalido():
 
+# Verifica se o PIS é valido
+# PIS inválido
+def pessoas_pis_invalido():
     resultado = consultar(
         """
            SELECT
@@ -312,12 +317,13 @@ def pessoas_pis_invalido():
 
         if not pis_validar(pis):
             u = "UPDATE bethadba.pessoas_fisicas SET num_pis = NULL WHERE i_pessoas = {};".format(identificador)
-            
-            executar(u)          
 
-#Gera CNPJ aleatorio para pessoas com CNPJ nulo
+            executar(u)
+
+        # Gera CNPJ aleatorio para pessoas com CNPJ nulo
+
+
 def pessoas_sem_cnpj():
-
     resultado = consultar(
         """ 
             SELECT 
@@ -341,9 +347,9 @@ def pessoas_sem_cnpj():
             """.format(cnpj_gerar(False), identificador)
         )
 
-#Renomeia a descrição dos logradouros que tem caracter especial no inicio da descrição
-def ruas_nome_caracter_especial():
 
+# Renomeia a descrição dos logradouros que tem caracter especial no inicio da descrição
+def ruas_nome_caracter_especial():
     executar(
         """
             UPDATE 
@@ -355,9 +361,9 @@ def ruas_nome_caracter_especial():
         """
     )
 
-#Adiona um nome aleatorio para o nome da rua que está vazio
-def ruas_sem_nome():
 
+# Adiona um nome aleatorio para o nome da rua que está vazio
+def ruas_sem_nome():
     executar(
         """
             UPDATE 
@@ -370,9 +376,9 @@ def ruas_sem_nome():
         """
     )
 
-#Coloca a cidade da entidade
-def ruas_sem_cidade():
 
+# Coloca a cidade da entidade
+def ruas_sem_cidade():
     executar(
         """
             UPDATE 
@@ -384,9 +390,9 @@ def ruas_sem_cidade():
         """
     )
 
-#Renomeia os logradouros com descrição repetidos
-def ruas_nome_repetido():
 
+# Renomeia os logradouros com descrição repetidos
+def ruas_nome_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -411,15 +417,16 @@ def ruas_nome_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
-            u = "UPDATE bethadba.ruas SET nome = '{}' WHERE i_ruas = {};".format((nome + " |" + str(index)), identificador)
+
+            u = "UPDATE bethadba.ruas SET nome = '{}' WHERE i_ruas = {};".format((nome + " |" + str(index)),
+                                                                                 identificador)
 
             print(u)
             executar(u)
 
-#Renomeia os tipos bases repetidos
-def tipos_bases_repetido():
 
+# Renomeia os tipos bases repetidos
+def tipos_bases_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -442,15 +449,16 @@ def tipos_bases_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
-            u = "UPDATE bethadba.tipos_bases SET nome = '{}'  WHERE i_tipos_bases = {};".format((nome + " |" + str(index)), identificador)
+
+            u = "UPDATE bethadba.tipos_bases SET nome = '{}'  WHERE i_tipos_bases = {};".format(
+                (nome + " |" + str(index)), identificador)
 
             print(u)
             executar(u)
 
-#Renomeia os atos com número nulo
-def atos_sem_numero():
 
+# Renomeia os atos com número nulo
+def atos_sem_numero():
     resultado = consultar(
         """
             SELECT 
@@ -466,16 +474,16 @@ def atos_sem_numero():
         identificador = i[0]
 
         numero = "NAO INFOR. " + str(index)
-        
+
         u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numero, identificador)
 
         print(u)
         executar(u)
 
-#Renomeia os atos repetidos
-#Já existe um ato com o tipo e número oficial informado
-def atos_repetido():
 
+# Renomeia os atos repetidos
+# Já existe um ato com o tipo e número oficial informado
+def atos_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -496,26 +504,26 @@ def atos_repetido():
     for i in resultado:
         lista = i[0].split(',')
         numero = i[1]
-        
+
         for index, identificador in enumerate(lista):
 
             if index == 0:
                 continue
-            
-            numero_novo = numero + " |" + str(index) 
+
+            numero_novo = numero + " |" + str(index)
 
             if len(numero) > 13:
-                numero_novo = numero[:13] + " |" + str(index) 
+                numero_novo = numero[:13] + " |" + str(index)
 
             u = "UPDATE bethadba.atos SET num_ato = '{}'  WHERE i_atos = {};".format(numero_novo, identificador)
 
             print(u)
             executar(u)
 
-#Adiciona o CBO mais utilizado no cargo
-#O campo CBO é obrigatório
-def cargos_sem_cbo():
 
+# Adiciona o CBO mais utilizado no cargo
+# O campo CBO é obrigatório
+def cargos_sem_cbo():
     executar(
         """
             UPDATE 
@@ -538,9 +546,9 @@ def cargos_sem_cbo():
         """.format(lista_entidade)
     )
 
-#Adiciona uma categoria eSocial qualquer no vinculo empregaticio
-def vinculos_sem_esocial():
 
+# Adiciona uma categoria eSocial qualquer no vinculo empregaticio
+def vinculos_sem_esocial():
     executar(
         """
             UPDATE 
@@ -557,9 +565,9 @@ def vinculos_sem_esocial():
         """
     )
 
-#Renomeia os vinculos empregaticios repetidos
-def vinculos_descricao_repetido():
 
+# Renomeia os vinculos empregaticios repetidos
+def vinculos_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -580,23 +588,24 @@ def vinculos_descricao_repetido():
         descricao = i[1]
 
         for index, identificador in enumerate(lista):
-            
+
             if index == 0:
                 continue
-            
-            descricao_novo = descricao + " |" + str(index) 
+
+            descricao_novo = descricao + " |" + str(index)
 
             if len(descricao) > 26:
-                descricao_novo = descricao[:26] + " |" + str(index) 
+                descricao_novo = descricao[:26] + " |" + str(index)
 
-            u = "UPDATE bethadba.vinculos SET descricao = '{}'  WHERE i_vinculos = {};".format(descricao_novo, identificador)
-            
+            u = "UPDATE bethadba.vinculos SET descricao = '{}'  WHERE i_vinculos = {};".format(descricao_novo,
+                                                                                               identificador)
+
             print(u)
             executar(u)
 
-#Adiciona uma categoria eSocial qualquer no motivo de rescisão
-def motivos_resc_sem_esocial():
 
+# Adiciona uma categoria eSocial qualquer no motivo de rescisão
+def motivos_resc_sem_esocial():
     executar(
         """
             UPDATE 
@@ -608,9 +617,9 @@ def motivos_resc_sem_esocial():
         """
     )
 
-#Fecha as folha que não foram fechadas confome competencia passada por parametro
-def folha_fechamento(competencia):
 
+# Fecha as folha que não foram fechadas confome competencia passada por parametro
+def folha_fechamento(competencia):
     executar(
         """
             UPDATE 
@@ -638,9 +647,9 @@ def folha_fechamento(competencia):
         """.format(competencia)
     )
 
-#Adiciona uma categoria eSocial qualquer no motivo de aposentadoria
-def motivos_apos_sem_esocial():
 
+# Adiciona uma categoria eSocial qualquer no motivo de aposentadoria
+def motivos_apos_sem_esocial():
     executar(
         """
             UPDATE 
@@ -652,9 +661,9 @@ def motivos_apos_sem_esocial():
         """
     )
 
-#Coloca R$0,01 nos historicos salariais com salario zerado ou nulo
-def hist_salariais_sem_salario():
 
+# Coloca R$0,01 nos historicos salariais com salario zerado ou nulo
+def hist_salariais_sem_salario():
     executar(
         """
             UPDATE 
@@ -667,10 +676,10 @@ def hist_salariais_sem_salario():
         """.format(lista_entidade)
     )
 
-#Faz a exclusão dessas variaveis
-#Verifica variaveis com data inicial ou data final maior que data de rescisão
-def variaveis_dt_inical_maior_dt_rescisao():
 
+# Faz a exclusão dessas variaveis
+# Verifica variaveis com data inicial ou data final maior que data de rescisão
+def variaveis_dt_inical_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT 
@@ -697,14 +706,16 @@ def variaveis_dt_inical_maior_dt_rescisao():
 
     delete = ""
     for i in resultado:
-        delete += "DELETE FROM bethadba.variaveis_emprestimos_parc WHERE i_entidades = {} AND i_funcionarios = {} AND i_eventos = {} AND i_processamentos = {} AND i_tipos_proc = {} AND dt_inicial = '{}' AND dt_final = '{}';\n".format(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
-        delete += "DELETE FROM bethadba.variaveis WHERE i_entidades = {} AND i_funcionarios = {} AND i_eventos = {} AND i_processamentos = {} AND i_tipos_proc = {} AND dt_inicial = '{}' AND dt_final = '{}';\n".format(i[0], i[1], i[2], i[3], i[4], i[5], i[6])
-    
+        delete += "DELETE FROM bethadba.variaveis_emprestimos_parc WHERE i_entidades = {} AND i_funcionarios = {} AND i_eventos = {} AND i_processamentos = {} AND i_tipos_proc = {} AND dt_inicial = '{}' AND dt_final = '{}';\n".format(
+            i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+        delete += "DELETE FROM bethadba.variaveis WHERE i_entidades = {} AND i_funcionarios = {} AND i_eventos = {} AND i_processamentos = {} AND i_tipos_proc = {} AND dt_inicial = '{}' AND dt_final = '{}';\n".format(
+            i[0], i[1], i[2], i[3], i[4], i[5], i[6])
+
     executar(delete)
 
-#Renomeia as movimetação de pessoal repetidos
-def tipos_movpes_descricao_repetido():
 
+# Renomeia as movimetação de pessoal repetidos
+def tipos_movpes_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -723,25 +734,26 @@ def tipos_movpes_descricao_repetido():
     for i in resultado:
         lista = i[0].split(',')
         descricao = i[1]
-        
+
         for index, identificador in enumerate(lista):
 
             if index == 0:
                 continue
-            
-            descricao_novo = descricao + " |" + str(index) 
+
+            descricao_novo = descricao + " |" + str(index)
 
             if len(descricao) > 47:
-                descricao_novo = descricao[:47] + " |" + str(index) 
+                descricao_novo = descricao[:47] + " |" + str(index)
 
-            u = "UPDATE bethadba.tipos_movpes SET descricao = '{}'  WHERE i_tipos_movpes = {};".format(descricao_novo, identificador)
-            
+            u = "UPDATE bethadba.tipos_movpes SET descricao = '{}'  WHERE i_tipos_movpes = {};".format(descricao_novo,
+                                                                                                       identificador)
+
             print(u)
             executar(u)
-        
-#Renomeia os tipos de afastamentos repetidos
-def tipos_afast_descricao_repetido():
 
+
+# Renomeia os tipos de afastamentos repetidos
+def tipos_afast_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -760,25 +772,26 @@ def tipos_afast_descricao_repetido():
     for i in resultado:
         lista = i[0].split(',')
         descricao = i[1]
-        
+
         for index, identificador in enumerate(lista):
-            
+
             if index == 0:
                 continue
-            
-            descricao_novo = descricao + " |" + str(index) 
+
+            descricao_novo = descricao + " |" + str(index)
 
             if len(descricao) > 47:
-                descricao_novo = descricao[:47] + " |" + str(index) 
+                descricao_novo = descricao[:47] + " |" + str(index)
 
-            u = "UPDATE bethadba.tipos_afast SET descricao = '{}'  WHERE i_tipos_afast = {};".format(descricao_novo, identificador)
-            
+            u = "UPDATE bethadba.tipos_afast SET descricao = '{}'  WHERE i_tipos_afast = {};".format(descricao_novo,
+                                                                                                     identificador)
+
             print(u)
             executar(u)
 
-#Coloca a data de rescisão na data de alteração
-def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
 
+# Coloca a data de rescisão na data de alteração
+def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT
@@ -800,24 +813,29 @@ def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
 
     for i in resultado:
         query = ""
-        quantidade = "SELECT * FROM bethadba.hist_funcionarios WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';".format(i[0], i[1], i[4])
-        
+        quantidade = "SELECT * FROM bethadba.hist_funcionarios WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';".format(
+            i[0], i[1], i[4])
+
         if len(consultar(quantidade)) > 0:
-            query += "DELETE FROM bethadba.hist_funcionarios WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(i[0], i[1], i[2])
-            query += "DELETE FROM bethadba.hist_funcionarios_prop_adic WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(i[0], i[1], i[2])
-            
+            query += "DELETE FROM bethadba.hist_funcionarios WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(
+                i[0], i[1], i[2])
+            query += "DELETE FROM bethadba.hist_funcionarios_prop_adic WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(
+                i[0], i[1], i[2])
+
             print(query)
             executar(query)
         else:
-            query += "UPDATE bethadba.hist_funcionarios SET dt_alteracoes = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(i[4], i[0], i[1], i[2])
-            query += "UPDATE bethadba.hist_funcionarios_prop_adic SET dt_alteracoes = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(i[4], i[0], i[1], i[2])
-            
+            query += "UPDATE bethadba.hist_funcionarios SET dt_alteracoes = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(
+                i[4], i[0], i[1], i[2])
+            query += "UPDATE bethadba.hist_funcionarios_prop_adic SET dt_alteracoes = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_alteracoes = '{}';\n".format(
+                i[4], i[0], i[1], i[2])
+
             print(query)
             executar(query)
-    
-#Coloca a data de rescisão na data de alteração
-def hist_salariais_dt_alteracoes_maior_dt_rescisao():
 
+
+# Coloca a data de rescisão na data de alteração
+def hist_salariais_dt_alteracoes_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT
@@ -839,7 +857,7 @@ def hist_salariais_dt_alteracoes_maior_dt_rescisao():
     )
 
     for i in resultado:
-      
+
         u = """
             UPDATE
                 bethadba.hist_salariais
@@ -874,9 +892,9 @@ def hist_salariais_dt_alteracoes_maior_dt_rescisao():
         else:
             executar(u)
 
-#Coloca a data de rescisão na data de alteração
-def hist_cargos_dt_alteracoes_maior_dt_rescisao():
 
+# Coloca a data de rescisão na data de alteração
+def hist_cargos_dt_alteracoes_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT
@@ -931,10 +949,10 @@ def hist_cargos_dt_alteracoes_maior_dt_rescisao():
 
         else:
             executar(u)
-        
-#Coloca 7 - (Licença SEM vencimentos) para as classificações que estão com código errado no tipo de afastamento
-def tipos_afast_classif_invalida():
 
+
+# Coloca 7 - (Licença SEM vencimentos) para as classificações que estão com código errado no tipo de afastamento
+def tipos_afast_classif_invalida():
     executar(
         """
             UPDATE
@@ -946,9 +964,9 @@ def tipos_afast_classif_invalida():
         """
     )
 
-#Renomeia os tipos de atos repetidos
-def tipos_atos_nome_repetido():
 
+# Renomeia os tipos de atos repetidos
+def tipos_atos_nome_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -967,25 +985,26 @@ def tipos_atos_nome_repetido():
     for i in resultado:
         lista = i[0].split(',')
         descricao = i[1]
-        
+
         for index, identificador in enumerate(lista):
 
             if index == 0:
                 continue
-            
-            descricao_novo = descricao + " |" + str(index) 
+
+            descricao_novo = descricao + " |" + str(index)
 
             if len(descricao) > 37:
-                descricao_novo = descricao[:37] + " |" + str(index) 
+                descricao_novo = descricao[:37] + " |" + str(index)
 
-            u = "UPDATE bethadba.tipos_atos SET nome = '{}' WHERE i_tipos_atos = {};".format(descricao_novo, identificador)
-            
+            u = "UPDATE bethadba.tipos_atos SET nome = '{}' WHERE i_tipos_atos = {};".format(descricao_novo,
+                                                                                             identificador)
+
             print(u)
             executar(u)
 
-#Renomeia as descrições repetidas no horario ponto
-def horarios_ponto_descricao_repetido():
 
+# Renomeia as descrições repetidas no horario ponto
+def horarios_ponto_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -1006,16 +1025,16 @@ def horarios_ponto_descricao_repetido():
         entidade = i[0].split(',')
         horario = i[1].split(',')
         descricao = i[2]
-        
+
         for index in range(len(entidade)):
-            
+
             if index == 0:
                 continue
-            
+
             descricao_novo = descricao + " |" + str(index)
 
             if len(descricao) > 47:
-                descricao_novo = descricao[:47] + " |" + str(index) 
+                descricao_novo = descricao[:47] + " |" + str(index)
 
             u = """
                 UPDATE 
@@ -1025,12 +1044,12 @@ def horarios_ponto_descricao_repetido():
                 WHERE 
                     i_entidades = {} AND i_horarios_ponto = {};
             """.format(descricao_novo, entidade[index], horario[index])
-            
+
             executar(u)
 
-#Renomeia as descrições repetidas na turma
-def turmas_descricao_repetido():
 
+# Renomeia as descrições repetidas na turma
+def turmas_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -1051,25 +1070,26 @@ def turmas_descricao_repetido():
         entidade = i[0].split(',')
         turma = i[1].split(',')
         descricao = i[2]
-        
+
         for index in range(len(entidade)):
-            
+
             if index == 0:
                 continue
-            
+
             descricao_novo = descricao + " |" + str(index)
 
             if len(descricao) > 57:
-                descricao_novo = descricao[:57] + " |" + str(index) 
+                descricao_novo = descricao[:57] + " |" + str(index)
 
-            u = "UPDATE bethadba.turmas SET descricao = '{}' WHERE i_entidades = {} AND i_turmas = {};".format(descricao_novo, entidade[index], turma[index])
-            
+            u = "UPDATE bethadba.turmas SET descricao = '{}' WHERE i_entidades = {} AND i_turmas = {};".format(
+                descricao_novo, entidade[index], turma[index])
+
             print(u)
             executar(u)
 
-#Coloca um ponto (.) nos separadores nulos
-def niveis_organ_separador_invalido():
 
+# Coloca um ponto (.) nos separadores nulos
+def niveis_organ_separador_invalido():
     executar(
         """
             UPDATE 
@@ -1081,9 +1101,9 @@ def niveis_organ_separador_invalido():
         """
     )
 
-#Adiciona a natureza de texto juridico mais utilizada no ato
-def atos_sem_natureza_texto_juridico():
 
+# Adiciona a natureza de texto juridico mais utilizada no ato
+def atos_sem_natureza_texto_juridico():
     executar(
         """
             UPDATE 
@@ -1095,9 +1115,9 @@ def atos_sem_natureza_texto_juridico():
         """
     )
 
-#Coloca a data de publicação do ato na data de fonte de divulgação
-def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
 
+# Coloca a data de publicação do ato na data de fonte de divulgação
+def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
     executar(
         """
             UPDATE 
@@ -1122,9 +1142,9 @@ def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
         """
     )
 
-#Inseri um tipo de afastamento na configuração do cancelamento de férias
-def canc_ferias_sem_tipos_afast():
 
+# Inseri um tipo de afastamento na configuração do cancelamento de férias
+def canc_ferias_sem_tipos_afast():
     executar(
         """
             INSERT INTO bethadba.canc_ferias_afast
@@ -1138,9 +1158,9 @@ def canc_ferias_sem_tipos_afast():
         """
     )
 
-#Renomeia descricao de cofiguração de organograma maior que 30 caracteres
-def config_organograma_descricao_invalida():
 
+# Renomeia descricao de cofiguração de organograma maior que 30 caracteres
+def config_organograma_descricao_invalida():
     executar(
         """
             UPDATE 
@@ -1161,11 +1181,11 @@ def config_organograma_descricao_invalida():
             WHERE 
                 co.i_config_organ = config_organograma.i_config_organ;
         """
-    )    
+    )
 
-#Renomeia descricao de cofiguração de organograma repetido
+
+# Renomeia descricao de cofiguração de organograma repetido
 def config_organ_descricao_repetido():
-
     resultado = consultar(
         """
             SELECT 
@@ -1189,20 +1209,21 @@ def config_organ_descricao_repetido():
 
             if index == 0:
                 continue
-            
-            nome_novo = nome + " |" + str(index) 
+
+            nome_novo = nome + " |" + str(index)
 
             if len(nome) > 27:
-                nome_novo = nome[:27] + " |" + str(index) 
-            
-            u = "UPDATE bethadba.config_organ SET descricao = '{}'  WHERE i_config_organ = {};".format(nome_novo, identificador)
+                nome_novo = nome[:27] + " |" + str(index)
+
+            u = "UPDATE bethadba.config_organ SET descricao = '{}'  WHERE i_config_organ = {};".format(nome_novo,
+                                                                                                       identificador)
 
             print(u)
             executar(u)
 
-#Adiciona um CPF valido
-def pessoas_cpf_invalido():
 
+# Adiciona um CPF valido
+def pessoas_cpf_invalido():
     resultado = consultar(
         """
            SELECT
@@ -1218,15 +1239,15 @@ def pessoas_cpf_invalido():
     for i in resultado:
         identificador = i[0]
         cpf = i[1]
-       
+
         if not cpf_validar(cpf):
             u = "UPDATE bethadba.pessoas_fisicas SET cpf = NULL WHERE i_pessoas = {};".format(identificador)
 
             executar(u)
 
-#Adiciona um CNPJ valido
-def pessoas_cnpj_invalido():
 
+# Adiciona um CNPJ valido
+def pessoas_cnpj_invalido():
     resultado = consultar(
         """
            SELECT
@@ -1240,15 +1261,16 @@ def pessoas_cnpj_invalido():
     for i in resultado:
         identificador = i[0]
         cnpj = i[1]
-       
+
         if not cnpj_validar(cnpj):
-            u = "UPDATE bethadba.pessoas_juridicas SET cnpj = '{}'  WHERE i_pessoas = {};".format(cnpj_gerar(), identificador)
+            u = "UPDATE bethadba.pessoas_juridicas SET cnpj = '{}'  WHERE i_pessoas = {};".format(cnpj_gerar(),
+                                                                                                  identificador)
 
             executar(u)
-            
-#Adiciona um RG aleatorio
-def pessoas_rg_repetido():
 
+
+# Adiciona um RG aleatorio
+def pessoas_rg_repetido():
     resultado = consultar(
         """
             SELECT
@@ -1270,16 +1292,16 @@ def pessoas_rg_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
+
             u = "UPDATE bethadba.pessoas_fisicas SET rg = NULL  WHERE i_pessoas = {};".format(identificador)
 
             print(u)
             executar(u)
 
-#Renomeia os cargos com descricão repetidos
-#Já existe um cargo com a descrição informada
-def cargos_descricao_repetido():
 
+# Renomeia os cargos com descricão repetidos
+# Já existe um cargo com a descrição informada
+def cargos_descricao_repetido():
     resultado = consultar(
         """
             SELECT
@@ -1304,19 +1326,23 @@ def cargos_descricao_repetido():
         cargo = i[0].split(',')
         entidade = i[1].split(',')
         nome = i[2]
-        
+
         for index in range(len(entidade)):
-            
+
             if index == 0:
                 continue
-            
+
             nome_novo = nome + " |" + str(index)
 
             if len(nome) > 97:
-                nome_novo = nome[:97] + " |" + str(index) 
+                nome_novo = nome[:97] + " |" + str(index)
 
-            u1 = "UPDATE bethadba.cargos SET nome = '{}' WHERE i_entidades = {} AND i_cargos = {};".format(nome_novo, entidade[index], cargo[index])
-            u2 = "UPDATE bethadba.hist_cargos_cadastro SET nome = '{}' WHERE i_entidades = {} AND i_cargos = {};".format(nome_novo, entidade[index], cargo[index])
+            u1 = "UPDATE bethadba.cargos SET nome = '{}' WHERE i_entidades = {} AND i_cargos = {};".format(nome_novo,
+                                                                                                           entidade[
+                                                                                                               index],
+                                                                                                           cargo[index])
+            u2 = "UPDATE bethadba.hist_cargos_cadastro SET nome = '{}' WHERE i_entidades = {} AND i_cargos = {};".format(
+                nome_novo, entidade[index], cargo[index])
 
             print(u1)
             print(u2)
@@ -1324,10 +1350,10 @@ def cargos_descricao_repetido():
             executar(u1)
             executar(u2)
 
-#Adiciona um valor fixo para o termino de vigencia maior que 2099
-#Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
-def bases_calc_outras_empresas_vigencia_invalida():
 
+# Adiciona um valor fixo para o termino de vigencia maior que 2099
+# Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
+def bases_calc_outras_empresas_vigencia_invalida():
     executar(
         """
             UPDATE 
@@ -1339,9 +1365,9 @@ def bases_calc_outras_empresas_vigencia_invalida():
         """
     )
 
-#Remove os emails invalidos
-def pessoas_email_invalido():
 
+# Remove os emails invalidos
+def pessoas_email_invalido():
     resultado = consultar(
         """
             SELECT 
@@ -1364,9 +1390,9 @@ def pessoas_email_invalido():
             print(u)
             executar(u)
 
-#Remove o número do endereço que está vazio
-def pessoas_enderecos_sem_numero():
 
+# Remove o número do endereço que está vazio
+def pessoas_enderecos_sem_numero():
     executar(
         """
             UPDATE 
@@ -1378,9 +1404,9 @@ def pessoas_enderecos_sem_numero():
         """
     )
 
-#Adiciona previdencia federal para os funcionarios sem previdencia
+
+# Adiciona previdencia federal para os funcionarios sem previdencia
 def funcionarios_sem_previdencia():
-    
     executar(
         """
             UPDATE 
@@ -1415,10 +1441,10 @@ def funcionarios_sem_previdencia():
         """.format(lista_entidade)
     )
 
-#Exclui os eventos de média/vantagem que não tem eventos vinculados
-#Os eventos de composição da média são obrigatórios
-def mediasvant_sem_composicao():
 
+# Exclui os eventos de média/vantagem que não tem eventos vinculados
+# Os eventos de composição da média são obrigatórios
+def mediasvant_sem_composicao():
     resultado = consultar(
         """
             SELECT 
@@ -1435,15 +1461,15 @@ def mediasvant_sem_composicao():
 
     for i in resultado:
         idEventos = i[0]
-        
+
         d = "DELETE FROM bethadba.mediasvant WHERE i_eventos = {};".format(idEventos)
-        
+
         print(d)
         executar(d)
 
-#Exclui os eventos de média/vantagem pai que estão vinculados a outros
-def mediasvant_eve_composicao_invalida():
 
+# Exclui os eventos de média/vantagem pai que estão vinculados a outros
+def mediasvant_eve_composicao_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -1459,14 +1485,15 @@ def mediasvant_eve_composicao_invalida():
     for i in resultado:
         evento_media = i[0]
         evento = i[1]
-        
-        d = "DELETE FROM bethadba.mediasvant_eve WHERE i_eventos_medias = {} AND i_eventos = {};".format(evento_media, evento)
-        
+
+        d = "DELETE FROM bethadba.mediasvant_eve WHERE i_eventos_medias = {} AND i_eventos = {};".format(evento_media,
+                                                                                                         evento)
+
         executar(d)
 
-#Verifica a data de admissão da matrícula se é posterior a data de início da matrícula nesta lotação física
-def locais_mov_dt_inicial_menor_dt_admissao():
 
+# Verifica a data de admissão da matrícula se é posterior a data de início da matrícula nesta lotação física
+def locais_mov_dt_inicial_menor_dt_admissao():
     executar(
         """
             UPDATE 
@@ -1497,10 +1524,10 @@ def locais_mov_dt_inicial_menor_dt_admissao():
         """.format(lista_entidade)
     )
 
-#Limita a descrição do motivo de alteração do ponto em 30 caracteres
-#A descrição não pode conter mais de 30 caracteres
-def motivos_altponto_descricao_invalida():
 
+# Limita a descrição do motivo de alteração do ponto em 30 caracteres
+# A descrição não pode conter mais de 30 caracteres
+def motivos_altponto_descricao_invalida():
     executar(
         """
             UPDATE 
@@ -1521,10 +1548,10 @@ def motivos_altponto_descricao_invalida():
                 ma.i_motivos_altponto = alteracao_ponto.i_motivos_altponto;  
         """
     )
-    
-#Limita o numero de caracteres em 150 no motivo dos afastamentos
-def afastamentos_observacao_invalida():
 
+
+# Limita o numero de caracteres em 150 no motivo dos afastamentos
+def afastamentos_observacao_invalida():
     executar(
         """
             UPDATE 
@@ -1551,10 +1578,10 @@ def afastamentos_observacao_invalida():
         """
     )
 
-#Verifica a data inicial no afastamento se é maior que a data final 
-#A quantidade de dias não pode ser menor que 0
-def ferias_dt_gozo_ini_maior_dt_gozo_fin():
 
+# Verifica a data inicial no afastamento se é maior que a data final
+# A quantidade de dias não pode ser menor que 0
+def ferias_dt_gozo_ini_maior_dt_gozo_fin():
     executar(
         """
             UPDATE 
@@ -1583,10 +1610,10 @@ def ferias_dt_gozo_ini_maior_dt_gozo_fin():
         """.format(lista_entidade)
     )
 
-#Adiciona o motivo de aposentadoria 1 - Aposentadoria por tempo de serviço, com rescisão contratual
-#O motivo de rescisão é obrigatório
-def rescisoes_sem_motivos_apos():
 
+# Adiciona o motivo de aposentadoria 1 - Aposentadoria por tempo de serviço, com rescisão contratual
+# O motivo de rescisão é obrigatório
+def rescisoes_sem_motivos_apos():
     executar(
         """
             UPDATE
@@ -1600,9 +1627,9 @@ def rescisoes_sem_motivos_apos():
         """.format(lista_entidade)
     )
 
-#Renomeia os grupos funcionais repetidos
-def grupos_nome_repetido():
 
+# Renomeia os grupos funcionais repetidos
+def grupos_nome_repetido():
     resultado = consultar(
         """
             SELECT
@@ -1625,16 +1652,16 @@ def grupos_nome_repetido():
         entidade = i[0].split(',')
         grupo = i[1].split(',')
         nome = i[2]
-        
+
         for index in range(len(entidade)):
 
             if index == 0:
                 continue
-            
+
             nome_novo = nome + " |" + str(index)
 
             if len(nome) > 57:
-                nome_novo = nome[:57] + " |" + str(index) 
+                nome_novo = nome[:57] + " |" + str(index)
 
             u = """
                 UPDATE 
@@ -1644,14 +1671,14 @@ def grupos_nome_repetido():
                 WHERE 
                     i_entidades = {} AND i_grupos = {};
             """.format(nome_novo, entidade[index], grupo[index])
-            
+
             print(u)
             executar(u)
 
-#A data inicial do benefício não pode ser menor que a data de admissão
-#Plano de saude
-def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
 
+# A data inicial do benefício não pode ser menor que a data de admissão
+# Plano de saude
+def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
     executar(
         """
             UPDATE 
@@ -1680,12 +1707,12 @@ def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
                 fp.i_pessoas = plano_saude.i_pessoas AND
                 fp.i_sequenciais = plano_saude.i_sequenciais;    
         """.format(lista_entidade)
-    ) 
+    )
 
-#Remove caracteres especiais e espaços para que o número do telefone seja menor ou igual a 11
-#O telefone pode conter no máximo 11 caracteres
+
+# Remove caracteres especiais e espaços para que o número do telefone seja menor ou igual a 11
+# O telefone pode conter no máximo 11 caracteres
 def locais_trab_fone_invalido():
-
     executar(
         """
             UPDATE
@@ -1697,11 +1724,11 @@ def locais_trab_fone_invalido():
                 i_entidades IN ({});    
         """.format(lista_entidade)
     )
-        
-#Coloca a data de vigor na data de criação
-#A data de criação é obrigatória
-def atos_sem_dt_inicial():
 
+
+# Coloca a data de vigor na data de criação
+# A data de criação é obrigatória
+def atos_sem_dt_inicial():
     executar(
         """
             UPDATE 
@@ -1711,11 +1738,11 @@ def atos_sem_dt_inicial():
             WHERE 
                 a.dt_inicial IS NULL;                                  
         """
-    ) 
+    )
 
-#Renomeia as descrições repetidas dos niveis salariais
+
+# Renomeia as descrições repetidas dos niveis salariais
 def niveis_descricao_repetido():
-
     resultado = consultar(
         """
             SELECT 
@@ -1738,26 +1765,27 @@ def niveis_descricao_repetido():
         entidade = i[0].split(',')
         nivel = i[1].split(',')
         nome = i[2]
-        
+
         for index in range(len(entidade)):
-            
+
             if index == 0:
                 continue
-            
+
             descricao_novo = nome + " |" + str(index)
 
             if len(nome) > 46:
-                descricao_novo = nome[:46] + " |" + str(index) 
+                descricao_novo = nome[:46] + " |" + str(index)
 
-            u = "UPDATE bethadba.niveis SET nome = '{}' WHERE i_entidades = {} AND i_niveis = {};".format(descricao_novo, entidade[index], nivel[index])
-            
+            u = "UPDATE bethadba.niveis SET nome = '{}' WHERE i_entidades = {} AND i_niveis = {};".format(
+                descricao_novo, entidade[index], nivel[index])
+
             print(u)
             executar(u)
 
-#Recodifica os cartões pontos que estão diferentes de sua matricula ou repetidos
-#Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
-def funcionarios_cartao_ponto_repetido():
 
+# Recodifica os cartões pontos que estão diferentes de sua matricula ou repetidos
+# Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
+def funcionarios_cartao_ponto_repetido():
     funcionario = consultar(
         """
             SELECT 
@@ -1789,7 +1817,7 @@ def funcionarios_cartao_ponto_repetido():
             WHERE 
                 bate_cartao = 'S' AND i_entidades IN ({});                                  
         """.format(lista_entidade)
-    ) 
+    )
 
     executar(
         """
@@ -1800,12 +1828,12 @@ def funcionarios_cartao_ponto_repetido():
             WHERE 
                 bate_cartao = 'N' AND i_entidades IN ({});                                  
         """.format(lista_entidade)
-    ) 
+    )
 
-#Coloca a data de nomeação na data de posse
-#O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
+
+# Coloca a data de nomeação na data de posse
+# O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
 def cargos_dt_nomeacao_maior_dt_posse():
-
     executar(
         """
             UPDATE 
@@ -1815,12 +1843,12 @@ def cargos_dt_nomeacao_maior_dt_posse():
             WHERE 
                 dt_nomeacao > dt_posse AND i_entidades IN ({});                                  
         """.format(lista_entidade)
-    ) 
+    )
 
-#Colaca os dados da conta bancaria de acordo com o cadastro de conta bancaria da pessoa
-#Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
+
+# Colaca os dados da conta bancaria de acordo com o cadastro de conta bancaria da pessoa
+# Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
 def funcionarios_conta_bancaria_invalida():
-
     executar(
         """
             UPDATE 
@@ -1854,12 +1882,12 @@ def funcionarios_conta_bancaria_invalida():
                 hff.i_funcionarios = conta_bancaria.i_funcionarios AND
                 hff.dt_alteracoes = conta_bancaria.dt_alteracoes;
         """.format(lista_entidade)
-    ) 
+    )
 
-#Coloca previdencia federal para os historicos de funcionarios com mais do que uma previdencia informada
-#Apenas uma previdência pode ser informada
+
+# Coloca previdencia federal para os historicos de funcionarios com mais do que uma previdencia informada
+# Apenas uma previdência pode ser informada
 def funcionarios_com_mais_de_uma_previdencia():
-
     executar(
         """
             UPDATE 
@@ -1886,12 +1914,12 @@ def funcionarios_com_mais_de_uma_previdencia():
                 hff.i_funcionarios = historico_funcionario.i_funcionarios AND
                 hff.dt_alteracoes = historico_funcionario.dt_alteracoes;
         """.format(lista_entidade)
-    ) 
+    )
 
-#Ajusta os afastamentos com data inicial menor que data de admissão
-#A data inicial não poderá ser menor que a data de admissão
+
+# Ajusta os afastamentos com data inicial menor que data de admissão
+# A data inicial não poderá ser menor que a data de admissão
 def afastamentos_dt_afastamento_menor_dt_admissao():
-
     resultado = consultar(
         """
             SELECT 
@@ -1909,21 +1937,22 @@ def afastamentos_dt_afastamento_menor_dt_admissao():
     )
 
     for i in resultado:
-        dt_inicial = i[0]  
+        dt_inicial = i[0]
         dt_final = i[1]
         entidade = i[2]
         funcionario = i[3]
         dt_admissao = i[4]
 
-        u = "UPDATE bethadba.afastamentos SET dt_afastamento = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_afastamento = '{}';".format(dt_admissao, funcionario, entidade, dt_inicial)
+        u = "UPDATE bethadba.afastamentos SET dt_afastamento = '{}' WHERE i_funcionarios = {} AND i_entidades = {} AND dt_afastamento = '{}';".format(
+            dt_admissao, funcionario, entidade, dt_inicial)
 
         print(u)
         executar(u)
 
-#Renomeia as areas de atuação com descrição repetido
-#Já existe uma área de atuação com a descrição informada
-def areas_atuacao_nome_repetido():
 
+# Renomeia as areas de atuação com descrição repetido
+# Já existe uma área de atuação com a descrição informada
+def areas_atuacao_nome_repetido():
     resultado = consultar(
         """
            SELECT 
@@ -1946,16 +1975,17 @@ def areas_atuacao_nome_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
-            u = "UPDATE bethadba.areas_atuacao SET nome = '{}'  WHERE i_areas_atuacao = {};".format((nome + " |" + str(index)), identificador)
+
+            u = "UPDATE bethadba.areas_atuacao SET nome = '{}'  WHERE i_areas_atuacao = {};".format(
+                (nome + " |" + str(index)), identificador)
 
             print(u)
             executar(u)
 
-#Coloca 0 - Outros para os dependentes sem motivo de termino
-#O motivo de término é obrigatório
-def dependentes_sem_dt_fim():
 
+# Coloca 0 - Outros para os dependentes sem motivo de termino
+# O motivo de término é obrigatório
+def dependentes_sem_dt_fim():
     executar(
         """
             UPDATE
@@ -1966,12 +1996,12 @@ def dependentes_sem_dt_fim():
                 mot_fin_depende IS NULL AND 
                 dt_fin_depende IS NOT NULL;                               
         """
-    )  
+    )
 
-#Coloca a configuração de feroas mais utilizada para os cargos sem configuração de ferias
-#A configuração de férias é obrigatória
+
+# Coloca a configuração de feroas mais utilizada para os cargos sem configuração de ferias
+# A configuração de férias é obrigatória
 def cargos_sem_configuracao_ferias():
-
     executar(
         """
             UPDATE
@@ -1983,12 +2013,12 @@ def cargos_sem_configuracao_ferias():
                 i_config_ferias IS NULL OR 
                 i_config_ferias_subst IS NULL;                               
         """
-    )  
+    )
 
-#Coloca a data de admissão na data de opção do FGTS
-#Quando a data de admissão for posterior a 04/10/1988, a data da opção do FGTS deve ser igual a data de admissão
+
+# Coloca a data de admissão na data de opção do FGTS
+# Quando a data de admissão for posterior a 04/10/1988, a data da opção do FGTS deve ser igual a data de admissão
 def opcao_fgts_diferente_dt_admissao():
-
     executar(
         """
             UPDATE
@@ -2000,12 +2030,12 @@ def opcao_fgts_diferente_dt_admissao():
                 dt_admissao != dt_opcao_fgts AND 
                 i_entidades IN ({});                               
         """.format(lista_entidade)
-    )  
+    )
 
-#Coloca forma de pagamento em dinheiro
-#Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
+
+# Coloca forma de pagamento em dinheiro
+# Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
 def funcionarios_conta_bancaria_sem_dados():
-
     executar(
         """
             UPDATE
@@ -2017,12 +2047,12 @@ def funcionarios_conta_bancaria_sem_dados():
                 i_pessoas_contas IS NULL AND
                 i_entidades IN ({});                            
         """.format(lista_entidade)
-    ) 
+    )
 
-#Coloca 'A' - Automatico como origem de marcações para as marcacoes com origem invalida
+
+# Coloca 'A' - Automatico como origem de marcações para as marcacoes com origem invalida
 def funcionarios_maracoes_invalida():
-
-   executar(
+    executar(
         """
             UPDATE
                 bethadba.apuracoes_marc
@@ -2032,12 +2062,12 @@ def funcionarios_maracoes_invalida():
                 origem_marc NOT IN ('O','I','A') AND
                 i_entidades IN ({});                          
         """.format(lista_entidade)
-    ) 
+    )
 
-#Renomeia as ocorrencias do ponto com nome repetido
-#Já existe uma ocorrência de ponto com a descrição informada
-def ocorrencia_ponto_nome_repetido(): 
 
+# Renomeia as ocorrencias do ponto com nome repetido
+# Já existe uma ocorrência de ponto com a descrição informada
+def ocorrencia_ponto_nome_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -2060,37 +2090,41 @@ def ocorrencia_ponto_nome_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
-            u = "UPDATE bethadba.ocorrencias_ponto SET nome = '{}'  WHERE i_ocorrencias_ponto = {};".format((nome + " |" + str(index)), identificador)
+
+            u = "UPDATE bethadba.ocorrencias_ponto SET nome = '{}'  WHERE i_ocorrencias_ponto = {};".format(
+                (nome + " |" + str(index)), identificador)
 
             print(u)
             executar(u)
 
-#Busca as as configurações de dirf com eventos repetidos
-def configuracao_dirf_com_eventos_repetidos():
 
-    resultado = consultar("SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  LIST(i_eventos)     from bethadba.comprends where campo not in ('05-01','0A-02')       and campoDirf IS not NULL     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  LIST(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05') and campoDirf iISnot NULL group by campoDirf, nomeCampoDsk, chave_dsk1")
+# Busca as as configurações de dirf com eventos repetidos
+def configuracao_dirf_com_eventos_repetidos():
+    resultado = consultar(
+        "SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  LIST(i_eventos)     from bethadba.comprends where campo not in ('05-01','0A-02')       and campoDirf IS not NULL     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  LIST(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05') and campoDirf iISnot NULL group by campoDirf, nomeCampoDsk, chave_dsk1")
 
     for i in resultado:
         lista_eventos = i[3].split(',')
 
         for j in buscar_duplicatas(lista_eventos):
-            
-            evento = consultar("SELECT campo, chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos = i_eventos     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf iISnot NULL and i_eventos = {}  union all         select campo, chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  i_eventos     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05') and campoDirf iISnot NULL and i_eventos = {}".format(j))
+
+            evento = consultar(
+                "SELECT campo, chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos = i_eventos     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf iISnot NULL and i_eventos = {}  union all         select campo, chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  i_eventos     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05') and campoDirf iISnot NULL and i_eventos = {}".format(
+                    j))
 
             for k in evento:
-            
+
                 if i[1] != k[2]:
                     continue
-                
+
                 print("campo: " + i[0])
                 print("i_ventos: " + j[4])
                 print("========")
 
-#Renomeia descricao de motivo de alteração salarial repetido
-#Já existe um motivo de alteração salarial com a descrição informada
-def motivo_alt_salarial_descricao_repetido(): 
 
+# Renomeia descricao de motivo de alteração salarial repetido
+# Já existe um motivo de alteração salarial com a descrição informada
+def motivo_alt_salarial_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -2113,16 +2147,18 @@ def motivo_alt_salarial_descricao_repetido():
         for index, identificador in enumerate(lista):
             if index == 0:
                 continue
-            
-            u = "UPDATE bethadba.motivos_altsal SET descricao = '{}'  WHERE i_motivos_altsal = {};".format((descricao + " |" + str(index)), identificador)
+
+            u = "UPDATE bethadba.motivos_altsal SET descricao = '{}'  WHERE i_motivos_altsal = {};".format(
+                (descricao + " |" + str(index)), identificador)
 
             print(u)
-            executar(u)   
+            executar(u)
 
-#Remove a taxa do evento que está invalido
-#A taxa deve ser composta de no máximo 3 números inteiros e 4 decimais
+        # Remove a taxa do evento que está invalido
+
+
+# A taxa deve ser composta de no máximo 3 números inteiros e 4 decimais
 def evento_taxa_invalida():
-
     executar(
         """
             UPDATE 
@@ -2132,12 +2168,12 @@ def evento_taxa_invalida():
             WHERE 
                 taxa > 999.9999;
         """
-    )  
+    )
 
-#Altera a faixa da licença premio
-#A licença não pode conter mais de 2 dígitos
+
+# Altera a faixa da licença premio
+# A licença não pode conter mais de 2 dígitos
 def licenca_premio_faixa_invalida():
-
     executar(
         """
             UPDATE 
@@ -2147,12 +2183,12 @@ def licenca_premio_faixa_invalida():
             WHERE 
                 taxa > 99;
         """
-    )      
+    )
 
-#Cria cadastro de formação para migração
-#O profissional XXXXXX deve possuir formações cadastradas!
+
+# Cria cadastro de formação para migração
+# O profissional XXXXXX deve possuir formações cadastradas!
 def formacao_vazio():
-
     resultado = consultar(
         """
             SELECT * FROM bethadba.formacoes WHERE nome = 'Formação para conversão'
@@ -2164,14 +2200,14 @@ def formacao_vazio():
 
     id_max = len(consultar("SELECT * FROM bethadba.formacoes")) + 1
 
-    u = "INSERT INTO formacoes (i_formacoes, nome, sigla_conselho, nivel_formacao, seguranca_trab, uf_conselho) VALUES({}, 'Formação para conversão', NULL, 1,'N', NULL);".format(id_max)
+    u = "INSERT INTO formacoes (i_formacoes, nome, sigla_conselho, nivel_formacao, seguranca_trab, uf_conselho) VALUES({}, 'Formação para conversão', NULL, 1,'N', NULL);".format(
+        id_max)
 
     print(u)
     executar(u)
 
 
 def contratacao_aprendiz_vazio():
-
     executar(
         """ 
             update 
@@ -2187,7 +2223,6 @@ def contratacao_aprendiz_vazio():
 
 
 def contratacao_pcd_vazio():
-
     executar(
         """
             update 
@@ -2199,87 +2234,88 @@ def contratacao_pcd_vazio():
         """
     )
 
-#-----------------------Executar---------------------#
-#pessoas_sem_cpf() - Em analise
-#hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
-#cargos_sem_configuracao_ferias() - Em analise
-#pessoas_data_vencimento_cnh_menor_data_emissao() - Em analise
-#caracteristicas_nome_repetido()
-#dependentes_grau_outros()
-#pessoa_data_nascimento_maior_data_admissao()
+
+# -----------------------Executar---------------------#
+# pessoas_sem_cpf() - Em analise
+# hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
+# cargos_sem_configuracao_ferias() - Em analise
+# pessoas_data_vencimento_cnh_menor_data_emissao() - Em analise
+caracteristicas_nome_repetido()
+# dependentes_grau_outros()
+# pessoa_data_nascimento_maior_data_admissao()
 pessoas_sem_dt_nascimento()
-#pessoas_cnh_dt_vencimento_menor_dt_emissao()
-#pessoas_dt_primeira_cnh_maior_dt_nascimento()
+# pessoas_cnh_dt_vencimento_menor_dt_emissao()
+# pessoas_dt_primeira_cnh_maior_dt_nascimento()
 pessoas_dt_nasc_maior_dt_nasc_responsavel()
 pessoas_cpf_repetido()
 pessoas_pis_repetido()
-#pessoas_pis_invalido()
+# pessoas_pis_invalido()
 pessoas_sem_cnpj()
-#ruas_nome_caracter_especial()
-#ruas_sem_nome()
-#ruas_sem_cidade()
-#ruas_nome_repetido()
-#tipos_bases_repetido()
+# ruas_nome_caracter_especial()
+# ruas_sem_nome()
+# ruas_sem_cidade()
+# ruas_nome_repetido()
+# tipos_bases_repetido()
 atos_sem_numero()
 atos_repetido()
-#cargos_sem_cbo()
+# cargos_sem_cbo()
 vinculos_sem_esocial()
 vinculos_descricao_repetido()
 motivos_resc_sem_esocial()
-#folha_fechamento(folha_fechamento_competencia)
-#folhas_ferias_sem_dt_pagamento() Em analise
+folha_fechamento(folha_fechamento_competencia)
+# folhas_ferias_sem_dt_pagamento() Em analise
 motivos_apos_sem_esocial()
-#hist_salariais_sem_salario()
-#variaveis_dt_inical_maior_dt_rescisao()
-#tipos_movpes_descricao_repetido()
-#tipos_afast_descricao_repetido()
-#hist_salariais_dt_alteracoes_maior_dt_rescisao()
-#hist_cargos_dt_alteracoes_maior_dt_rescisao()
-#tipos_afast_classif_invalida()
-#tipos_atos_nome_repetido()
-#horarios_ponto_descricao_repetido()
+# hist_salariais_sem_salario()
+# variaveis_dt_inical_maior_dt_rescisao()
+# tipos_movpes_descricao_repetido()
+# tipos_afast_descricao_repetido()
+# hist_salariais_dt_alteracoes_maior_dt_rescisao()
+# hist_cargos_dt_alteracoes_maior_dt_rescisao()
+# tipos_afast_classif_invalida()
+# tipos_atos_nome_repetido()
+# horarios_ponto_descricao_repetido()
 turmas_descricao_repetido()
-#niveis_organ_separador_invalido()
-#atos_sem_natureza_texto_juridico()
-#atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
-#canc_ferias_sem_tipos_afast()
+niveis_organ_separador_invalido()
+atos_sem_natureza_texto_juridico()
+# atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
+# canc_ferias_sem_tipos_afast()
 config_organograma_descricao_invalida()
-#config_organ_descricao_repetido()
-#pessoas_cpf_invalido()
-#pessoas_cnpj_invalido()
+config_organ_descricao_repetido()
+# pessoas_cpf_invalido()
+# pessoas_cnpj_invalido()
 pessoas_rg_repetido()
 cargos_descricao_repetido()
-#bases_calc_outras_empresas_vigencia_invalida()
-#pessoas_email_invalido()
-#pessoas_enderecos_sem_numero()
-#funcionarios_sem_previdencia()
-#mediasvant_sem_composicao()
-#mediasvant_eve_composicao_invalida()
-#locais_mov_dt_inicial_menor_dt_admissao()
-#motivos_altponto_descricao_invalida()
-#afastamentos_observacao_invalida()
-#ferias_dt_gozo_ini_maior_dt_gozo_fin()
-#rescisoes_sem_motivos_apos()
-#grupos_nome_repetido()
-#func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
-#locais_trab_fone_invalido()
-#atos_sem_dt_inicial()
+# bases_calc_outras_empresas_vigencia_invalida()
+# pessoas_email_invalido()
+# pessoas_enderecos_sem_numero()
+# funcionarios_sem_previdencia()
+# mediasvant_sem_composicao()
+# mediasvant_eve_composicao_invalida()
+# locais_mov_dt_inicial_menor_dt_admissao()
+# motivos_altponto_descricao_invalida()
+# afastamentos_observacao_invalida()
+# ferias_dt_gozo_ini_maior_dt_gozo_fin()
+# rescisoes_sem_motivos_apos()
+# grupos_nome_repetido()
+# func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
+# locais_trab_fone_invalido()
+# atos_sem_dt_inicial()
 niveis_descricao_repetido()
 funcionarios_cartao_ponto_repetido()
 cargos_dt_nomeacao_maior_dt_posse()
-#funcionarios_conta_bancaria_invalida()
-#funcionarios_com_mais_de_uma_previdencia()
-#afastamentos_dt_afastamento_menor_dt_admissao()
-#areas_atuacao_nome_repetido()
-#dependentes_sem_dt_fim()
-#opcao_fgts_diferente_dt_admissao()
-#funcionarios_conta_bancaria_sem_dados()
-#funcionarios_maracoes_invalida()
-#ocorrencia_ponto_nome_repetido()
-#configuracao_dirf_com_eventos_repetidos()
-#motivo_alt_salarial_descricao_repetido()
-#evento_taxa_invalida()
-#licenca_premio_faixa_invalida()
+# funcionarios_conta_bancaria_invalida()
+# funcionarios_com_mais_de_uma_previdencia()
+# afastamentos_dt_afastamento_menor_dt_admissao()
+# areas_atuacao_nome_repetido()
+# dependentes_sem_dt_fim()
+# opcao_fgts_diferente_dt_admissao()
+# funcionarios_conta_bancaria_sem_dados()
+# funcionarios_maracoes_invalida()
+# ocorrencia_ponto_nome_repetido()
+# configuracao_dirf_com_eventos_repetidos()
+# motivo_alt_salarial_descricao_repetido()
+# evento_taxa_invalida()
+# licenca_premio_faixa_invalida()
 formacao_vazio()
 contratacao_aprendiz_vazio()
 contratacao_pcd_vazio()
