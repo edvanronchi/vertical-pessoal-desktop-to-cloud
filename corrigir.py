@@ -80,7 +80,7 @@ def pessoa_data_nascimento_maior_data_admissao():
             UPDATE 
                 bethadba.pessoas_fisicas pff
             SET 
-                pff.dt_nascimento = '1900-01-01' 
+                pff.dt_nascimento = dt_admissao--'1900-01-01' 
             FROM 
                 ( 
                     SELECT 
@@ -207,26 +207,26 @@ def pessoas_dt_nasc_maior_dt_nasc_responsavel():
                 pff.dt_nascimento = pessoa.data_nascimento_responsavel
             FROM 
                 ( 
+                   SELECT 
+                pf.i_pessoas as id_responsavel,
+                dt_nascimento as data_nascimento_responsavel, 
+                i_dependentes as id_dependente, 
+                (
                     SELECT 
-                        pf.i_pessoas as id_responsavel,
-                        dt_nascimento as data_nascimento_responsavel, 
-                        i_dependentes as id_dependente, 
-                        (
-                            SELECT 
-                                a.dt_nascimento 
-                            FROM 
-                                bethadba.pessoas_fisicas a 
-                            WHERE 
-                                a.i_pessoas = d.i_dependentes
-                        ) AS data_nascimento_dependente 
+                        a.dt_nascimento 
                     FROM 
-                        bethadba.pessoas_fisicas pf 
-                    INNER JOIN 
-                        bethadba.dependentes d ON (pf.i_pessoas = d.i_pessoas)
+                        bethadba.pessoas_fisicas a 
                     WHERE 
-                        (data_nascimento_dependente < data_nascimento_responsavel OR
-                        data_nascimento_dependente IS NULL) AND
-                        grau = 1
+                        a.i_pessoas = d.i_dependentes
+                ) AS data_nascimento_dependente 
+            FROM 
+                bethadba.pessoas_fisicas pf 
+            INNER JOIN 
+                bethadba.dependentes d ON (pf.i_pessoas = d.i_pessoas)
+            WHERE 
+                data_nascimento_dependente < data_nascimento_responsavel 
+                OR data_nascimento_dependente IS NULL
+                AND grau = 1
                 ) AS pessoa
             WHERE 
                 pff.i_pessoas = pessoa.id_dependente; 
@@ -314,13 +314,10 @@ def pessoas_pis_invalido():
     for i in resultado:
         identificador = i[0]
         pis = i[1]
-
         if not pis_validar(pis):
+            print(pis)
             u = "UPDATE bethadba.pessoas_fisicas SET num_pis = NULL WHERE i_pessoas = {};".format(identificador)
-
             executar(u)
-
-        # Gera CNPJ aleatorio para pessoas com CNPJ nulo
 
 
 def pessoas_sem_cnpj():
@@ -2300,7 +2297,7 @@ def contratacao_pcd_vazio():
 # -----------------------Executar---------------------#
 # pessoas_sem_cpf() # - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
-# cargos_sem_configuracao_ferias() # - Em analise
+cargos_sem_configuracao_ferias()
 # pessoas_data_vencimento_cnh_menor_data_emissao() # - Em analise
 caracteristicas_nome_repetido()
 dependentes_grau_outros()

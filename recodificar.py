@@ -1,4 +1,3 @@
-from variaveis import *
 from src.funcoes import *
 from src.conexao import *
 from os import path
@@ -8,9 +7,10 @@ desabilitar_triggers = "CALL bethadba.dbp_conn_gera(1, 2021, 300);\nCALL bethadb
 recodificar_geral = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_geral.sql", "a")
 recodificar_geral.writelines(desabilitar_triggers)
 
+
 def recodificar_funcionarios(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_funcionarios.sql", "a")
-    
+
     recodificar.writelines(desabilitar_triggers)
 
     resultado = consultar(
@@ -36,7 +36,9 @@ def recodificar_funcionarios(lista_entidade):
 
     id_max = consultar("SELECT (MAX(i_funcionarios)+1) AS id FROM bethadba.funcionarios")[0][0]
 
-    id_campo_adicional = consultar("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Matrícula do funcionário'")[0][0]
+    id_campo_adicional = \
+        consultar("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Matrícula do funcionário'")[0][
+            0]
 
     for i in resultado:
         ids_entidade = i[0].split(',')
@@ -49,19 +51,26 @@ def recodificar_funcionarios(lista_entidade):
 
             valor_caracter = "{}-{}".format(id_entidade, identificador)
 
-            buscar_dados_adicionais = consultar("SELECT * FROM bethadba.funcionarios_prop_adic WHERE i_caracteristicas = {} AND i_funcionarios = {} AND i_entidades = {};".format(id_campo_adicional, identificador, id_entidade))
-            
-            querys = "INSERT INTO bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_caracter) VALUES ({}, {}, {}, '{}');\n".format(id_campo_adicional, id_entidade, identificador, valor_caracter)
-            
-            if len(buscar_dados_adicionais) > 0:
-                querys = "UPDATE bethadba.funcionarios_prop_adic SET valor_caracter = '{}' WHERE i_caracteristicas = {} AND i_entidades = {} AND i_funcionarios = {};\n".format(valor_caracter, id_campo_adicional, id_entidade, identificador)
-                
-            querys += "UPDATE bethadba.funcionarios_subst SET i_substituto = {} WHERE i_substituto = {} AND i_entidades = {};\n".format(id_max, identificador, id_entidade)
-            querys += "UPDATE bethadba.funcionarios_subst SET i_substituido = {} WHERE i_substituido = {} AND i_entidades = {};\n".format(id_max, identificador, id_entidade)
+            buscar_dados_adicionais = consultar(
+                "SELECT * FROM bethadba.funcionarios_prop_adic WHERE i_caracteristicas = {} AND i_funcionarios = {} AND i_entidades = {};".format(
+                    id_campo_adicional, identificador, id_entidade))
 
-            for tabela in tabelas:            
-                querys += "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
-            
+            querys = "INSERT INTO bethadba.funcionarios_prop_adic (i_caracteristicas, i_entidades, i_funcionarios, valor_caracter) VALUES ({}, {}, {}, '{}');\n".format(
+                id_campo_adicional, id_entidade, identificador, valor_caracter)
+
+            if len(buscar_dados_adicionais) > 0:
+                querys = "UPDATE bethadba.funcionarios_prop_adic SET valor_caracter = '{}' WHERE i_caracteristicas = {} AND i_entidades = {} AND i_funcionarios = {};\n".format(
+                    valor_caracter, id_campo_adicional, id_entidade, identificador)
+
+            querys += "UPDATE bethadba.funcionarios_subst SET i_substituto = {} WHERE i_substituto = {} AND i_entidades = {};\n".format(
+                id_max, identificador, id_entidade)
+            querys += "UPDATE bethadba.funcionarios_subst SET i_substituido = {} WHERE i_substituido = {} AND i_entidades = {};\n".format(
+                id_max, identificador, id_entidade)
+
+            for tabela in tabelas:
+                querys += "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(
+                    tabela, id_max, identificador, id_entidade)
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -70,6 +79,7 @@ def recodificar_funcionarios(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: funcionarios")
+
 
 def recodificar_cargos(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_cargos.sql", "a")
@@ -98,15 +108,19 @@ def recodificar_cargos(lista_entidade):
     tabelas = tabela_coluna(['i_entidades', 'i_cargos'])
 
     id_max = consultar("SELECT (MAX(i_cargos)+1) AS id FROM bethadba.cargos")[0][0]
-    
-    id_campo_adicional = consultar("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Cargo do funcionário'")[0][0]
 
-    cargo_vinculo = consultar("SELECT * FROM bethadba.cargos_caract_cfg WHERE i_caracteristicas = {}".format(id_campo_adicional))
+    id_campo_adicional = \
+        consultar("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Cargo do funcionário'")[0][0]
+
+    cargo_vinculo = consultar(
+        "SELECT * FROM bethadba.cargos_caract_cfg WHERE i_caracteristicas = {}".format(id_campo_adicional))
 
     if len(cargo_vinculo) == 0:
         maximo = consultar("SELECT MAX(ordem)+1 AS id from bethadba.cargos_caract_cfg")[0][0]
 
-        executar("INSERT INTO bethadba.cargos_caract_cfg (i_caracteristicas, ordem, permite_excluir, dt_expiracao) VALUES({}, {}, 'S', '2999-12-31');".format(id_campo_adicional, maximo))
+        executar(
+            "INSERT INTO bethadba.cargos_caract_cfg (i_caracteristicas, ordem, permite_excluir, dt_expiracao) VALUES({}, {}, 'S', '2999-12-31');".format(
+                id_campo_adicional, maximo))
 
     for i in resultado:
         ids_entidade = i[0].split(',')
@@ -116,20 +130,25 @@ def recodificar_cargos(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue      
+                continue
 
             valor_caracter = "{}-{}".format(id_entidade, identificador)
-            
-            buscar_dados_adicionais = consultar("SELECT * FROM bethadba.cargos_prop_adic WHERE i_caracteristicas = {} AND i_cargos = {} AND i_entidades = {};".format(id_campo_adicional, identificador, id_entidade))
-            
-            querys = "INSERT INTO bethadba.cargos_prop_adic (i_caracteristicas, i_entidades, i_cargos, valor_caracter) VALUES ({}, {}, {}, '{}');\n".format(id_campo_adicional, id_entidade, identificador, valor_caracter)
-            
+
+            buscar_dados_adicionais = consultar(
+                "SELECT * FROM bethadba.cargos_prop_adic WHERE i_caracteristicas = {} AND i_cargos = {} AND i_entidades = {};".format(
+                    id_campo_adicional, identificador, id_entidade))
+
+            querys = "INSERT INTO bethadba.cargos_prop_adic (i_caracteristicas, i_entidades, i_cargos, valor_caracter) VALUES ({}, {}, {}, '{}');\n".format(
+                id_campo_adicional, id_entidade, identificador, valor_caracter)
+
             if len(buscar_dados_adicionais) > 0:
-                querys = "UPDATE bethadba.cargos_prop_adic SET valor_caracter = '{}' WHERE i_caracteristicas = {} AND i_entidades = {} AND i_cargos = {};\n".format(valor_caracter, id_campo_adicional, id_entidade, identificador)
-                
+                querys = "UPDATE bethadba.cargos_prop_adic SET valor_caracter = '{}' WHERE i_caracteristicas = {} AND i_entidades = {} AND i_cargos = {};\n".format(
+                    valor_caracter, id_campo_adicional, id_entidade, identificador)
+
             for tabela in tabelas:
-                querys += "UPDATE bethadba.{} SET i_cargos = {} WHERE i_cargos = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
-            
+                querys += "UPDATE bethadba.{} SET i_cargos = {} WHERE i_cargos = {} AND i_entidades = {};\n".format(
+                    tabela, id_max, identificador, id_entidade)
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -138,6 +157,7 @@ def recodificar_cargos(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: cargos")
+
 
 def recodificar_periodos_trab(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_periodos_trab.sql", "a")
@@ -175,16 +195,16 @@ def recodificar_periodos_trab(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue      
-            
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_periodos_trab = {} WHERE i_periodos_trab = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
+                u = "UPDATE bethadba.{} SET i_periodos_trab = {} WHERE i_periodos_trab = {} AND i_entidades = {};\n".format(
+                    tabela, id_max, identificador, id_entidade)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -193,6 +213,7 @@ def recodificar_periodos_trab(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: periodos_trab")
+
 
 def recodificar_turmas(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_turmas.sql", "a")
@@ -230,16 +251,18 @@ def recodificar_turmas(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue      
-            
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_turmas = {} WHERE i_turmas = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
+                u = "UPDATE bethadba.{} SET i_turmas = {} WHERE i_turmas = {} AND i_entidades = {};\n".format(tabela,
+                                                                                                              id_max,
+                                                                                                              identificador,
+                                                                                                              id_entidade)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -248,6 +271,7 @@ def recodificar_turmas(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: turmas")
+
 
 def recodificar_despesas(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_despesas.sql", "a")
@@ -288,16 +312,16 @@ def recodificar_despesas(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue      
-            
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_despesas = {} WHERE i_despesas = {} AND i_entidades = {} AND ano_exerc = {};\n".format(tabela, id_max, identificador, id_entidade, anoExercicio)
+                u = "UPDATE bethadba.{} SET i_despesas = {} WHERE i_despesas = {} AND i_entidades = {} AND ano_exerc = {};\n".format(
+                    tabela, id_max, identificador, id_entidade, anoExercicio)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -306,6 +330,7 @@ def recodificar_despesas(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: despesas")
+
 
 def recodificar_niveis(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_niveis.sql", "a")
@@ -343,16 +368,18 @@ def recodificar_niveis(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue      
-            
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_niveis = {} WHERE i_niveis = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
+                u = "UPDATE bethadba.{} SET i_niveis = {} WHERE i_niveis = {} AND i_entidades = {};\n".format(tabela,
+                                                                                                              id_max,
+                                                                                                              identificador,
+                                                                                                              id_entidade)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -365,7 +392,7 @@ def recodificar_niveis(lista_entidade):
 
 def recodificar_horarios_ponto(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_horarios_ponto.sql", "a")
- 
+
     recodificar.writelines(desabilitar_triggers)
 
     resultado = consultar(
@@ -399,16 +426,16 @@ def recodificar_horarios_ponto(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue  
-           
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_horarios_ponto = {} WHERE i_horarios_ponto = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
+                u = "UPDATE bethadba.{} SET i_horarios_ponto = {} WHERE i_horarios_ponto = {} AND i_entidades = {};\n".format(
+                    tabela, id_max, identificador, id_entidade)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -417,6 +444,7 @@ def recodificar_horarios_ponto(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: horarios_ponto")
+
 
 def recodificar_grupos(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_grupos.sql", "a")
@@ -454,16 +482,18 @@ def recodificar_grupos(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue    
-            
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_grupos = {} WHERE i_grupos = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
+                u = "UPDATE bethadba.{} SET i_grupos = {} WHERE i_grupos = {} AND i_entidades = {};\n".format(tabela,
+                                                                                                              id_max,
+                                                                                                              identificador,
+                                                                                                              id_entidade)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -472,6 +502,7 @@ def recodificar_grupos(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: grupos")
+
 
 def recodificar_locais_trab(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_locais_trab.sql", "a")
@@ -509,16 +540,16 @@ def recodificar_locais_trab(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue    
-            
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_locais_trab = {} WHERE i_locais_trab = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
+                u = "UPDATE bethadba.{} SET i_locais_trab = {} WHERE i_locais_trab = {} AND i_entidades = {};\n".format(
+                    tabela, id_max, identificador, id_entidade)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -527,6 +558,7 @@ def recodificar_locais_trab(lista_entidade):
             id_max += 1
 
     print("Código SQL gerado para tabela: locais_trab")
+
 
 def recodificar_relogios(lista_entidade):
     recodificar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\recodificar_relogios.sql", "a")
@@ -564,16 +596,16 @@ def recodificar_relogios(lista_entidade):
         for id_entidade in ids_entidade:
 
             if id_entidade == entidade:
-                continue    
-            
+                continue
+
             querys = ""
 
             for tabela in tabelas:
-          
-                u = "UPDATE bethadba.{} SET i_relogios = {} WHERE i_relogios = {} AND i_entidades = {};\n".format(tabela, id_max, identificador, id_entidade)
+                u = "UPDATE bethadba.{} SET i_relogios = {} WHERE i_relogios = {} AND i_entidades = {};\n".format(
+                    tabela, id_max, identificador, id_entidade)
 
                 querys += u
-            
+
             querys += "\n"
 
             recodificar.writelines(querys)
@@ -583,7 +615,8 @@ def recodificar_relogios(lista_entidade):
 
     print("Código SQL gerado para tabela: relogios")
 
-#--------------------Executar-------------------------#
+
+# --------------------Executar-------------------------#
 recodificar_funcionarios(lista_entidade)
 recodificar_cargos(lista_entidade)
 recodificar_despesas(lista_entidade)
