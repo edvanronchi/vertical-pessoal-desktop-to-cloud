@@ -174,7 +174,7 @@ def pessoas_dt_primeira_cnh_maior_dt_nascimento():
                 pf.dt_nascimento > pfc.dt_primeira_cnh or pf.dt_nascimento > pfc.dt_emissao_cnh;
         """
     )
-
+    u = None
     for i in resultado:
         i_pessoas = i[0]
         dt_nascimento = i[1]
@@ -2098,28 +2098,90 @@ def ocorrencia_ponto_nome_repetido():
             executar(u)
 
 
-# Busca as as configurações de dirf com eventos repetidos
-def configuracao_dirf_com_eventos_repetidos():
-    resultado = consultar(
-        "SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  LIST(i_eventos)     from bethadba.comprends where campo not in ('05-01','0A-02')       and campoDirf IS not NULL     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  LIST(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05') and campoDirf iISnot NULL group by campoDirf, nomeCampoDsk, chave_dsk1")
-
-    for i in resultado:
-        lista_eventos = i[3].split(',')
-
-        for j in buscar_duplicatas(lista_eventos):
-
-            evento = consultar(
-                "SELECT campo, chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos = i_eventos     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf iISnot NULL and i_eventos = {}  union all         select campo, chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  i_eventos     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05') and campoDirf iISnot NULL and i_eventos = {}".format(
-                    j))
-
-            for k in evento:
-
-                if i[1] != k[2]:
-                    continue
-
-                print("campo: " + i[0])
-                print("i_ventos: " + j[4])
-                print("========")
+# Busca as as configurações de dirf com eventos repetidos def configuracao_dirf_com_eventos_repetidos(): resultado =
+# consultar( """SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN
+# '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN
+# 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then
+# '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01'
+# then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(
+# campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then
+# 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then
+# 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then
+# 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when
+# '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305'
+# then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then
+# 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then
+# 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when
+# '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when
+# '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then
+# 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702'
+# then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when
+# '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when
+# '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then
+# 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then
+# 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then
+# 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then
+# 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then
+# 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603'
+# then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when
+# '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then
+# 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  LIST(i_eventos)
+# from bethadba.comprends where campo not in ('05-01','0A-02')       and campoDirf IS not NULL     group by
+# campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =
+# case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then
+# '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)
+# end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601'
+# then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'
+# when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'
+# when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  LIST(
+# i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03',
+# '03-03-04', '03-04','03-05') and campoDirf is not NULL group by campoDirf, nomeCampoDsk, chave_dsk1""")
+#
+#     for i in resultado:
+#         lista_eventos = i[3].split(',')
+#
+#         for j in buscar_duplicatas(lista_eventos):
+#
+# evento = consultar( """SELECT campo, chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101'
+# WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN
+# '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN
+# '04-01' then '040101' when '04-01-01' then '040102' when '04-03' then '040301' when '04-03-01' then '040302' when
+# '04-06' then '040601' else bethadba.dbf_retira_alfa_de_inteiros(campo)     end , campoDirf = case
+# bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk) when '0301' then 'TOTAL_REND_INC_FERIAS' when '0302' then
+# 'CONTRIB_PREV_OFICIAL' when '030301' then 'CONTRIB_PREV_PRIVADA' when '030302' then 'CONTRIB_FAPI' when '030303'
+# then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO' when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR' when '030401' then
+# 'PENSAO_ALIMENTICIA' when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO' when '0305' then 'IRRF' when '040101' then
+# 'PARC_ISENTA_APOSENT' when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO' when '0402' then 'DIARIAS_AJUDAS_CUSTO'
+# when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE' when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO' when
+# '0404' then 'LUCROS_DIVIDENDOS' when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA' when '040601' then
+# 'INDENIZ_RESC_CONTRATO_TRABALHO' when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO' when '040701' then
+# 'REND_ISENTOS_OUTROS' when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE' when '050101' then
+# 'TOTAL_REND_13_SALARIO' when '050102' then 'IRRF_13_SALARIO' when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'
+# when '0501020202' then 'CONTRIB_FAPI_13_SALARIO' when '0501020203' then
+# 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO' when '0501020204' then
+# 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO' when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO' when
+# '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE' when '0601' then
+# 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS' when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL' when '0603' then
+# 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL' when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA' when '0605' then 'RRA_IRRF'
+# when '0606' then 'RRA_RENDIMENTOS_ISENTOS' when '0700' then 'INFORMACOES_COMPLEMENTARES' when 'ABOPEC' then
+# 'ABONO_PECUNIARIO' end, eventos = i_eventos from bethadba.comprends  where campo not in ('05-01','0A-02') and
+# campoDirf iISnot NULL and i_eventos = {}  union all         select campo, chave_dsk1 = campoDirf, nomeCampoDsk =
+# case campo             when '03-01' then '0601' when '03-02' then '0603'             when '03-05' then '0605' when
+# '03-04' then '0604'         else bethadba.dbf_retira_alfa_de_inteiros(campo)         end , campoDirf = case
+# bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk) when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS' when '0602'
+# then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL' when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL' when '0604' then
+# 'RRA_DEDUCAO_PENSAO_ALIMENTICIA' when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS'
+# end,         eventos =  i_eventos     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01',
+# '03-03-02','03-03-03','03-03-04', '03-04','03-05') and campoDirf iISnot NULL and i_eventos = {}""".format( j))
+#
+#             for k in evento:
+#
+#                 if i[1] != k[2]:
+#                     continue
+#
+#                 print("campo: " + i[0])
+#                 print("i_ventos: " + j[4])
+#                 print("========")
 
 
 # Renomeia descricao de motivo de alteração salarial repetido
@@ -2179,9 +2241,9 @@ def licenca_premio_faixa_invalida():
             UPDATE 
                 bethadba.licpremio_faixas 
             SET
-                taxa = 99
+                i_faixas = 99
             WHERE 
-                taxa > 99;
+                i_faixas > 99;
         """
     )
 
@@ -2236,86 +2298,86 @@ def contratacao_pcd_vazio():
 
 
 # -----------------------Executar---------------------#
-# pessoas_sem_cpf() - Em analise
-# hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
-# cargos_sem_configuracao_ferias() - Em analise
-# pessoas_data_vencimento_cnh_menor_data_emissao() - Em analise
+# pessoas_sem_cpf() # - Em analise
+hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
+# cargos_sem_configuracao_ferias() # - Em analise
+# pessoas_data_vencimento_cnh_menor_data_emissao() # - Em analise
 caracteristicas_nome_repetido()
-# dependentes_grau_outros()
-# pessoa_data_nascimento_maior_data_admissao()
+dependentes_grau_outros()
+pessoa_data_nascimento_maior_data_admissao()
 pessoas_sem_dt_nascimento()
-# pessoas_cnh_dt_vencimento_menor_dt_emissao()
-# pessoas_dt_primeira_cnh_maior_dt_nascimento()
+pessoas_cnh_dt_vencimento_menor_dt_emissao()
+pessoas_dt_primeira_cnh_maior_dt_nascimento()
 pessoas_dt_nasc_maior_dt_nasc_responsavel()
 pessoas_cpf_repetido()
 pessoas_pis_repetido()
-# pessoas_pis_invalido()
+pessoas_pis_invalido()
 pessoas_sem_cnpj()
-# ruas_nome_caracter_especial()
-# ruas_sem_nome()
-# ruas_sem_cidade()
-# ruas_nome_repetido()
-# tipos_bases_repetido()
+ruas_nome_caracter_especial()
+ruas_sem_nome()
+ruas_sem_cidade()
+ruas_nome_repetido()
+tipos_bases_repetido()
 atos_sem_numero()
 atos_repetido()
-# cargos_sem_cbo()
+cargos_sem_cbo()
 vinculos_sem_esocial()
 vinculos_descricao_repetido()
 motivos_resc_sem_esocial()
 folha_fechamento(folha_fechamento_competencia)
-# folhas_ferias_sem_dt_pagamento() Em analise
+# folhas_ferias_sem_dt_pagamento() # - Em analise
 motivos_apos_sem_esocial()
-# hist_salariais_sem_salario()
-# variaveis_dt_inical_maior_dt_rescisao()
-# tipos_movpes_descricao_repetido()
-# tipos_afast_descricao_repetido()
-# hist_salariais_dt_alteracoes_maior_dt_rescisao()
-# hist_cargos_dt_alteracoes_maior_dt_rescisao()
-# tipos_afast_classif_invalida()
-# tipos_atos_nome_repetido()
-# horarios_ponto_descricao_repetido()
+hist_salariais_sem_salario()
+variaveis_dt_inical_maior_dt_rescisao()
+tipos_movpes_descricao_repetido()
+tipos_afast_descricao_repetido()
+hist_salariais_dt_alteracoes_maior_dt_rescisao()
+hist_cargos_dt_alteracoes_maior_dt_rescisao()
+tipos_afast_classif_invalida()
+tipos_atos_nome_repetido()
+horarios_ponto_descricao_repetido()
 turmas_descricao_repetido()
 niveis_organ_separador_invalido()
 atos_sem_natureza_texto_juridico()
-# atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
-# canc_ferias_sem_tipos_afast()
+atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
+canc_ferias_sem_tipos_afast()
 config_organograma_descricao_invalida()
 config_organ_descricao_repetido()
-# pessoas_cpf_invalido()
-# pessoas_cnpj_invalido()
+pessoas_cpf_invalido()
+pessoas_cnpj_invalido()
 pessoas_rg_repetido()
 cargos_descricao_repetido()
-# bases_calc_outras_empresas_vigencia_invalida()
-# pessoas_email_invalido()
-# pessoas_enderecos_sem_numero()
-# funcionarios_sem_previdencia()
-# mediasvant_sem_composicao()
-# mediasvant_eve_composicao_invalida()
-# locais_mov_dt_inicial_menor_dt_admissao()
-# motivos_altponto_descricao_invalida()
-# afastamentos_observacao_invalida()
-# ferias_dt_gozo_ini_maior_dt_gozo_fin()
-# rescisoes_sem_motivos_apos()
-# grupos_nome_repetido()
-# func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
-# locais_trab_fone_invalido()
-# atos_sem_dt_inicial()
+bases_calc_outras_empresas_vigencia_invalida()
+pessoas_email_invalido()
+pessoas_enderecos_sem_numero()
+funcionarios_sem_previdencia()
+mediasvant_sem_composicao()
+mediasvant_eve_composicao_invalida()
+locais_mov_dt_inicial_menor_dt_admissao()
+motivos_altponto_descricao_invalida()
+afastamentos_observacao_invalida()
+ferias_dt_gozo_ini_maior_dt_gozo_fin()
+rescisoes_sem_motivos_apos()
+grupos_nome_repetido()
+func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
+locais_trab_fone_invalido()
+atos_sem_dt_inicial()
 niveis_descricao_repetido()
 funcionarios_cartao_ponto_repetido()
 cargos_dt_nomeacao_maior_dt_posse()
-# funcionarios_conta_bancaria_invalida()
-# funcionarios_com_mais_de_uma_previdencia()
-# afastamentos_dt_afastamento_menor_dt_admissao()
-# areas_atuacao_nome_repetido()
-# dependentes_sem_dt_fim()
-# opcao_fgts_diferente_dt_admissao()
-# funcionarios_conta_bancaria_sem_dados()
-# funcionarios_maracoes_invalida()
-# ocorrencia_ponto_nome_repetido()
+funcionarios_conta_bancaria_invalida()
+funcionarios_com_mais_de_uma_previdencia()
+afastamentos_dt_afastamento_menor_dt_admissao()
+areas_atuacao_nome_repetido()
+dependentes_sem_dt_fim()
+opcao_fgts_diferente_dt_admissao()
+funcionarios_conta_bancaria_sem_dados()
+funcionarios_maracoes_invalida()
+ocorrencia_ponto_nome_repetido()
 # configuracao_dirf_com_eventos_repetidos()
-# motivo_alt_salarial_descricao_repetido()
-# evento_taxa_invalida()
-# licenca_premio_faixa_invalida()
+motivo_alt_salarial_descricao_repetido()
+evento_taxa_invalida()
+licenca_premio_faixa_invalida()
 formacao_vazio()
 contratacao_aprendiz_vazio()
 contratacao_pcd_vazio()

@@ -1,10 +1,9 @@
-from variaveis import *
-from src.funcoes import *
 from src.conexao import *
+from src.funcoes import *
 
-#Busca as pessoas com data de nascimento maior que data de admissão
+
+# Busca as pessoas com data de nascimento maior que data de admissão
 def pessoa_data_nascimento_maior_data_admissao():
-
     resultado = consultar(
         """
             SELECT 
@@ -31,11 +30,11 @@ def pessoa_data_nascimento_maior_data_admissao():
     if quantidade == 0:
         return
 
-    print('Pessoas com data de nascimento maior que data de admissão: '+ str(quantidade))
+    print('Pessoas com data de nascimento maior que data de admissão: ' + str(quantidade))
 
-#Busca as pessoas com data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
+
+# Busca as pessoas com data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
 def pessoas_data_vencimento_cnh_menor_data_emissao():
-
     resultado = consultar(
         """
             SELECT 
@@ -52,13 +51,13 @@ def pessoas_data_vencimento_cnh_menor_data_emissao():
     if quantidade == 0:
         return
 
-    print('Pessoas com data de vencimento da CNH maior que emissão da 1ª habilitação: '+ str(quantidade))
+    print('Pessoas com data de vencimento da CNH maior que emissão da 1ª habilitação: ' + str(quantidade))
 
     return quantidade
 
-#Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
-def pessoas_dt_primeira_cnh_maior_dt_nascimento():
 
+# Busca pessoas com data de nascimento maior que emissão da 1ª habilitação!
+def pessoas_dt_primeira_cnh_maior_dt_nascimento():
     resultado = consultar(
         """
             SELECT 
@@ -80,13 +79,13 @@ def pessoas_dt_primeira_cnh_maior_dt_nascimento():
     if quantidade == 0:
         return
 
-    print('Pessoas com data de nascimento maior que emissão da 1ª habilitação: '+ str(quantidade))
+    print('Pessoas com data de nascimento maior que emissão da 1ª habilitação: ' + str(quantidade))
 
-    return quantidade    
+    return quantidade
 
-#Busca os campos adicionais com descrição repetido
+
+# Busca os campos adicionais com descrição repetido
 def caracteristicas_nome_repetido():
-
     resultado = consultar(
         """
             SELECT 
@@ -107,13 +106,13 @@ def caracteristicas_nome_repetido():
     if quantidade == 0:
         return
 
-    print('Campos adicionais com descrição repetida: '+ str(quantidade))
+    print('Campos adicionais com descrição repetida: ' + str(quantidade))
 
     return quantidade
 
-#Verifica se o dependente está cadastrado como 10 - OUTROS
-def dependentes_grau_outros():
 
+# Verifica se o dependente está cadastrado como 10 - OUTROS
+def dependentes_grau_outros():
     resultado = consultar(
         """
             SELECT 
@@ -131,13 +130,13 @@ def dependentes_grau_outros():
     if quantidade == 0:
         return
 
-    print('Dependentes cadastrados como OUTROS: '+ str(quantidade))
+    print('Dependentes cadastrados como OUTROS: ' + str(quantidade))
 
     return quantidade
 
-#Pessoas sem data de nascimento
-def pessoas_sem_dt_nascimento():
 
+# Pessoas sem data de nascimento
+def pessoas_sem_dt_nascimento():
     resultado = consultar(
         """
             SELECT 
@@ -158,13 +157,13 @@ def pessoas_sem_dt_nascimento():
     if quantidade == 0:
         return
 
-    print('Pessoas sem data de nascimento: '+ str(quantidade))
+    print('Pessoas sem data de nascimento: ' + str(quantidade))
 
     return quantidade
 
-#Pessoas com data de nascimento maior que data de dependencia
-def pessoas_cnh_dt_vencimento_menor_dt_emissao():
 
+# Pessoas com data de nascimento maior que data de dependencia
+def pessoas_cnh_dt_vencimento_menor_dt_emissao():
     resultado = consultar(
         """
             SELECT 
@@ -185,13 +184,13 @@ def pessoas_cnh_dt_vencimento_menor_dt_emissao():
     if quantidade == 0:
         return
 
-    print('Pessoas com data de nascimento maior do que data de dependencia: '+ str(quantidade))
+    print('Pessoas com data de nascimento maior do que data de dependencia: ' + str(quantidade))
 
     return quantidade
 
-#Pessoas com data de nascimento maior que data de nascimento do responsavel
-def pessoas_dt_nasc_maior_dt_nasc_responsavel():
 
+# Pessoas com data de nascimento maior que data de nascimento do responsavel
+def pessoas_dt_nasc_maior_dt_nasc_responsavel():
     resultado = consultar(
         """
             SELECT 
@@ -222,13 +221,13 @@ def pessoas_dt_nasc_maior_dt_nasc_responsavel():
     if quantidade == 0:
         return
 
-    print('Pessoas com data de nascimento maior do que data de nascimento do responsavel: '+ str(quantidade))
+    print('Pessoas com data de nascimento maior do que data de nascimento do responsavel: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os CPF's nulos
-def pessoas_sem_cpf():
 
+# Verifica os CPF's nulos
+def pessoas_sem_cpf():
     resultado = consultar(
         """
             SELECT 
@@ -248,14 +247,14 @@ def pessoas_sem_cpf():
     if quantidade == 0:
         return
 
-    print('Pessoas sem CPF: '+ str(quantidade))
+    print('Pessoas sem CPF: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os CPF's repetidos
-#As Pessoas (0,0) possuem o mesmo CPF!
-def pessoas_cpf_repetido():
 
+# Verifica os CPF's repetidos
+# As Pessoas (0,0) possuem o mesmo CPF!
+def pessoas_cpf_repetido():
     resultado = consultar(
         """
             SELECT
@@ -276,14 +275,14 @@ def pessoas_cpf_repetido():
     if quantidade == 0:
         return
 
-    print('CPF repetido(s): '+ str(quantidade))
+    print('CPF repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica os PIS's repetidos
-#As Pessoas (0,0) possuem o mesmo número do PIS!
-def pessoas_pis_repetido():
 
+# Verifica os PIS's repetidos
+# As Pessoas (0,0) possuem o mesmo número do PIS!
+def pessoas_pis_repetido():
     resultado = consultar(
         """
             SELECT
@@ -304,14 +303,14 @@ def pessoas_pis_repetido():
     if quantidade == 0:
         return
 
-    print('Pessoas com PIS repetido(s): '+ str(quantidade))
+    print('Pessoas com PIS repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica se o PIS é valido
-#PIS inválido
-def pessoas_pis_invalido():
 
+# Verifica se o PIS é valido
+# PIS inválido
+def pessoas_pis_invalido():
     resultado = consultar(
         """
            SELECT
@@ -335,13 +334,13 @@ def pessoas_pis_invalido():
     if quantidade == 0:
         return
 
-    print('Pessoas com PIS invalido(s): '+ str(quantidade))
+    print('Pessoas com PIS invalido(s): ' + str(quantidade))
 
     return quantidade
 
-#Busca as pessoas sem CNPJ
-def pessoas_sem_cnpj():
 
+# Busca as pessoas sem CNPJ
+def pessoas_sem_cnpj():
     resultado = consultar(
         """
             SELECT 
@@ -361,13 +360,13 @@ def pessoas_sem_cnpj():
     if quantidade == 0:
         return
 
-    print('Pessoas sem CNPJ: '+ str(quantidade))
+    print('Pessoas sem CNPJ: ' + str(quantidade))
 
     return quantidade
 
-#Verifica a descrição dos logradouros que tem caracter especial no inicio da descrição
-def ruas_nome_caracter_especial():
 
+# Verifica a descrição dos logradouros que tem caracter especial no inicio da descrição
+def ruas_nome_caracter_especial():
     resultado = consultar(
         """
             SELECT 
@@ -384,13 +383,13 @@ def ruas_nome_caracter_especial():
     if quantidade == 0:
         return
 
-    print('Logradouros que tem caracter especial no inicio da descrição: '+ str(quantidade))
+    print('Logradouros que tem caracter especial no inicio da descrição: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os logradouros com descrição repetidos
-def ruas_nome_repetido():
 
+# Verifica os logradouros com descrição repetidos
+def ruas_nome_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -413,13 +412,13 @@ def ruas_nome_repetido():
     if quantidade == 0:
         return
 
-    print('Logradouros repetido(s): '+ str(quantidade))
+    print('Logradouros repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Renomeia os tipos bases repetidos
-def tipos_bases_repetido():
 
+# Renomeia os tipos bases repetidos
+def tipos_bases_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -440,13 +439,13 @@ def tipos_bases_repetido():
     if quantidade == 0:
         return
 
-    print('Tipos bases repetido(s): '+ str(quantidade))
+    print('Tipos bases repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica as ruas sem cidade
-def ruas_sem_cidade():
 
+# Verifica as ruas sem cidade
+def ruas_sem_cidade():
     resultado = consultar(
         """
             SELECT 
@@ -464,13 +463,13 @@ def ruas_sem_cidade():
     if quantidade == 0:
         return
 
-    print('Ruas sem cidade: '+ str(quantidade))
+    print('Ruas sem cidade: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os atos com número nulos
-def atos_sem_numero():
 
+# Verifica os atos com número nulos
+def atos_sem_numero():
     resultado = consultar(
         """
             SELECT 
@@ -487,14 +486,14 @@ def atos_sem_numero():
     if quantidade == 0:
         return
 
-    print('Atos sem número: '+ str(quantidade))
+    print('Atos sem número: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os atos repetidos
-#Já existe um ato com o tipo e número oficial informado
-def atos_repetido():
 
+# Verifica os atos repetidos
+# Já existe um ato com o tipo e número oficial informado
+def atos_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -517,14 +516,14 @@ def atos_repetido():
     if quantidade == 0:
         return
 
-    print('Atos repetido(s): '+ str(quantidade))
+    print('Atos repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica os CBO's nulos nos cargos
-#O campo CBO é obrigatório
-def cargos_sem_cbo():
 
+# Verifica os CBO's nulos nos cargos
+# O campo CBO é obrigatório
+def cargos_sem_cbo():
     resultado = consultar(
         """
             SELECT 
@@ -541,13 +540,13 @@ def cargos_sem_cbo():
     if quantidade == 0:
         return
 
-    print('Cargos sem CBO: '+ str(quantidade))
+    print('Cargos sem CBO: ' + str(quantidade))
 
     return quantidade
 
-#Verifica categoria eSocial nulo no vinculo empregaticio
-def vinculos_sem_esocial():
 
+# Verifica categoria eSocial nulo no vinculo empregaticio
+def vinculos_sem_esocial():
     resultado = consultar(
         """
             SELECT 
@@ -567,13 +566,13 @@ def vinculos_sem_esocial():
     if quantidade == 0:
         return
 
-    print('Vinculo empregaticio sem eSocial: '+ str(quantidade))
+    print('Vinculo empregaticio sem eSocial: ' + str(quantidade))
 
     return quantidade
 
-#Renomeia os vinculos empregaticios repetidos
-def vinculos_descricao_repetido():
 
+# Renomeia os vinculos empregaticios repetidos
+def vinculos_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -594,13 +593,13 @@ def vinculos_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Vinculo(s) empregaticio(s) repetido(s): '+ str(quantidade))
+    print('Vinculo(s) empregaticio(s) repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica categoria eSocial nulo no motivo de rescisão
-def motivos_resc_sem_esocial():
 
+# Verifica categoria eSocial nulo no motivo de rescisão
+def motivos_resc_sem_esocial():
     resultado = consultar(
         """
             SELECT 
@@ -619,13 +618,13 @@ def motivos_resc_sem_esocial():
     if quantidade == 0:
         return
 
-    print('Motivo de rescisão sem eSocial: '+ str(quantidade))
+    print('Motivo de rescisão sem eSocial: ' + str(quantidade))
 
     return quantidade
 
-#Verifica as folha que não foram fechadas confome competencia passada por parametro
-def folha_fechamento(competencia):
 
+# Verifica as folha que não foram fechadas confome competencia passada por parametro
+def folha_fechamento(competencia):
     resultado = consultar(
         """
             SELECT * FROM bethadba.processamentos WHERE i_competencias < {} AND pagto_realizado = 'N' AND i_entidades IN ({})
@@ -637,14 +636,14 @@ def folha_fechamento(competencia):
     if quantidade == 0:
         return
 
-    print('Folhas que não foram fechadas até a competencia ' + str(competencia) + ': '+ str(quantidade))
+    print('Folhas que não foram fechadas até a competencia ' + str(competencia) + ': ' + str(quantidade))
 
     return quantidade
 
-#Verifica as folhas de ferias sem data de pagamento
-#A data de pagamento é obrigatória
-def folhas_ferias_sem_dt_pagamento():
 
+# Verifica as folhas de ferias sem data de pagamento
+# A data de pagamento é obrigatória
+def folhas_ferias_sem_dt_pagamento():
     resultado = consultar(
         """
             SELECT 
@@ -664,13 +663,13 @@ def folhas_ferias_sem_dt_pagamento():
     if quantidade == 0:
         return
 
-    print('Folhas de ferias sem data de pagamento: '+ str(quantidade))
+    print('Folhas de ferias sem data de pagamento: ' + str(quantidade))
 
     return quantidade
 
-#Verifica categoria eSocial nulo no motivo de aposentadoria
-def motivos_apos_sem_esocial():
 
+# Verifica categoria eSocial nulo no motivo de aposentadoria
+def motivos_apos_sem_esocial():
     resultado = consultar(
         """
             SELECT 
@@ -689,11 +688,12 @@ def motivos_apos_sem_esocial():
     if quantidade == 0:
         return
 
-    print('Motivo aposentadoria sem eSocial: '+ str(quantidade))
+    print('Motivo aposentadoria sem eSocial: ' + str(quantidade))
 
     return quantidade
 
-#Verifica historicos salariais com salario zerado ou nulo
+
+# Verifica historicos salariais com salario zerado ou nulo
 
 def hist_salariais_sem_salario():
     resultado = consultar(
@@ -707,11 +707,12 @@ def hist_salariais_sem_salario():
     if quantidade == 0:
         return
 
-    print('Historico salarial com salario zerado: '+ str(quantidade))
+    print('Historico salarial com salario zerado: ' + str(quantidade))
 
     return quantidade
 
-#Verifica variaveis com data inicial ou data final maior que data de rescisão
+
+# Verifica variaveis com data inicial ou data final maior que data de rescisão
 def variaveis_dt_inical_maior_dt_rescisao():
     resultado = consultar(
         """
@@ -739,13 +740,13 @@ def variaveis_dt_inical_maior_dt_rescisao():
     if quantidade == 0:
         return
 
-    print('Variaveis com data final maior que data de rescisão: '+ str(quantidade))
+    print('Variaveis com data final maior que data de rescisão: ' + str(quantidade))
 
     return quantidade
 
-#Busca as movimetação de pessoal repetidos
-def tipos_movpes_descricao_repetido():
 
+# Busca as movimetação de pessoal repetidos
+def tipos_movpes_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -766,13 +767,13 @@ def tipos_movpes_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Movimetação de pessoal repetido(s): '+ str(quantidade))
+    print('Movimetação de pessoal repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Busca os tipos de afastamentos repetidos
-def tipos_afast_descricao_repetido():
 
+# Busca os tipos de afastamentos repetidos
+def tipos_afast_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -793,13 +794,13 @@ def tipos_afast_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Movimetação de pessoal repetido(s): '+ str(quantidade))
+    print('Movimetação de pessoal repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Busca as alterações de historicos dos funcionarios maior que a data de rescisão
-def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
 
+# Busca as alterações de historicos dos funcionarios maior que a data de rescisão
+def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT
@@ -825,13 +826,13 @@ def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
     if quantidade == 0:
         return
 
-    print('Data alteração de historico do funcionario maior que data de rescisão: '+ str(quantidade))
+    print('Data alteração de historico do funcionario maior que data de rescisão: ' + str(quantidade))
 
     return quantidade
 
-#Busca as alterações de salario dos funcionarios maior que a data de rescisão
-def hist_salariais_dt_alteracoes_maior_dt_rescisao():
 
+# Busca as alterações de salario dos funcionarios maior que a data de rescisão
+def hist_salariais_dt_alteracoes_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT
@@ -856,13 +857,13 @@ def hist_salariais_dt_alteracoes_maior_dt_rescisao():
     if quantidade == 0:
         return
 
-    print('Data alteração salarial do funcionario maior que data de rescisão: '+ str(quantidade))
+    print('Data alteração salarial do funcionario maior que data de rescisão: ' + str(quantidade))
 
     return quantidade
 
-#Busca as alterações de cargo dos funcionarios maior que a data de rescisão
-def hist_cargos_dt_alteracoes_maior_dt_rescisao():
 
+# Busca as alterações de cargo dos funcionarios maior que a data de rescisão
+def hist_cargos_dt_alteracoes_maior_dt_rescisao():
     resultado = consultar(
         """
             SELECT
@@ -888,13 +889,13 @@ def hist_cargos_dt_alteracoes_maior_dt_rescisao():
     if quantidade == 0:
         return
 
-    print('Data alteração de cargo do funcionario maior que data de rescisão: '+ str(quantidade))
+    print('Data alteração de cargo do funcionario maior que data de rescisão: ' + str(quantidade))
 
     return quantidade
 
-#Busca as classificações que estão com código errado no tipo de afastamento
-def tipos_afast_classif_invalida():
 
+# Busca as classificações que estão com código errado no tipo de afastamento
+def tipos_afast_classif_invalida():
     resultado = consultar(
         """
             SELECT
@@ -911,13 +912,13 @@ def tipos_afast_classif_invalida():
     if quantidade == 0:
         return
 
-    print('Classificações que estão com código errado no tipo de afastamento: '+ str(quantidade))
+    print('Classificações que estão com código errado no tipo de afastamento: ' + str(quantidade))
 
     return quantidade
 
-#Busca os tipos de atos repetidos
-def tipos_atos_nome_repetido():
 
+# Busca os tipos de atos repetidos
+def tipos_atos_nome_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -938,13 +939,13 @@ def tipos_atos_nome_repetido():
     if quantidade == 0:
         return
 
-    print('Tipo de ato repetido(s): '+ str(quantidade))
+    print('Tipo de ato repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Busca as descrições repetidas no horario ponto
-def horarios_ponto_descricao_repetido():
 
+# Busca as descrições repetidas no horario ponto
+def horarios_ponto_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -966,13 +967,13 @@ def horarios_ponto_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Descricao do horario ponto repetido(s): '+ str(quantidade))
+    print('Descricao do horario ponto repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Busca as descrições repetidas na turma
-def turmas_descricao_repetido():
 
+# Busca as descrições repetidas na turma
+def turmas_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -994,13 +995,13 @@ def turmas_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Descricao da turma repetido(s): '+ str(quantidade))
+    print('Descricao da turma repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Buscar niveis de organogramas com separadores nulos
-def niveis_organ_separador_invalido():
 
+# Buscar niveis de organogramas com separadores nulos
+def niveis_organ_separador_invalido():
     resultado = consultar(
         """
             SELECT 
@@ -1017,13 +1018,13 @@ def niveis_organ_separador_invalido():
     if quantidade == 0:
         return
 
-    print('Separadores nulos nos niveis de organogramas: '+ str(quantidade))
+    print('Separadores nulos nos niveis de organogramas: ' + str(quantidade))
 
     return quantidade
 
-#Verifica a natureza de texto juridico se é nulo nos atos
-def atos_sem_natureza_texto_juridico():
 
+# Verifica a natureza de texto juridico se é nulo nos atos
+def atos_sem_natureza_texto_juridico():
     resultado = consultar(
         """
             SELECT 
@@ -1040,13 +1041,13 @@ def atos_sem_natureza_texto_juridico():
     if quantidade == 0:
         return
 
-    print('Natureza texto juridico do ato nulo: '+ str(quantidade))
+    print('Natureza texto juridico do ato nulo: ' + str(quantidade))
 
     return quantidade
 
-#Verifica se a data de fonte de divulgação é menor que a data de publicacao do ato
-def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
 
+# Verifica se a data de fonte de divulgação é menor que a data de publicacao do ato
+def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
     resultado = consultar(
         """
             SELECT 
@@ -1067,13 +1068,13 @@ def atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao():
     if quantidade == 0:
         return
 
-    print('Data de fonte de divulgação é menor que a data de publicacao do ato: '+ str(quantidade))
+    print('Data de fonte de divulgação é menor que a data de publicacao do ato: ' + str(quantidade))
 
     return quantidade
 
-#Ter ao menos um tipo de afastamento na configuração do cancelamento de férias
-def canc_ferias_sem_tipos_afast():
 
+# Ter ao menos um tipo de afastamento na configuração do cancelamento de férias
+def canc_ferias_sem_tipos_afast():
     resultado = consultar(
         """
             SELECT 
@@ -1090,13 +1091,13 @@ def canc_ferias_sem_tipos_afast():
     if quantidade == 0:
         return
 
-    print('Tipo de afastamento na configuração do cancelamento de férias vazio: '+ str(quantidade))
+    print('Tipo de afastamento na configuração do cancelamento de férias vazio: ' + str(quantidade))
 
     return quantidade
 
-#Verifica descricao de cofiguração de organograma se é maior que 30 caracteres
-def config_organograma_descricao_invalida():
 
+# Verifica descricao de cofiguração de organograma se é maior que 30 caracteres
+def config_organograma_descricao_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -1115,13 +1116,13 @@ def config_organograma_descricao_invalida():
     if quantidade == 0:
         return
 
-    print('Descricao de cofiguração de organograma maior que 30 caracteres: '+ str(quantidade))
+    print('Descricao de cofiguração de organograma maior que 30 caracteres: ' + str(quantidade))
 
     return quantidade
 
-#Verifica descricao de cofiguração de organograma repetido
-def config_organ_descricao_repetido():
 
+# Verifica descricao de cofiguração de organograma repetido
+def config_organ_descricao_repetido():
     resultado = consultar(
         """
            SELECT 
@@ -1142,13 +1143,13 @@ def config_organ_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Descricao de cofiguração de organograma repetido(s): '+ str(quantidade))
+    print('Descricao de cofiguração de organograma repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica se o CPF é invalido
-def pessoas_cpf_invalido():
 
+# Verifica se o CPF é invalido
+def pessoas_cpf_invalido():
     resultado = consultar(
         """
            SELECT
@@ -1165,20 +1166,20 @@ def pessoas_cpf_invalido():
 
     for i in resultado:
         cpf = i[1]
-        
+
         if not cpf_validar(cpf):
             quantidade += 1
 
     if quantidade == 0:
         return
 
-    print('CPF invalido(s): '+ str(quantidade))
+    print('CPF invalido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica se o CNPJ é invalido
-def pessoas_cnpj_invalido():
 
+# Verifica se o CNPJ é invalido
+def pessoas_cnpj_invalido():
     resultado = consultar(
         """
            SELECT
@@ -1193,20 +1194,20 @@ def pessoas_cnpj_invalido():
 
     for i in resultado:
         cnpj = i[1]
-       
+
         if not cnpj_validar(cnpj):
             quantidade += 1
 
     if quantidade == 0:
         return
 
-    print('CNPJ invalido(s): '+ str(quantidade))
+    print('CNPJ invalido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica os RG's repetidos
-def pessoas_rg_repetido():
 
+# Verifica os RG's repetidos
+def pessoas_rg_repetido():
     resultado = consultar(
         """
             SELECT
@@ -1227,14 +1228,14 @@ def pessoas_rg_repetido():
     if quantidade == 0:
         return
 
-    print('RG repetido(s): '+ str(quantidade))
+    print('RG repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica os cargos com descricao repetidos
-#Já existe um cargo com a descrição informada
-def cargos_descricao_repetido():
 
+# Verifica os cargos com descricao repetidos
+# Já existe um cargo com a descrição informada
+def cargos_descricao_repetido():
     resultado = consultar(
         """
             SELECT
@@ -1260,14 +1261,14 @@ def cargos_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Cargo(s) repetido(s): '+ str(quantidade))
+    print('Cargo(s) repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica o termino de vigencia maior que 2099
-#Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
-def bases_calc_outras_empresas_vigencia_invalida():
 
+# Verifica o termino de vigencia maior que 2099
+# Essa verificação é necessaria para não dar loop ao migrar a pessoa fisica
+def bases_calc_outras_empresas_vigencia_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -1284,13 +1285,13 @@ def bases_calc_outras_empresas_vigencia_invalida():
     if quantidade == 0:
         return
 
-    print('Vigencia maior que 2099 em bases de calculos de outras empresas: '+ str(quantidade))
+    print('Vigencia maior que 2099 em bases de calculos de outras empresas: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os emails invalidos
-def pessoas_email_invalido():
 
+# Verifica os emails invalidos
+def pessoas_email_invalido():
     resultado = consultar(
         """
             SELECT 
@@ -1315,13 +1316,13 @@ def pessoas_email_invalido():
     if quantidade == 0:
         return
 
-    print('Email invalido: '+ str(quantidade))
+    print('Email invalido: ' + str(quantidade))
 
     return quantidade
 
-#Verifica o número de endereço se está vazio
-def pessoas_enderecos_sem_numero():
 
+# Verifica o número de endereço se está vazio
+def pessoas_enderecos_sem_numero():
     resultado = consultar(
         """
             SELECT 
@@ -1338,13 +1339,13 @@ def pessoas_enderecos_sem_numero():
     if quantidade == 0:
         return
 
-    print('Número de endereço vazio: '+ str(quantidade))
+    print('Número de endereço vazio: ' + str(quantidade))
 
     return quantidade
 
-#Verifica o nome de rua se está vazio
-def ruas_sem_nome():
 
+# Verifica o nome de rua se está vazio
+def ruas_sem_nome():
     resultado = consultar(
         """
             SELECT 
@@ -1362,13 +1363,13 @@ def ruas_sem_nome():
     if quantidade == 0:
         return
 
-    print('Nome da rua vazio: '+ str(quantidade))
+    print('Nome da rua vazio: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os funcionarios sem previdencia
-def funcionarios_sem_previdencia():
 
+# Verifica os funcionarios sem previdencia
+def funcionarios_sem_previdencia():
     resultado = consultar(
         """
             SELECT 
@@ -1398,14 +1399,14 @@ def funcionarios_sem_previdencia():
     if quantidade == 0:
         return
 
-    print('Funcionarios sem previdencia: '+ str(quantidade))
+    print('Funcionarios sem previdencia: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os eventos de média/vantagem que não tem eventos vinculados
-#Os eventos de composição da média são obrigatórios
-def mediasvant_sem_composicao():
 
+# Verifica os eventos de média/vantagem que não tem eventos vinculados
+# Os eventos de composição da média são obrigatórios
+def mediasvant_sem_composicao():
     resultado = consultar(
         """
             SELECT 
@@ -1425,14 +1426,14 @@ def mediasvant_sem_composicao():
     if quantidade == 0:
         return
 
-    print('Eventos de média/vantagem compondo outros eventos: '+ str(quantidade))
+    print('Eventos de média/vantagem compondo outros eventos: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os eventos de média/vantagem se estão compondo outros eventos de média/vantagem
-#Eventos de composição não pode ser eventos de média/vantagem
-def mediasvant_eve_composicao_invalida():
 
+# Verifica os eventos de média/vantagem se estão compondo outros eventos de média/vantagem
+# Eventos de composição não pode ser eventos de média/vantagem
+def mediasvant_eve_composicao_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -1450,13 +1451,13 @@ def mediasvant_eve_composicao_invalida():
     if quantidade == 0:
         return
 
-    print('Eventos de média/vantagem sem composição de eventos: '+ str(quantidade))
+    print('Eventos de média/vantagem sem composição de eventos: ' + str(quantidade))
 
     return quantidade
 
-#Verifica a data de admissão da matrícula se é posterior a data de início da matrícula nesta lotação física
-def locais_mov_dt_inicial_menor_dt_admissao():
 
+# Verifica a data de admissão da matrícula se é posterior a data de início da matrícula nesta lotação física
+def locais_mov_dt_inicial_menor_dt_admissao():
     resultado = consultar(
         """
            SELECT 
@@ -1480,14 +1481,14 @@ def locais_mov_dt_inicial_menor_dt_admissao():
     if quantidade == 0:
         return
 
-    print('Data admissão matricula maior que data inicial de lotação fisica: '+ str(quantidade))
+    print('Data admissão matricula maior que data inicial de lotação fisica: ' + str(quantidade))
 
     return quantidade
 
-#Verifica a descrição do motivo de alteração do ponto se contem mais que 30 caracteres
-#A descrição não pode conter mais de 30 caracteres
-def motivos_altponto_descricao_invalida():
 
+# Verifica a descrição do motivo de alteração do ponto se contem mais que 30 caracteres
+# A descrição não pode conter mais de 30 caracteres
+def motivos_altponto_descricao_invalida():
     resultado = consultar(
         """
             SELECT
@@ -1505,13 +1506,13 @@ def motivos_altponto_descricao_invalida():
     if quantidade == 0:
         return
 
-    print('Descricao de motivos de alteração do ponto maior que 30 caracteres: '+ str(quantidade))
+    print('Descricao de motivos de alteração do ponto maior que 30 caracteres: ' + str(quantidade))
 
     return quantidade
 
-#Verifica o motivo nos afastamentos se contem no máximo 150 caracteres
-def afastamentos_observacao_invalida():
 
+# Verifica o motivo nos afastamentos se contem no máximo 150 caracteres
+def afastamentos_observacao_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -1531,14 +1532,14 @@ def afastamentos_observacao_invalida():
     if quantidade == 0:
         return
 
-    print('Motivos nos afastamentos maior que 150 caracteres: '+ str(quantidade))
+    print('Motivos nos afastamentos maior que 150 caracteres: ' + str(quantidade))
 
     return quantidade
 
-#Verifica a data inicial no afastamento de ferias se é maior que a data final 
-#A quantidade de dias não pode ser menor que 0
-def ferias_dt_gozo_ini_maior_dt_gozo_fin():
 
+# Verifica a data inicial no afastamento de ferias se é maior que a data final
+# A quantidade de dias não pode ser menor que 0
+def ferias_dt_gozo_ini_maior_dt_gozo_fin():
     resultado = consultar(
         """
             SELECT 
@@ -1560,14 +1561,14 @@ def ferias_dt_gozo_ini_maior_dt_gozo_fin():
     if quantidade == 0:
         return
 
-    print('Data inicial no afastamento de férias é maior que a data final: '+ str(quantidade))
+    print('Data inicial no afastamento de férias é maior que a data final: ' + str(quantidade))
 
     return quantidade
 
-#Busca as rescisões de aposentadoria com motivo nulo
-#O motivo de rescisão é obrigatório
-def rescisoes_sem_motivos_apos():
 
+# Busca as rescisões de aposentadoria com motivo nulo
+# O motivo de rescisão é obrigatório
+def rescisoes_sem_motivos_apos():
     resultado = consultar(
         """
             SELECT 
@@ -1588,13 +1589,13 @@ def rescisoes_sem_motivos_apos():
     if quantidade == 0:
         return
 
-    print('Rescisões de aposentadoria com motivo nulo: '+ str(quantidade))
+    print('Rescisões de aposentadoria com motivo nulo: ' + str(quantidade))
 
     return quantidade
 
-#Verifica os grupos funcionais repetidos
-def grupos_nome_repetido():
 
+# Verifica os grupos funcionais repetidos
+def grupos_nome_repetido():
     resultado = consultar(
         """
             SELECT
@@ -1618,15 +1619,15 @@ def grupos_nome_repetido():
     if quantidade == 0:
         return
 
-    print('Grupos funcionais repetido(s): '+ str(quantidade))
+    print('Grupos funcionais repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Verifica a data inicial de beneficio do dependente se é melhor que a do titular
-#A data inicial do benefício não pode ser menor que a data de admissão
-#Plano de saude
-def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
 
+# Verifica a data inicial de beneficio do dependente se é melhor que a do titular
+# A data inicial do benefício não pode ser menor que a data de admissão
+# Plano de saude
+def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
     resultado = consultar(
         """
             SELECT 
@@ -1649,14 +1650,14 @@ def func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular():
     if quantidade == 0:
         return
 
-    print('A data inicial do dependente maior do que do titular (Plano de Saude): '+ str(quantidade))
+    print('A data inicial do dependente maior do que do titular (Plano de Saude): ' + str(quantidade))
 
     return quantidade
 
-#Verifica se o número de telefone na lotação fisica é maior que 11 caracteres
-#O telefone pode conter no máximo 11 caracteres
-def locais_trab_fone_invalido():
 
+# Verifica se o número de telefone na lotação fisica é maior que 11 caracteres
+# O telefone pode conter no máximo 11 caracteres
+def locais_trab_fone_invalido():
     resultado = consultar(
         """
             SELECT 
@@ -1677,14 +1678,14 @@ def locais_trab_fone_invalido():
     if quantidade == 0:
         return
 
-    print('Número de telefone na lotação fisica é maior que 11 caracteres: '+ str(quantidade))
+    print('Número de telefone na lotação fisica é maior que 11 caracteres: ' + str(quantidade))
 
     return quantidade
 
-#Busca os atos com data inicial nulo
-#A data de criação é obrigatória
-def atos_sem_dt_inicial():
 
+# Busca os atos com data inicial nulo
+# A data de criação é obrigatória
+def atos_sem_dt_inicial():
     resultado = consultar(
         """
             SELECT 
@@ -1702,13 +1703,13 @@ def atos_sem_dt_inicial():
     if quantidade == 0:
         return
 
-    print('Atos sem data de criação: '+ str(quantidade))
+    print('Atos sem data de criação: ' + str(quantidade))
 
     return quantidade
 
-#Busca as descrições repetidas dos niveis salariais
-def niveis_descricao_repetido():
 
+# Busca as descrições repetidas dos niveis salariais
+def niveis_descricao_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -1732,14 +1733,14 @@ def niveis_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Descricao de niveis salariais repetido(s): '+ str(quantidade))
+    print('Descricao de niveis salariais repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Busca os cartões pontos que estão diferente de sua matricula ou repetidos
-#Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
-def funcionarios_cartao_ponto_repetido():
 
+# Busca os cartões pontos que estão diferente de sua matricula ou repetidos
+# Esta função só ira funcionar se os números das matriculas estiverem recodificados (que não se repetem)
+def funcionarios_cartao_ponto_repetido():
     matriculas = consultar(
         """
             SELECT 
@@ -1787,14 +1788,14 @@ def funcionarios_cartao_ponto_repetido():
     if quantidade == 0:
         return
 
-    print('Cartão ponto repetido(s): '+ str(quantidade))
+    print('Cartão ponto repetido(s): ' + str(quantidade))
 
     return quantidade
 
-#Busca os funcionarios com data de nomeação maior que a data de posse
-#O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
-def cargos_dt_nomeacao_maior_dt_posse():
 
+# Busca os funcionarios com data de nomeação maior que a data de posse
+# O funcionário x da entidade x deve ter a data de posse (0000-00-00) posterior à data de nomeação (0000-00-00)!
+def cargos_dt_nomeacao_maior_dt_posse():
     resultado = consultar(
         """
             SELECT 
@@ -1811,14 +1812,14 @@ def cargos_dt_nomeacao_maior_dt_posse():
     if quantidade == 0:
         return
 
-    print('Data de nomeação maior que data de posse: '+ str(quantidade))
+    print('Data de nomeação maior que data de posse: ' + str(quantidade))
 
     return quantidade
 
-#Busca as contas bancarias dos funcionarios que estão invalidas
-#Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
-def funcionarios_conta_bancaria_invalida():
 
+# Busca as contas bancarias dos funcionarios que estão invalidas
+# Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
+def funcionarios_conta_bancaria_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -1846,14 +1847,14 @@ def funcionarios_conta_bancaria_invalida():
     if quantidade == 0:
         return
 
-    print('Historicos de funcionarios que estão com conta bancaria errada: '+ str(quantidade))
+    print('Historicos de funcionarios que estão com conta bancaria errada: ' + str(quantidade))
 
     return quantidade
 
-#Busca os historicos de funcionarios com mais do que uma previdencia informada
-#Apenas uma previdência pode ser informada
-def funcionarios_com_mais_de_uma_previdencia():
 
+# Busca os historicos de funcionarios com mais do que uma previdencia informada
+# Apenas uma previdência pode ser informada
+def funcionarios_com_mais_de_uma_previdencia():
     resultado = consultar(
         """
             SELECT 
@@ -1873,14 +1874,14 @@ def funcionarios_com_mais_de_uma_previdencia():
     if quantidade == 0:
         return
 
-    print('Historicos de funcionarios com mais do que uma previdencia informada: '+ str(quantidade))
+    print('Historicos de funcionarios com mais do que uma previdencia informada: ' + str(quantidade))
 
     return quantidade
 
-#Busca os afastamentos com data inicial menor que data de admissão
-#A data inicial não poderá ser menor que a data de admissão
-def afastamentos_dt_afastamento_menor_dt_admissao():
 
+# Busca os afastamentos com data inicial menor que data de admissão
+# A data inicial não poderá ser menor que a data de admissão
+def afastamentos_dt_afastamento_menor_dt_admissao():
     resultado = consultar(
         """
             SELECT 
@@ -1901,14 +1902,14 @@ def afastamentos_dt_afastamento_menor_dt_admissao():
     if quantidade == 0:
         return
 
-    print('Afastamentos com data inicial menor que data de admissão: '+ str(quantidade))
+    print('Afastamentos com data inicial menor que data de admissão: ' + str(quantidade))
 
     return quantidade
 
-#Busca as areas de atuação com descrição repetido
-#Já existe uma área de atuação com a descrição informada
-def areas_atuacao_nome_repetido():
 
+# Busca as areas de atuação com descrição repetido
+# Já existe uma área de atuação com a descrição informada
+def areas_atuacao_nome_repetido():
     resultado = consultar(
         """
            SELECT 
@@ -1929,14 +1930,14 @@ def areas_atuacao_nome_repetido():
     if quantidade == 0:
         return
 
-    print('Áreas de atuação com descrição repetido: '+ str(quantidade))
+    print('Áreas de atuação com descrição repetido: ' + str(quantidade))
 
     return quantidade
 
-#Busca os dependentes sem motivo de termino
-#O motivo de término é obrigatório
-def dependentes_sem_dt_fim():
 
+# Busca os dependentes sem motivo de termino
+# O motivo de término é obrigatório
+def dependentes_sem_dt_fim():
     resultado = consultar(
         """
             SELECT 
@@ -1956,14 +1957,14 @@ def dependentes_sem_dt_fim():
     if quantidade == 0:
         return
 
-    print('Dependente sem motivo de termino: '+ str(quantidade))
+    print('Dependente sem motivo de termino: ' + str(quantidade))
 
     return quantidade
 
-#Busca os cargos sem configuração de ferias
-#A configuração de férias é obrigatória
-def cargos_sem_configuracao_ferias():
 
+# Busca os cargos sem configuração de ferias
+# A configuração de férias é obrigatória
+def cargos_sem_configuracao_ferias():
     resultado = consultar(
         """
             SELECT 
@@ -1982,14 +1983,14 @@ def cargos_sem_configuracao_ferias():
     if quantidade == 0:
         return
 
-    print('Cargos sem configuração de ferias: '+ str(quantidade))
+    print('Cargos sem configuração de ferias: ' + str(quantidade))
 
     return quantidade
 
-#Busca a data da opção do FGTS diferente que a data de admissão
-#Quando a data de admissão for posterior a 04/10/1988, a data da opção do FGTS deve ser igual a data de admissão
-def opcao_fgts_diferente_dt_admissao():
 
+# Busca a data da opção do FGTS diferente que a data de admissão
+# Quando a data de admissão for posterior a 04/10/1988, a data da opção do FGTS deve ser igual a data de admissão
+def opcao_fgts_diferente_dt_admissao():
     resultado = consultar(
         """
             SELECT 
@@ -2011,14 +2012,14 @@ def opcao_fgts_diferente_dt_admissao():
     if quantidade == 0:
         return
 
-    print('Data da opção do FGTS diferente que a data de admissão: '+ str(quantidade))
+    print('Data da opção do FGTS diferente que a data de admissão: ' + str(quantidade))
 
     return quantidade
 
-#Busca os funcionarios com recebimento credito em conta sem dados da conta bancaria
-#Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
-def funcionarios_conta_bancaria_sem_dados():
 
+# Busca os funcionarios com recebimento credito em conta sem dados da conta bancaria
+# Quando a forma de pagamento for "Crédito em conta" é necessário informar a conta bancária
+def funcionarios_conta_bancaria_sem_dados():
     resultado = consultar(
         """
             SELECT 
@@ -2038,13 +2039,13 @@ def funcionarios_conta_bancaria_sem_dados():
     if quantidade == 0:
         return
 
-    print('Funcionarios com recebimento credito em conta sem dados da conta bancaria: '+ str(quantidade))
+    print('Funcionarios com recebimento credito em conta sem dados da conta bancaria: ' + str(quantidade))
 
     return quantidade
 
-#Busca os funcionarios com marcacoes com origem invalida
-def funcionarios_maracoes_invalida():
 
+# Busca os funcionarios com marcacoes com origem invalida
+def funcionarios_maracoes_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -2062,14 +2063,14 @@ def funcionarios_maracoes_invalida():
     if quantidade == 0:
         return
 
-    print('Funcionarios com marcacoes com origem invalida: '+ str(quantidade))
+    print('Funcionarios com marcacoes com origem invalida: ' + str(quantidade))
 
     return quantidade
 
-#Busca as ocorrencias do ponto com nome repetido
-#Já existe uma ocorrência de ponto com a descrição informada
-def ocorrencia_ponto_nome_repetido():
 
+# Busca as ocorrencias do ponto com nome repetido
+# Já existe uma ocorrência de ponto com a descrição informada
+def ocorrencia_ponto_nome_repetido():
     resultado = consultar(
         """
             SELECT 
@@ -2090,14 +2091,15 @@ def ocorrencia_ponto_nome_repetido():
     if quantidade == 0:
         return
 
-    print('Ocorrencias do ponto com nome repetido: '+ str(quantidade))
+    print('Ocorrencias do ponto com nome repetido: ' + str(quantidade))
 
     return quantidade
 
-#Busca as as configurações de dirf com eventos repetidos
-def configuracao_dirf_com_eventos_repetidos():
 
-    resultado = consultar("SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  LIST(i_eventos)     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  LIST(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1")
+# Busca as as configurações de dirf com eventos repetidos
+def configuracao_dirf_com_eventos_repetidos():
+    resultado = consultar(
+        "SELECT chave_dsk1 = campoDirf, nomeCampoDsk = CASE campo WHEN '0A-01' THEN '050101' WHEN '0A-03' THEN '050102' WHEN 'AA-01' THEN '05010201' WHEN 'AA-02-01' THEN '0501020201' WHEN 'AA-02-02' THEN '0501020202' WHEN 'AA-02-03' THEN '0501020203' WHEN 'AA-02-04' THEN '0501020204' WHEN '03-04' THEN '030401' WHEN '04-01' then '040101'           when '04-01-01' then '040102'             when '04-03' then '040301'         when '04-03-01' then '040302'         when '04-06' then '040601'            else         bethadba.dbf_retira_alfa_de_inteiros(campo)     end ,     campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)         when '0301' then 'TOTAL_REND_INC_FERIAS'         when '0302' then 'CONTRIB_PREV_OFICIAL'         when '030301' then 'CONTRIB_PREV_PRIVADA'         when '030302' then 'CONTRIB_FAPI'         when '030303' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO'         when '030304' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR'         when '030401' then 'PENSAO_ALIMENTICIA'         when '030402' then 'PENSAO_ALIMENTICIA_13_SALARIO'         when '0305' then 'IRRF'         when '040101' then 'PARC_ISENTA_APOSENT'         when '040102' then 'PARC_ISENTA_APOSENT_13_SALARIO'         when '0402' then 'DIARIAS_AJUDAS_CUSTO'         when '040301' then 'PROV_APOSENT_MOLESTIA_GRAVE'         when '040302' then 'PROV_APOSENT_MOLESTIA_GRAVE_13_SALARIO'         when '0404' then 'LUCROS_DIVIDENDOS'         when '0405' then 'VALORES_PAGOS_TITULAR_SOCIO_EMPRESA'         when '040601' then 'INDENIZ_RESC_CONTRATO_TRABALHO'         when '040602' then 'INDENIZ_RESC_CONTRATO_TRABALHO_13_SALARIO'         when '040701' then 'REND_ISENTOS_OUTROS'         when '040702' then 'REND_ISENTOS_OUTROS_MEDICO_RESIDENTE'         when '050101' then 'TOTAL_REND_13_SALARIO'         when '050102' then 'IRRF_13_SALARIO'         when '05010201' then 'CONTRIB_PREV_OFICIAL_13_SALARIO'         when '0501020202' then 'CONTRIB_FAPI_13_SALARIO'         when '0501020203' then 'CONTRIB_FUND_PREV_SERVIDOR_PUBLICO_13_SALARIO'         when '0501020204' then 'CONTRIB_ENTE_PUBLICO_PATROCINADOR_13_SALARIO'         when '050301' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO'         when '050302' then 'REND_SUJ_TRIB_EXCLUSIVA_OUTROS_13_SALARIO_MEDICO_RESIDENTE'         when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'         when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'         when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'         when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'         when '0605' then 'RRA_IRRF'         when '0606' then 'RRA_RENDIMENTOS_ISENTOS'         when '0700' then 'INFORMACOES_COMPLEMENTARES'         when 'ABOPEC' then 'ABONO_PECUNIARIO' end,         eventos =  LIST(i_eventos)     from bethadba.comprends            where campo not in ('05-01','0A-02')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1         union all         select chave_dsk1 = campoDirf,         nomeCampoDsk =         case campo             when '03-01' then '0601'             when '03-02' then '0603'             when '03-05' then '0605'             when '03-04' then '0604'         else             bethadba.dbf_retira_alfa_de_inteiros(campo)         end ,         campoDirf = case bethadba.dbf_retira_alfa_de_inteiros(nomeCampoDsk)                    when '0601' then 'RRA_TOTAL_RENDIMENTOS_TRIBUTAVEIS'             when '0602' then 'RRA_EXCLUSAO_DESP_ACAO_JUDICIAL'             when '0603' then 'RRA_DEDUCAO_CONTRIB_PREV_OFICIAL'             when '0604' then 'RRA_DEDUCAO_PENSAO_ALIMENTICIA'             when '0605' then 'RRA_IRRF'             when '0606' then 'RRA_RENDIMENTOS_ISENTOS' end,         eventos =  LIST(i_eventos)     from bethadba.comprends     where campo in ('03-01','03-02','03-03-01','03-03-02','03-03-03','03-03-04', '03-04','03-05')       and campoDirf is not null     group by campoDirf, nomeCampoDsk, chave_dsk1")
 
     quantidade = 0
 
@@ -2110,14 +2112,14 @@ def configuracao_dirf_com_eventos_repetidos():
     if quantidade == 0:
         return
 
-    print('Configurações de dirf com eventos repetidos: '+ str(quantidade))
+    print('Configurações de dirf com eventos repetidos: ' + str(quantidade))
 
     return quantidade
 
-#Verifica a descricao de motivo de alteração salarial repetindo
-#Já existe um motivo de alteração salarial com a descrição informada
-def motivo_alt_salarial_descricao_repetido():
 
+# Verifica a descricao de motivo de alteração salarial repetindo
+# Já existe um motivo de alteração salarial com a descrição informada
+def motivo_alt_salarial_descricao_repetido():
     resultado = consultar(
         """
            SELECT 
@@ -2138,14 +2140,14 @@ def motivo_alt_salarial_descricao_repetido():
     if quantidade == 0:
         return
 
-    print('Descrição de motivo de alteração salarial repetindo: '+ str(quantidade))
+    print('Descrição de motivo de alteração salarial repetindo: ' + str(quantidade))
 
     return quantidade
 
-#Verifica se a taxa do evento está invalida
-#A taxa deve ser composta de no máximo 3 números inteiros e 4 decimais
-def evento_taxa_invalida():
 
+# Verifica se a taxa do evento está invalida
+# A taxa deve ser composta de no máximo 3 números inteiros e 4 decimais
+def evento_taxa_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -2163,14 +2165,14 @@ def evento_taxa_invalida():
     if quantidade == 0:
         return
 
-    print('Taxa de evento invalida: '+ str(quantidade))
+    print('Taxa de evento invalida: ' + str(quantidade))
 
     return quantidade
 
-#Verifica se a licenca da licenca premio é maior do que 2 digitos
-#A licença não pode conter mais de 2 dígitos
-def licenca_premio_faixa_invalida():
 
+# Verifica se a licenca da licenca premio é maior do que 2 digitos
+# A licença não pode conter mais de 2 dígitos
+def licenca_premio_faixa_invalida():
     resultado = consultar(
         """
             SELECT 
@@ -2187,14 +2189,14 @@ def licenca_premio_faixa_invalida():
     if quantidade == 0:
         return
 
-    print('Faixa na licença premio maior que dois digitos: '+ str(quantidade))
+    print('Faixa na licença premio maior que dois digitos: ' + str(quantidade))
 
     return quantidade
 
-#Verifica se tem cadastro a formação para conversão
-#O profissional XXXXXX deve possuir formações cadastradas!
-def formacao_vazio():
 
+# Verifica se tem cadastro a formação para conversão
+# O profissional XXXXXX deve possuir formações cadastradas!
+def formacao_vazio():
     resultado = consultar(
         """
             SELECT * FROM bethadba.formacoes WHERE nome = 'Formação para conversão'
@@ -2210,7 +2212,6 @@ def formacao_vazio():
 
 
 def contratacao_aprendiz_vazio():
-
     resultado = consultar(
         """ 
             select 
@@ -2232,7 +2233,6 @@ def contratacao_aprendiz_vazio():
 
 
 def contratacao_pcd_vazio():
-
     resultado = consultar(
         """
             select 
@@ -2251,10 +2251,11 @@ def contratacao_pcd_vazio():
 
     print('O campo de contratação de PCD é obrigatório!')
 
-#-----------------------Executar---------------------#
-#pessoas_sem_cpf() - Em analise
+
+# -----------------------Executar---------------------#
+# pessoas_sem_cpf() - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
-#cargos_sem_configuracao_ferias() - Em analise
+# cargos_sem_configuracao_ferias() - Em analise
 pessoas_data_vencimento_cnh_menor_data_emissao()
 caracteristicas_nome_repetido()
 dependentes_grau_outros()
