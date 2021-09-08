@@ -4,15 +4,16 @@ from variaveis import *
 conexao = pyodbc.connect(f'DSN={odbc}', ConnectionIdleTimeout=0)
 cursor = conexao.cursor()
 
-#Pesquisar dados.
+
+# Pesquisar dados.
 def consultar(comando: str) -> list:
     cursor.execute(comando)
-    
+
     return cursor.fetchall()
 
-#Executa ações de atualizar, deletar, inserir dados desabilitando os gatilhos.
-def executar(comando: str):
 
+# Executa ações de atualizar, deletar, inserir dados desabilitando os gatilhos.
+def executar(comando: str):
     if bethadba:
         cursor.execute(
             """
@@ -26,7 +27,7 @@ def executar(comando: str):
         )
 
         return
-    
+
     cursor.execute(
         """
             CALL bethadba.dbp_conn_gera(1, 2021, 300);
