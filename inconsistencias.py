@@ -34,7 +34,7 @@ def pessoa_data_nascimento_maior_data_admissao():
 
 
 # Busca as pessoas com data de vencimento da CNH menor que a data de emissão da 1ª habilitação!
-def pessoas_data_vencimento_cnh_menor_data_emissao():
+def pessoas_cnh_dt_vencimento_menor_dt_emissao():
     resultado = consultar(
         """
             SELECT 
@@ -161,9 +161,8 @@ def pessoas_sem_dt_nascimento():
 
     return quantidade
 
-
 # Pessoas com data de nascimento maior que data de dependencia
-def pessoas_cnh_dt_vencimento_menor_dt_emissao():
+def pessoas_dt_nasc_maior_dt_ini_depende():
     resultado = consultar(
         """
             SELECT 
@@ -2256,13 +2255,13 @@ def contratacao_pcd_vazio():
 # pessoas_sem_cpf() - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
 cargos_sem_configuracao_ferias()
-pessoas_data_vencimento_cnh_menor_data_emissao()
 caracteristicas_nome_repetido()
 dependentes_grau_outros()
 pessoa_data_nascimento_maior_data_admissao()
 pessoas_sem_dt_nascimento()
 pessoas_cnh_dt_vencimento_menor_dt_emissao()
 pessoas_dt_primeira_cnh_maior_dt_nascimento()
+pessoas_dt_nasc_maior_dt_ini_depende()
 pessoas_dt_nasc_maior_dt_nasc_responsavel()
 pessoas_cpf_repetido()
 pessoas_pis_repetido()

@@ -145,14 +145,29 @@ def pessoas_cnh_dt_vencimento_menor_dt_emissao():
         """
     )
 
+
+def pessoas_dt_nasc_maior_dt_ini_depende():
     executar(
         """
-            UPDATE
-                bethadba.pessoas_fis_compl
+            UPDATE 
+                bethadba.dependentes dd
             SET 
-                dt_vencto_cnh = dt_primeira_cnh+1
+                dd.dt_ini_depende = s.dt_nascimento
+            FROM 
+                ( 
+                    SELECT 
+                        d.i_dependentes,
+                        pf.dt_nascimento,
+                        d.dt_ini_depende 
+                    FROM 
+                        bethadba.dependentes d 
+                    JOIN 
+                        bethadba.pessoas_fisicas pf  ON (d.i_dependentes = pf.i_pessoas)
+                    WHERE 
+                        dt_nascimento > dt_ini_depende
+                ) AS s
             WHERE 
-                dt_primeira_cnh >= dt_vencto_cnh; 
+                dd.i_dependentes = s.i_dependentes;
         """
     )
 
@@ -2298,11 +2313,11 @@ def contratacao_pcd_vazio():
 # pessoas_sem_cpf() # - Em analise
 hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
 cargos_sem_configuracao_ferias()
-# pessoas_data_vencimento_cnh_menor_data_emissao() # - Em analise
 caracteristicas_nome_repetido()
 dependentes_grau_outros()
 pessoa_data_nascimento_maior_data_admissao()
 pessoas_sem_dt_nascimento()
+pessoas_dt_nasc_maior_dt_ini_depende()
 pessoas_cnh_dt_vencimento_menor_dt_emissao()
 pessoas_dt_primeira_cnh_maior_dt_nascimento()
 pessoas_dt_nasc_maior_dt_nasc_responsavel()
