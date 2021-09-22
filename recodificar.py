@@ -17,32 +17,35 @@ def recodificar_funcionarios(lista_entidade):
         """
             SELECT 
                 list(i_entidades), 
-                i_funcionarios, 
+                codigoMatriculaNumero = if(select ctr_contrato_matric from bethadba.parametros_folha) = 'S' then string(left(funcionarios.i_funcionarios,length(funcionarios.i_funcionarios)-(select digitos_matric from bethadba.parametros_folha))) else string(funcionarios.i_funcionarios) endif, 
+	            codigoMatriculaContrato = if(select ctr_contrato_matric from bethadba.parametros_folha) = 'S' then string(right(funcionarios.i_funcionarios,(select digitos_matric from bethadba.parametros_folha))) else ' ' endif,
                 count(*) AS quantidade 
             FROM 
                 bethadba.funcionarios 
             WHERE
                 i_entidades IN ({})    
             GROUP BY 
-                i_funcionarios 
+                codigoMatriculaNumero,
+                codigoMatriculaContrato
             HAVING 
                 quantidade > 1 
             ORDER BY 
-                i_funcionarios   
+                codigoMatriculaNumero,
+                codigoMatriculaContrato
         """.format(lista_entidade)
     )
 
     tabelas = tabela_coluna(['i_entidades', 'i_funcionarios'])
 
-    id_max = consultar("SELECT (MAX(i_funcionarios)+1) AS id FROM bethadba.funcionarios")[0][0]
+    id_max = consultar(
+        "SELECT (MAX(cast(if(select ctr_contrato_matric from bethadba.parametros_folha) = 'S' then string(left(funcionarios.i_funcionarios,length(funcionarios.i_funcionarios)-(select digitos_matric from bethadba.parametros_folha))) else string(funcionarios.i_funcionarios) endif as int))+1) AS id FROM bethadba.funcionarios")[0][0]
 
     id_campo_adicional = \
-        consultar("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Matrícula do funcionário'")[0][
-            0]
+        consultar("SELECT i_caracteristicas FROM bethadba.caracteristicas WHERE nome = 'Matrícula do funcionário'")[0][0]
 
     for i in resultado:
         ids_entidade = i[0].split(',')
-        identificador = i[1]
+        identificador = (str(i[1]) + str(i[2])).strip()
 
         for id_entidade in ids_entidade:
 
@@ -63,13 +66,13 @@ def recodificar_funcionarios(lista_entidade):
                     valor_caracter, id_campo_adicional, id_entidade, identificador)
 
             querys += "UPDATE bethadba.funcionarios_subst SET i_substituto = {} WHERE i_substituto = {} AND i_entidades = {};\n".format(
-                id_max, identificador, id_entidade)
+                (str(id_max) + str(i[2])).strip(), identificador, id_entidade)
             querys += "UPDATE bethadba.funcionarios_subst SET i_substituido = {} WHERE i_substituido = {} AND i_entidades = {};\n".format(
-                id_max, identificador, id_entidade)
+                (str(id_max) + str(i[2])).strip(), identificador, id_entidade)
 
             for tabela in tabelas:
                 querys += "UPDATE bethadba.{} SET i_funcionarios = {} WHERE i_funcionarios = {} AND i_entidades = {};\n".format(
-                    tabela, id_max, identificador, id_entidade)
+                    tabela, (str(id_max) + str(i[2])).strip(), identificador, id_entidade)
 
             querys += "\n"
 
@@ -618,8 +621,8 @@ def recodificar_relogios(lista_entidade):
 
 # --------------------Executar-------------------------#
 recodificar_funcionarios(lista_entidade)
-recodificar_cargos(lista_entidade)
-recodificar_despesas(lista_entidade)
-recodificar_niveis(lista_entidade)
-recodificar_grupos(lista_entidade)
-recodificar_locais_trab(lista_entidade)
+# recodificar_cargos(lista_entidade)
+# recodificar_despesas(lista_entidade)
+# recodificar_niveis(lista_entidade)
+# recodificar_grupos(lista_entidade)
+# recodificar_locais_trab(lista_entidade)
