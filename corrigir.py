@@ -112,7 +112,7 @@ def pessoas_sem_dt_nascimento():
             UPDATE 
                 bethadba.pessoas_fisicas pff
             SET 
-                pff.dt_nascimento = '1900-01-01' 
+                pff.dt_nascimento = '1998-01-01' 
             FROM 
                 ( 
                     SELECT 
@@ -649,7 +649,7 @@ def folha_fechamento(competencia):
                 (if month(i_competencias) = 2 then '28' else '30' endif))
             WHERE 
                 i_competencias < {0} AND dt_fechamento IS NULL; 
-            
+
             COMMIT;
 
             UPDATE 
@@ -692,24 +692,34 @@ def hist_salariais_sem_salario():
 # Faz a exclusão dessas variaveis
 # Verifica variaveis com data inicial ou data final maior que data de rescisão
 def variaveis_dt_inical_maior_dt_rescisao():
+    # from os import path
+    # deletar = open(path.dirname(path.realpath(__file__)) + "\src\sql\\variaveis_hist.sql", "a")
     resultado = consultar(
         """
-            SELECT 
-                v.i_entidades, 
-                v.i_funcionarios,
+             SELECT 
+                r.i_entidades, 
+                r.i_funcionarios,
                 v.i_eventos,
                 v.i_processamentos,
                 v.i_tipos_proc, 
                 v.dt_inicial, 
-                v.dt_final
+                v.dt_final,
+                DATEFORMAT(f.dt_admissao,'dd/MM/yyyy') AS dt_admissao,
+                DATEFORMAT(f.dt_admissao,'01/MM/yyyy') AS dt_admissao_novo,
+                DATEFORMAT(r.dt_rescisao,'dd/MM/yyyy') AS dt_resc,
+                DATEFORMAT(r.dt_rescisao,'01/MM/yyyy') AS dt_resc_novo,
+                DATEFORMAT(v.dt_inicial,'dd/MM/yyyy') AS ini_variavel,
+                DATEFORMAT(v.dt_final,'dd/MM/yyyy') AS fim_variavel ,
+  (select max(t.dt_rescisao) from  bethadba.rescisoes t where t.i_funcionarios = f.i_funcionarios and t.i_entidades = f.i_entidades) as datadaultimaRescisao
             FROM 
                 bethadba.rescisoes r 
-            INNER JOIN 
+            INNER JOIN  
                 bethadba.variaveis v ON (r.i_funcionarios = v.i_funcionarios AND r.i_entidades = v.i_entidades)
             INNER JOIN  
                 bethadba.funcionarios f ON (r.i_funcionarios = f.i_funcionarios AND r.i_entidades = f.i_entidades)
             WHERE 
-                v.dt_final > r.dt_rescisao OR v.dt_inicial > r.dt_rescisao AND f.i_entidades IN ({});
+                v.dt_final > DATEFORMAT(datadaultimaRescisao,'yyyy-MM-01') OR v.dt_inicial > DATEFORMAT(datadaultimaRescisao,'yyyy-MM-01') and r.dt_canc_resc is null
+                AND r.i_entidades IN ({});
         """.format(lista_entidade)
     )
 
@@ -718,11 +728,13 @@ def variaveis_dt_inical_maior_dt_rescisao():
 
     delete = ""
     for i in resultado:
+        print(i)
         delete += "DELETE FROM bethadba.variaveis_emprestimos_parc WHERE i_entidades = {} AND i_funcionarios = {} AND i_eventos = {} AND i_processamentos = {} AND i_tipos_proc = {} AND dt_inicial = '{}' AND dt_final = '{}';\n".format(
             i[0], i[1], i[2], i[3], i[4], i[5], i[6])
         delete += "DELETE FROM bethadba.variaveis WHERE i_entidades = {} AND i_funcionarios = {} AND i_eventos = {} AND i_processamentos = {} AND i_tipos_proc = {} AND dt_inicial = '{}' AND dt_final = '{}';\n".format(
             i[0], i[1], i[2], i[3], i[4], i[5], i[6])
 
+    # deletar.writelines(delete)
     executar(delete)
 
 
@@ -811,13 +823,16 @@ def hist_funcionarios_dt_alteracoes_maior_dt_rescisao():
                 hf.i_entidades,
                 hf.dt_alteracoes,
                 r.dt_rescisao,
+                (select max(t.dt_rescisao) from  bethadba.rescisoes t where t.i_funcionarios = hf.i_funcionarios and t.i_entidades = hf.i_entidades) as datadaultimaRescisao,
+                left(hf.dt_alteracoes,10) as datadeAlteracao,
                 STRING(r.dt_rescisao, ' ', SUBSTRING(hf.dt_alteracoes, 12, 8)) AS dt_alteracoes_novo
             FROM
                 bethadba.hist_funcionarios hf
             INNER JOIN 
                 bethadba.rescisoes r ON (hf.i_funcionarios = r.i_funcionarios AND hf.i_entidades = r.i_entidades)
             WHERE
-                hf.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59') AND hf.i_entidades IN ({})
+                datadeAlteracao > datadaultimaRescisao and r.dt_canc_resc is null
+                AND hf.i_entidades IN ({})
             ORDER BY 
             	hf.i_funcionarios, hf.dt_alteracoes DESC;
         """.format(lista_entidade)
@@ -855,13 +870,15 @@ def hist_salariais_dt_alteracoes_maior_dt_rescisao():
                 hs.i_entidades,
                 hs.dt_alteracoes,
                 r.dt_rescisao,
-                STRING(r.dt_rescisao, ' ', SUBSTRING(hs.dt_alteracoes, 12, 8)) AS dt_alteracoes_novo
+                STRING(r.dt_rescisao, ' ', SUBSTRING(hs.dt_alteracoes, 12, 8)) AS dt_alteracoes_novo,
+                (select max(t.dt_rescisao) from  bethadba.rescisoes t where t.i_funcionarios = hs.i_funcionarios and t.i_entidades = hs.i_entidades) as datadaultimaRescisao,
+                left(hs.dt_alteracoes,10) as datadeAlteracao
             FROM
                 bethadba.hist_salariais hs
             INNER JOIN 
                 bethadba.rescisoes r ON (hs.i_funcionarios = r.i_funcionarios AND hs.i_entidades = r.i_entidades)
             WHERE
-                hs.dt_alteracoes > STRING(r.dt_rescisao, ' 23:59:59') AND
+                datadeAlteracao > datadaultimaRescisao and r.dt_canc_resc is null AND
                 hs.i_entidades IN ({})
             ORDER BY 
                 hs.dt_alteracoes DESC;
@@ -1439,6 +1456,7 @@ def funcionarios_sem_previdencia():
                         hf.prev_estadual = 'N' AND
                         hf.fundo_ass = 'N' AND
                         hf.fundo_prev = 'N' AND
+                        hf.fundo_financ = 'N' AND
                         f.i_entidades IN ({}) AND
                         f.tipo_func = 'F'
                     GROUP BY
@@ -1909,13 +1927,14 @@ def funcionarios_com_mais_de_uma_previdencia():
                 hff.prev_estadual = 'N',
                 hff.fundo_ass = 'N',
                 hff.fundo_prev = 'N'
+                hff.fundo_financ = 'N'
             FROM 
                 ( 
                     SELECT 
                         i_funcionarios,
                         i_entidades,
                         dt_alteracoes,
-                        LENGTH(REPLACE(prev_federal || prev_estadual || fundo_ass || fundo_prev, 'N', '')) AS quantidade
+                        LENGTH(REPLACE(prev_federal || prev_estadual || fundo_ass || fundo_prev || fundo_financ, 'N', '')) AS quantidade
                     FROM 
                         bethadba.hist_funcionarios
                     WHERE
@@ -2311,85 +2330,85 @@ def contratacao_pcd_vazio():
 
 # -----------------------Executar---------------------#
 # pessoas_sem_cpf() # - Em analise
-hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
-cargos_sem_configuracao_ferias()
-caracteristicas_nome_repetido()
-dependentes_grau_outros()
-pessoa_data_nascimento_maior_data_admissao()
-pessoas_sem_dt_nascimento()
-pessoas_dt_nasc_maior_dt_ini_depende()
-pessoas_cnh_dt_vencimento_menor_dt_emissao()
-pessoas_dt_primeira_cnh_maior_dt_nascimento()
-pessoas_dt_nasc_maior_dt_nasc_responsavel()
-pessoas_cpf_repetido()
-pessoas_pis_repetido()
-pessoas_pis_invalido()
-pessoas_sem_cnpj()
-ruas_nome_caracter_especial()
-ruas_sem_nome()
-ruas_sem_cidade()
-ruas_nome_repetido()
-tipos_bases_repetido()
-atos_sem_numero()
-atos_repetido()
-cargos_sem_cbo()
-vinculos_sem_esocial()
-vinculos_descricao_repetido()
-motivos_resc_sem_esocial()
-folha_fechamento(folha_fechamento_competencia)
+# hist_funcionarios_dt_alteracoes_maior_dt_rescisao()
+# cargos_sem_configuracao_ferias()
+# caracteristicas_nome_repetido()
+# dependentes_grau_outros()
+# pessoa_data_nascimento_maior_data_admissao()
+# pessoas_sem_dt_nascimento()
+# pessoas_dt_nasc_maior_dt_ini_depende()
+# pessoas_cnh_dt_vencimento_menor_dt_emissao()
+# pessoas_dt_primeira_cnh_maior_dt_nascimento()
+# pessoas_dt_nasc_maior_dt_nasc_responsavel()
+# pessoas_cpf_repetido()
+# pessoas_pis_repetido()
+# pessoas_pis_invalido()
+# pessoas_sem_cnpj()
+# ruas_nome_caracter_especial()
+# ruas_sem_nome()
+# ruas_sem_cidade()
+# ruas_nome_repetido()
+# tipos_bases_repetido()
+# atos_sem_numero()
+# atos_repetido()
+# cargos_sem_cbo()
+# vinculos_sem_esocial()
+# vinculos_descricao_repetido()
+# motivos_resc_sem_esocial()
+# folha_fechamento(folha_fechamento_competencia)
 # folhas_ferias_sem_dt_pagamento() # - Em analise
-motivos_apos_sem_esocial()
-hist_salariais_sem_salario()
+# motivos_apos_sem_esocial()
+# hist_salariais_sem_salario()
 variaveis_dt_inical_maior_dt_rescisao()
-tipos_movpes_descricao_repetido()
-tipos_afast_descricao_repetido()
-hist_salariais_dt_alteracoes_maior_dt_rescisao()
-hist_cargos_dt_alteracoes_maior_dt_rescisao()
-tipos_afast_classif_invalida()
-tipos_atos_nome_repetido()
-horarios_ponto_descricao_repetido()
-turmas_descricao_repetido()
-niveis_organ_separador_invalido()
-atos_sem_natureza_texto_juridico()
-atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
-canc_ferias_sem_tipos_afast()
-config_organograma_descricao_invalida()
-config_organ_descricao_repetido()
-pessoas_cpf_invalido()
-pessoas_cnpj_invalido()
-pessoas_rg_repetido()
-cargos_descricao_repetido()
-bases_calc_outras_empresas_vigencia_invalida()
-pessoas_email_invalido()
-pessoas_enderecos_sem_numero()
-funcionarios_sem_previdencia()
-mediasvant_sem_composicao()
-mediasvant_eve_composicao_invalida()
-locais_mov_dt_inicial_menor_dt_admissao()
-motivos_altponto_descricao_invalida()
-afastamentos_observacao_invalida()
-ferias_dt_gozo_ini_maior_dt_gozo_fin()
-rescisoes_sem_motivos_apos()
-grupos_nome_repetido()
-func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
-locais_trab_fone_invalido()
-atos_sem_dt_inicial()
-niveis_descricao_repetido()
-funcionarios_cartao_ponto_repetido()
-cargos_dt_nomeacao_maior_dt_posse()
-funcionarios_conta_bancaria_invalida()
-funcionarios_com_mais_de_uma_previdencia()
-afastamentos_dt_afastamento_menor_dt_admissao()
-areas_atuacao_nome_repetido()
-dependentes_sem_dt_fim()
-opcao_fgts_diferente_dt_admissao()
-funcionarios_conta_bancaria_sem_dados()
-funcionarios_maracoes_invalida()
-ocorrencia_ponto_nome_repetido()
+# tipos_movpes_descricao_repetido()
+# tipos_afast_descricao_repetido()
+# hist_salariais_dt_alteracoes_maior_dt_rescisao()
+# hist_cargos_dt_alteracoes_maior_dt_rescisao()
+# tipos_afast_classif_invalida()
+# tipos_atos_nome_repetido()
+# horarios_ponto_descricao_repetido()
+# turmas_descricao_repetido()
+# niveis_organ_separador_invalido()
+# atos_sem_natureza_texto_juridico()
+# atos_dt_publicacao_fonte_menor_dt_publicacao_divulgacao()
+# canc_ferias_sem_tipos_afast()
+# config_organograma_descricao_invalida()
+# config_organ_descricao_repetido()
+# pessoas_cpf_invalido()
+# pessoas_cnpj_invalido()
+# pessoas_rg_repetido()
+# cargos_descricao_repetido()
+# bases_calc_outras_empresas_vigencia_invalida()
+# pessoas_email_invalido()
+# pessoas_enderecos_sem_numero()
+# funcionarios_sem_previdencia()
+# mediasvant_sem_composicao()
+# mediasvant_eve_composicao_invalida()
+# locais_mov_dt_inicial_menor_dt_admissao()
+# motivos_altponto_descricao_invalida()
+# afastamentos_observacao_invalida()
+# ferias_dt_gozo_ini_maior_dt_gozo_fin()
+# rescisoes_sem_motivos_apos()
+# grupos_nome_repetido()
+# func_planos_saude_vigencia_inicial_menor_vigencia_inicial_titular()
+# locais_trab_fone_invalido()
+# atos_sem_dt_inicial()
+# niveis_descricao_repetido()
+# funcionarios_cartao_ponto_repetido()
+# cargos_dt_nomeacao_maior_dt_posse()
+# funcionarios_conta_bancaria_invalida()
+# funcionarios_com_mais_de_uma_previdencia()
+# afastamentos_dt_afastamento_menor_dt_admissao()
+# areas_atuacao_nome_repetido()
+# dependentes_sem_dt_fim()
+# opcao_fgts_diferente_dt_admissao()
+# funcionarios_conta_bancaria_sem_dados()
+# funcionarios_maracoes_invalida()
+# ocorrencia_ponto_nome_repetido()
 # configuracao_dirf_com_eventos_repetidos()
-motivo_alt_salarial_descricao_repetido()
-evento_taxa_invalida()
-licenca_premio_faixa_invalida()
-formacao_vazio()
-contratacao_aprendiz_vazio()
-contratacao_pcd_vazio()
+# motivo_alt_salarial_descricao_repetido()
+# evento_taxa_invalida()
+# licenca_premio_faixa_invalida()
+# formacao_vazio()
+# contratacao_aprendiz_vazio()
+# contratacao_pcd_vazio()
